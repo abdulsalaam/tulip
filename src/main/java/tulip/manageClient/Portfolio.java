@@ -11,4 +11,13 @@ public class Portfolio {
 
     void removeStock(String company) {}
 
+    /**
+     * Returns the number of stocks owned for a given company
+     * @param company The company for which you want to get the number of stocks owned
+     * @return The number of stocks owned
+     */
+    int getNbOfStocks(String company) {
+        return stocksForEachCompany.get(company);
+    }
+
 }

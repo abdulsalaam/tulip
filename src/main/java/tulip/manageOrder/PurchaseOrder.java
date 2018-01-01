@@ -17,8 +17,9 @@ public class PurchaseOrder extends Order {
     /**
      * Constructs a PurchaseOrder
      */
-    public PurchaseOrder(int id, String client, String broker, Date emissionDate, int desiredNbOfStock, double maxPurchasingPrice) {
-        super(id, client, broker, emissionDate, desiredNbOfStock);
+    public PurchaseOrder(int id, String company, String client, String broker, Date emissionDate, int desiredNbOfStock,
+                         double maxPurchasingPrice) {
+        super(id, company, client, broker, emissionDate, desiredNbOfStock);
         this.maxPurchasingPrice = maxPurchasingPrice;
     }
 
@@ -28,6 +29,24 @@ public class PurchaseOrder extends Order {
     public void processOrder(int actualNbOfStocks, Date processingDate, double actualPurchasingPrice) {
         super.processOrder(actualNbOfStocks, processingDate);
         this.actualPurchasingPrice = actualPurchasingPrice;
+    }
+
+    /**
+     * Computes the amount of the order by taking into account the maximum purchasing price and the desired number of
+     * stocks
+     * @return The desired amount of the order
+     */
+    public double getDesiredAmount() {
+        return maxPurchasingPrice * getDesiredNbOfStocks();
+    }
+
+    /**
+     * Computes the amount of the order by taking into account the actual purchasing price and the actual number of
+     * stocks
+     * @return The actual amount of the order
+     */
+    public double getActualAmount() {
+        return actualPurchasingPrice * getActualNbOfStocks();
     }
 
     @Override
