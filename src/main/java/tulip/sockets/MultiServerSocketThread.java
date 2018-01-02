@@ -39,14 +39,16 @@ public class MultiServerSocketThread extends Thread {
                 System.out.println("MultiServerSocketThread \"" + SERVER_SOCKET_NAME + "\" receives: " + fromClient);
                 Message msgFromClient = Message.fromJSON(fromClient);
 
-                // If the server detects a connection request
-                if (!isConnected && msgFromClient.getContentType().equals(ContentType.connectionRequest)) {
+                if (!isConnected) {
 
-                    registerClientSocket(msgFromClient.getContent());
-
-                    // Sends a connection acknowledgment
-                    send(new Message(SERVER_SOCKET_NAME, clientSocketName, ContentType.connectionAcknowledgement, SERVER_SOCKET_NAME));
-
+                    // If the server detects a connection request
+                    if (msgFromClient.getContentType().equals(ContentType.connectionRequest)) {
+                        registerClientSocket(msgFromClient.getContent());
+                        // Sends a connection acknowledgment
+                        send(new Message(SERVER_SOCKET_NAME, clientSocketName, ContentType.connectionAcknowledgement, SERVER_SOCKET_NAME));
+                    }
+                } else {
+                    // Do something
                 }
 
             }
