@@ -17,6 +17,8 @@ public class Main {
             InetAddress localhost = InetAddress.getLocalHost();
             ClientSocket client = new ClientSocket(localhost, 4000, "Thibaud");
             client.start();
+            ClientSocket client2 = new ClientSocket(localhost, 4000, "Yanis");
+            client2.start();
         } catch (Exception e) {
             e.printStackTrace();
         }

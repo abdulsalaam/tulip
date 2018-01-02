@@ -11,6 +11,7 @@ import java.net.Socket;
 
 public class MultiServerSocketThread extends Thread {
 
+    private final MultiServerSocket MULTI_SERVER_SOCKET;
     private final String SERVER_SOCKET_NAME;
     private String clientSocketName;
     private boolean isConnected = false;
@@ -19,7 +20,8 @@ public class MultiServerSocketThread extends Thread {
     private PrintWriter out;
     private BufferedReader in;
 
-    public MultiServerSocketThread(String serverSocketName, Socket socket) {
+    public MultiServerSocketThread(MultiServerSocket multiServerSocket, String serverSocketName, Socket socket) {
+        this.MULTI_SERVER_SOCKET = multiServerSocket;
         this.SERVER_SOCKET_NAME = serverSocketName;
         this.socket = socket;
     }
@@ -27,7 +29,7 @@ public class MultiServerSocketThread extends Thread {
     @Override
     public void run() {
 
-        System.out.println("MultiServerSocketThread \"" + SERVER_SOCKET_NAME + "\" starting");
+        System.out.println("MultiServerSocketThread \"" + SERVER_SOCKET_NAME + "\" starting on thread " + this.getId());
 
         try {
 
@@ -76,8 +78,8 @@ public class MultiServerSocketThread extends Thread {
     private void registerClientSocket(String clientSocketName) {
         this.clientSocketName = clientSocketName;
         this.isConnected = true;
-        System.out.println("MultiServerSocketThread \"" + SERVER_SOCKET_NAME + "\": register client socket \"" + clientSocketName + "\"");
-
+        System.out.println("MultiServerSocketThread \"" + SERVER_SOCKET_NAME + "\": registers client socket \"" + clientSocketName + "\"");
+        this.MULTI_SERVER_SOCKET.registerConnectedClient(clientSocketName, this);
     }
 
 }
