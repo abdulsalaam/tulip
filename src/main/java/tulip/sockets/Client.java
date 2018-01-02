@@ -1,5 +1,7 @@
 package tulip.sockets;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,15 +11,15 @@ import java.net.Socket;
 
 public class Client extends Thread {
 
+    private final InetAddress ADDRESS;
     private final int PORT;
+    private final String NAME;
     private final Object monitor = new Object();
 
-    private String[] buffer = new String[10];
-    private int bufferPos = 0;
-
-
-    public Client(int port) {
-        PORT = port;
+    public Client(InetAddress address, int port, String name) {
+        this.ADDRESS = address;
+        this.PORT = port;
+        this.NAME = name;
     }
 
     @Override
@@ -26,13 +28,17 @@ public class Client extends Thread {
         System.out.println("Launch Client");
 
         try (
-                Socket socket = new Socket(InetAddress.getLocalHost(), 4000);
+                Socket socket = new Socket(ADDRESS, PORT);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))){
 
-            while (true) {
+            // Send name to server
+            out.println(NAME);
 
-                sendMessages(out);
+            // Wait for the welcome message from the server
+
+
+            while (true) {
 
                 String fromServer;
                 if ((fromServer = in.readLine()) != null) {
@@ -48,26 +54,6 @@ public class Client extends Thread {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void addMessage(String string) {
-        synchronized (monitor) {
-            buffer[bufferPos] = string;
-            bufferPos++;
-        }
-    }
-
-    private void sendMessages(PrintWriter out) {
-        synchronized (monitor) {
-            int index = 0;
-            while (buffer[index] != null) {
-                out.println(buffer[index]);
-                System.out.println("Client sends: " + buffer[index]);
-                buffer[index] = null;
-                index++;
-            }
-            bufferPos = 0;
         }
     }
 }
