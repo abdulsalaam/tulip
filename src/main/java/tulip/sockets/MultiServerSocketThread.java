@@ -7,18 +7,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class MultiServerThread extends Thread {
+public class MultiServerSocketThread extends Thread {
 
     private Socket socket;
 
-    public MultiServerThread(Socket socket) {
+    public MultiServerSocketThread(Socket socket) {
         this.socket = socket;
     }
 
     @Override
     public void run() {
 
-        System.out.println("Launch MultiServerThread");
+        System.out.println("Launch MultiServerSocketThread");
 
         try (
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -29,7 +29,7 @@ public class MultiServerThread extends Thread {
                 System.out.println("Server receive: " + fromClient);
 
                 if (fromClient.equals("Bye")) {
-                    System.out.println("Client quit");
+                    System.out.println("ClientSocket quit");
                     break;
                 }
             }
