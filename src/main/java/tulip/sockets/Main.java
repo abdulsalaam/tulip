@@ -11,7 +11,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        MultiServerSocket multiServer = new MultiServerSocket(4000);
+        MultiServerSocket multiServer = new MultiServerSocket("Bourse", 4000);
         multiServer.start();
         try {
             InetAddress localhost = InetAddress.getLocalHost();

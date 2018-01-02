@@ -14,25 +14,26 @@ public class ClientSocket extends Thread {
 
     private final InetAddress ADDRESS;
     private final int PORT;
-    private final String NAME;
+    private final String CLIENT_SOCKET_NAME;
+    private String serverSocketName;
+    private boolean isConnected = false;
 
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
 
-
     private final Object monitor = new Object();
 
-    public ClientSocket(InetAddress address, int port, String name) {
+    public ClientSocket(InetAddress address, int port, String clientSocketName) {
         this.ADDRESS = address;
         this.PORT = port;
-        this.NAME = name;
+        this.CLIENT_SOCKET_NAME = clientSocketName;
     }
 
     @Override
     public void run() {
 
-        System.out.println("Launch ClientSocket");
+        System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\" starting");
 
         try {
 
@@ -40,38 +41,59 @@ public class ClientSocket extends Thread {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            connect();
+            // Sends a connection request to the server
+            send(new Message(CLIENT_SOCKET_NAME, "", ContentType.connectionRequest, CLIENT_SOCKET_NAME));
+
+            try {
+                String fromServer;
+                while ((fromServer = in.readLine()) != null) {
+                    Message msgFromServer = Message.fromJSON(fromServer);
+                    System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\" receives: " + fromServer);
+
+                    if (!isConnected) {
+
+                        // If the message received is a connection acknowledgment
+                        if (msgFromServer.getContentType().equals(ContentType.connectionAcknowledgement)) {
+                            registerServerSocket(msgFromServer.getContent());
+                            System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\": connection successfully established");
+                        } else {
+                            System.out.println("Connection failed");
+                        }
+
+                    } else {
+                        // do something
+                    }
+
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            out.close();
+            try {
+                in.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+        System.out.println("ClientSocket stopping" );
     }
 
     private void send(Message message) {
-        out.println(message.toJSON());
+        String json = message.toJSON();
+        out.println(json);
+        System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\" sends: " + json);
     }
 
-    private void connect() {
-
-        // Send a connection request to the server
-        send(new Message(NAME, "Server", ContentType.connectionRequest, NAME));
-
-        // Wait for the connection acknowledgement from the server
-        try {
-            String fromServer;
-            while ((fromServer = in.readLine()) != null) {
-                Message messageFromServer = Message.fromJSON(fromServer);
-
-                // If the message received is a connection acknowledgment
-                if (messageFromServer.getContentType().equals(ContentType.connectionAcknowledgement)) {
-                    System.out.println("Connection successfully established");
-                } else {
-                    System.out.println("Connection failed");
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    private void registerServerSocket(String serverSocketName) {
+        this.serverSocketName = serverSocketName;
+        this.isConnected = true;
+        System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\": registers server socket \"" + serverSocketName + "\"");
     }
 }
