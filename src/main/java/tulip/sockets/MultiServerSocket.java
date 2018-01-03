@@ -1,8 +1,12 @@
 package tulip.sockets;
 
+import tulip.sockets.messages.Message;
+
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,6 +38,15 @@ public class MultiServerSocket extends Thread {
     private Iterator<Map.Entry<String, MultiServerSocketThread>> tokenIterator;
 
     private final Object monitor = new Object();
+
+    // Equitable producer/consumer algorithm related variables
+    private List<Message> messagesToConsume = new ArrayList<>();
+    private int inputIndex;
+    private int outputIndex;
+    private int nbMess;
+    private int nbCell;
+    private int totalallocatedPlaces;
+
 
     public MultiServerSocket(String serverSocketName, int port) {
         SERVER_SOCKET_NAME = serverSocketName;
@@ -90,7 +103,7 @@ public class MultiServerSocket extends Thread {
     public void passToken(int tokenValue) {
         synchronized (monitor) {
 
-            // If the last client on the token ring is attained, the iterator is resetted in order to send the token
+            // If the last client on the token ring is attained, the iterator is reset in order to send the token
             // to the first client and make a loop
             if (!tokenIterator.hasNext()) {
                 resetTokenIterator();
@@ -107,5 +120,20 @@ public class MultiServerSocket extends Thread {
      */
     public void resetTokenIterator() {
         tokenIterator = registeredClients.entrySet().iterator();
+    }
+
+    /**
+     * Consuming method to be called before receiving a message
+     * @param m is the message to be received
+     * @throws InterruptedException associated with wait()
+     */
+    public void consume(Message m) throws InterruptedException {
+        if(!(nbMess > 0)) {
+            wait();
+        }
+        m = messagesToConsume.get(outputIndex);
+        outputIndex = (outputIndex + 1) % totalallocatedPlaces;
+        nbMess--;
+        nbCell++;
     }
 }

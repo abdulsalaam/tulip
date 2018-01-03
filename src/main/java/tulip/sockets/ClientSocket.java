@@ -41,7 +41,7 @@ public class ClientSocket extends Thread {
     private final Object monitor = new Object();
 
 
-    //Algorithm attributes
+    // Equitable producer/consumer algorithm related variables
     /** List of produced messages */
     List<Message> producedMessages = new ArrayList<>();
     /** Number of messages produced (equivalent to producedMessages length) */
