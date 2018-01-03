@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A client socket communicates with a MultiServerSocketThread and follows a communication protocol
@@ -37,6 +39,23 @@ public class ClientSocket extends Thread {
     private BufferedReader in;
 
     private final Object monitor = new Object();
+
+
+    //Algorithm attributes
+    /** List of produced messages */
+    List<Message> producedMessages = new ArrayList<>();
+    /** Number of messages produced (equivalent to producedMessages length) */
+    private int nbMess;
+    /** Number of authorisations to send a message */
+    private int nbAut;
+    /** Next site to consider */
+    private int successor;
+    /** Total amount of places allocated to this producer */
+    private int allocatedPlaces;
+    /** Input index used for producedMessages */
+    private int inputIndex = 0;
+    /** Output index used for producedMessages */
+    private int outputIndex = 0;
 
     public ClientSocket(String host, int port, String clientSocketName) {
         this.HOST = host;
@@ -133,4 +152,21 @@ public class ClientSocket extends Thread {
         this.isRegistered = true;
         System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\": registers server socket \"" + serverSocketName + "\"");
     }
+
+    /**
+     * Producing method to be called before sending a message
+     * @param m is the message to be sent
+     * @throws InterruptedException associated with wait()
+     */
+    public void produce(Message m) throws InterruptedException {
+        if(!(nbMess < allocatedPlaces)) {
+            wait();
+        }
+        producedMessages.set(inputIndex, m);
+        inputIndex = (inputIndex + 1) % allocatedPlaces;
+        nbMess++;
+    }
+
+    public void onReception(){}
+    public void factor(){}
 }
