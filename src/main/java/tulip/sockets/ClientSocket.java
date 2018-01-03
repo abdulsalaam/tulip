@@ -159,7 +159,7 @@ public class ClientSocket extends Thread {
      * @throws InterruptedException associated with wait()
      */
     public void produce(Message m) throws InterruptedException {
-        if(!(nbMess < allocatedPlaces)) {
+        while(!(nbMess < allocatedPlaces)) {
             wait();
         }
         producedMessages.set(inputIndex, m);

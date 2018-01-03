@@ -128,7 +128,7 @@ public class MultiServerSocket extends Thread {
      * @throws InterruptedException associated with wait()
      */
     public void consume(Message m) throws InterruptedException {
-        if(!(nbMess > 0)) {
+        while(!(nbMess > 0)) {
             wait();
         }
         m = messagesToConsume.get(outputIndex);
