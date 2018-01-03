@@ -56,12 +56,25 @@ public class ClientSocket extends Thread {
                         if (msgFromServer.getContentType().equals(ContentType.connectionAcknowledgement)) {
                             registerServerSocket(msgFromServer.getContent());
                             System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\": connection successfully established");
+
+                        // If the message received is a token, sends back the token without doing anything
+                        } else if (msgFromServer.getContentType().equals(ContentType.token)) {
+                            send(new Message(CLIENT_SOCKET_NAME, "", ContentType.token, msgFromServer.getContent()));
                         } else {
                             System.out.println("Connection failed");
                         }
 
                     } else {
-                        // do something
+
+                        if (msgFromServer.getContentType().equals(ContentType.token)) {
+
+                            int tokenValue = Integer.parseInt(msgFromServer.getContent());
+                            tokenValue--;
+
+                            // Send back the token
+                            send(new Message(CLIENT_SOCKET_NAME, "", ContentType.token, Integer.toString(tokenValue)));
+                        }
+
                     }
 
 

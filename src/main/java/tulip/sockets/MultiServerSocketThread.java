@@ -48,9 +48,17 @@ public class MultiServerSocketThread extends Thread {
                         registerClientSocket(msgFromClient.getContent());
                         // Sends a connection acknowledgment
                         send(new Message(SERVER_SOCKET_NAME, clientSocketName, ContentType.connectionAcknowledgement, SERVER_SOCKET_NAME));
+                    } else {
+                        System.out.println("Error: the client is not connected. Send a connection request first.");
                     }
+
                 } else {
-                    // Do something
+
+                    if (msgFromClient.getContentType().equals(ContentType.token)) {
+                        int tokenValue = Integer.parseInt(msgFromClient.getContent());
+                        MULTI_SERVER_SOCKET.passToken(tokenValue);
+                    }
+
                 }
 
             }
@@ -82,4 +90,7 @@ public class MultiServerSocketThread extends Thread {
         this.MULTI_SERVER_SOCKET.registerConnectedClient(clientSocketName, this);
     }
 
+    void sendToken(int tokenValue) {
+        send(new Message(SERVER_SOCKET_NAME, clientSocketName, ContentType.token, Integer.toString(tokenValue)));
+    }
 }
