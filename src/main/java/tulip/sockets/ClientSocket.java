@@ -36,6 +36,51 @@ public class ClientSocket extends Thread {
     private PrintWriter out;
     private BufferedReader in;
 
+    /* Consumer-producer */
+
+    int Ni = 10;
+    Message[] Ti = new Message[Ni];
+    int ini = 0;
+    int outi = 0;
+    int nbmessi = 0;
+    int nbauti = 0;
+    int tempi;
+    final int SEUILi = 5;
+
+
+    public void produire(Message message) {
+        // Attendre (nbmessi < Ni)
+        Ti[ini] = message;
+        ini = (ini + 1) % Ni;
+        nbmessi++;
+    }
+
+    public void sur_reception_de(int val) {
+        tempi = Math.min(nbmessi - nbauti, val);
+        val -= tempi;
+        nbauti += tempi;
+        if (val > SEUILi) {
+            send(new Message(CLIENT_SOCKET_NAME, "NextProducer", ContentType.token, Integer.toString(val)));
+        } else {
+            send(new Message(CLIENT_SOCKET_NAME, "Consumer", ContentType.token, Integer.toString(val)));
+        }
+    }
+
+    public class Facteur extends Thread {
+
+        @Override
+        public void run() {
+            while (true) {
+                if (nbauti > 0) {
+                    send(Ti[outi]);
+                    outi = (outi + 1) % Ni;
+                    nbauti--;
+                    nbmessi--;
+                }
+            }
+        }
+    }
+
     private final Object monitor = new Object();
 
     public ClientSocket(String host, int port, String clientSocketName) {
@@ -46,6 +91,8 @@ public class ClientSocket extends Thread {
 
     @Override
     public void run() {
+
+        new Facteur().start();
 
         System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\" starting");
 
@@ -73,7 +120,11 @@ public class ClientSocket extends Thread {
 
                         // If the message received is a token, sends back the token without doing anything
                         } else if (msgFromServer.getContentType().equals(ContentType.token)) {
-                            send(new Message(CLIENT_SOCKET_NAME, "", ContentType.token, msgFromServer.getContent()));
+
+                            // Producteur-consommateur : sur_reception_de
+                            int val = Integer.parseInt(msgFromServer.getContent());
+                            sur_reception_de(val);
+
                         } else {
                             System.out.println("Connection failed");
                         }

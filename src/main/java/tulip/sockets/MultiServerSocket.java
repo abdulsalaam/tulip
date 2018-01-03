@@ -1,5 +1,7 @@
 package tulip.sockets;
 
+import tulip.sockets.messages.Message;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Iterator;
@@ -39,6 +41,36 @@ public class MultiServerSocket extends Thread {
         SERVER_SOCKET_NAME = serverSocketName;
         PORT = port;
     }
+
+    /* Producer - consumer */
+    int N = 10;
+    Message[] T = new Message[N];
+    int in = 0;
+    int out = 0;
+    int nbmess = 0;
+    int nbcell = 0;
+    final int SEUIL = 6;
+    boolean present = false;
+
+
+    public Message consommer() {
+        // Attendre (nbmess > 0)
+        Message m = T[out];
+        out = (out + 1) % N;
+        nbmess--;
+        nbcell++;
+        if (present && nbcell > SEUIL) {
+            passToken(nbcell);
+            present = false;
+            nbcell = 0;
+        }
+
+    }
+
+    public void sur_reception_de() {
+
+    }
+
 
     @Override
     public void run() {
