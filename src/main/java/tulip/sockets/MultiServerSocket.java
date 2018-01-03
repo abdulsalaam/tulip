@@ -30,7 +30,7 @@ public class MultiServerSocket extends Thread {
     /** Indicates whether the token system has been started by sending a the token */
     private boolean tokenStarted = false;
 
-    /** Iterator used in the token to iterate through the server socket threads corresponding to the connected clients */
+    /** Iterator used in the token system to iterate through the server socket threads corresponding to the registered clients */
     private Iterator<Map.Entry<String, MultiServerSocketThread>> tokenIterator;
 
     private final Object monitor = new Object();
