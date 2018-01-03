@@ -29,7 +29,7 @@ public class ClientSocket extends Thread {
     private String serverSocketName;
 
     /**
-     * Indicates whether the client socket is registered ie. whether it has sent a registration request to the server
+     * Indicates whether the client socket is registered i.e. whether it has sent a registration request to the server
      * socket and received a registration acknowledgment in response.
      * */
     private boolean isRegistered = false;
@@ -143,7 +143,7 @@ public class ClientSocket extends Thread {
     }
 
     /**
-     * When the client socket is registred (ie. when a registration acknowledgment is received), this
+     * When the client socket is registred (i.e. when a registration acknowledgment is received), this
      * methods is used to take into account the registration.
      * @param serverSocketName The name of the server socket on which the client socket registered
      */

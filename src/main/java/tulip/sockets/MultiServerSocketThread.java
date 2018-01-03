@@ -28,8 +28,8 @@ public class MultiServerSocketThread extends Thread {
     private String clientSocketName;
 
     /**
-     * Indicates whether the client is registered ie. whether the client has sent a registration request to the server
-     * socket
+     * Indicates whether the client is registered i.e. whether the client has sent a registration request
+     * to the server socket
      * */
     private boolean isRegisterd = false;
 
