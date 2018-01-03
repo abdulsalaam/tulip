@@ -12,7 +12,7 @@ import java.net.Socket;
 
 public class ClientSocket extends Thread {
 
-    private final InetAddress ADDRESS;
+    private final String ADDRESS;
     private final int PORT;
     private final String CLIENT_SOCKET_NAME;
     private String serverSocketName;
@@ -24,7 +24,7 @@ public class ClientSocket extends Thread {
 
     private final Object monitor = new Object();
 
-    public ClientSocket(InetAddress address, int port, String clientSocketName) {
+    public ClientSocket(String address, int port, String clientSocketName) {
         this.ADDRESS = address;
         this.PORT = port;
         this.CLIENT_SOCKET_NAME = clientSocketName;

@@ -1,23 +1,19 @@
 package tulip.sockets;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import tulip.sockets.messages.ContentType;
-import tulip.sockets.messages.Message;
-
-import java.io.Serializable;
 import java.net.InetAddress;
-import java.util.Map;
 
 public class Main {
 
     public static void main(String[] args) {
-        MultiServerSocket multiServer = new MultiServerSocket("Bourse", 4000);
+        String localhost = "127.0.0.1";
+        int port = 4000;
+
+        MultiServerSocket multiServer = new MultiServerSocket("Bourse", port);
         multiServer.start();
         try {
-            InetAddress localhost = InetAddress.getLocalHost();
-            ClientSocket client = new ClientSocket(localhost, 4000, "Thibaud");
+            ClientSocket client = new ClientSocket(localhost, port, "Thibaud");
             client.start();
-            ClientSocket client2 = new ClientSocket(localhost, 4000, "Yanis");
+            ClientSocket client2 = new ClientSocket(localhost, port, "Yanis");
             client2.start();
         } catch (Exception e) {
             e.printStackTrace();
