@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  * This class is used to communicate through sockets.
  * Messages are sent over a socket connection by converting a Message in a JSON String at one end of the connection
- * and doing the opposite operation at the other end.
+ * and doing the opposite operation at the other end of the connection.
  * */
 public class Message implements Serializable {
 
