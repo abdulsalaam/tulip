@@ -1,4 +1,4 @@
-package tulip.sockets.messages;
+package tulip.service.producerConsumer.messages;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,13 +18,9 @@ public class Message implements Serializable {
     /** ObjectMapper used to serialize and deserialize */
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    /** The name of the sender of the message */
-    @JsonProperty("sender")
-    private String sender;
-
-    /** The name of the recipient of the message */
-    @JsonProperty("recipient")
-    private String recipient;
+    /** The target of the message */
+    @JsonProperty("target")
+    private Target target;
 
     /** The type of the content of the message */
     @JsonProperty("contentType")
@@ -35,20 +31,16 @@ public class Message implements Serializable {
     private String content;
 
     @JsonCreator
-    public Message(@JsonProperty("sender") String sender, @JsonProperty("recipient") String recipient,
-                   @JsonProperty("contentType") ContentType contentType, @JsonProperty("content") String content) {
-        this.sender = sender;
-        this.recipient = recipient;
+    public Message(@JsonProperty("target") Target target,
+                   @JsonProperty("contentType") ContentType contentType,
+                   @JsonProperty("content") String content) {
+        this.target = target;
         this.contentType = contentType;
         this.content = content;
     }
 
-    public String getSender() {
-        return sender;
-    }
-
-    public String getRecipient() {
-        return recipient;
+    public Target getTarget() {
+        return target;
     }
 
     public ContentType getContentType() {
