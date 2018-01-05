@@ -10,26 +10,28 @@ public class Producer extends Thread {
     private final ClientSocket CLIENT_SOCKET;
     private final String NAME;
 
-    private int Ni = 10;
-    private Message[] Ti = new Message[Ni];
-    private int ini = 0;
-    private int outi = 0;
-    private int nbmessi = 0;
-    private int nbauti = 0;
-    private int tempi = 0;
-    private final int SEUILi = 4;
+    private final int BUFFER_SIZE = 10;
+    private Message[] buffer = new Message[BUFFER_SIZE];
+    private int in = 0;
+    private int out = 0;
+    private int nbmess = 0;
+    private int nbaut = 0;
+    private int temp = 0;
+    private final int THRESHOLD = 4;
 
     private final Object monitor = new Object();
 
     public Producer(String name) {
         this.NAME = name;
-        CLIENT_SOCKET = new ClientSocket(this,"127.0.0.1", 4000);
-        CLIENT_SOCKET.start();
-        new Facteur().start();
+        this.CLIENT_SOCKET = new ClientSocket(this,"127.0.0.1", 4000);
+        this.CLIENT_SOCKET.start();
+        new Postman().start();
     }
 
-    private class Facteur extends Thread {
-
+    /**
+     * When possible the postman will send the messages in the buffer
+     */
+    private class Postman extends Thread {
         @Override
         public void run() {
             while (true) {
@@ -39,77 +41,102 @@ public class Producer extends Thread {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (nbauti > 0) {
-                        envoyer_message(Ti[outi]);
-                        outi = (outi + 1) % Ni;
-                        nbauti--;
-                        nbmessi--;
+                    if (nbaut > 0) {
+                        sendMessage(buffer[out]);
+                        out = (out + 1) % BUFFER_SIZE;
+                        nbaut--;
+                        nbmess--;
                     }
                 }
             }
         }
     }
 
-    public void sur_reception_de(Message message) {
+    /**
+     * Deals with the receipt of a message
+     * @param message The message being received
+     */
+    public void uponReceipt(Message message) {
         synchronized (monitor) {
             System.out.println("Producer " + NAME + " receives: " + message.toJSON());
             if (message.getContentType().equals(ContentType.token)) {
                 int tokenValue = Integer.parseInt(message.getContent());
-                sur_reception_de_JETON(tokenValue);
+                uponReceiptOfToken(tokenValue);
             }
         }
     }
 
+    /** Indicates whether there is room in the buffer */
     public boolean canProduce() {
         synchronized (monitor) {
-            return nbmessi < Ni;
+            return nbmess < BUFFER_SIZE;
         }
     }
 
-    public void produire(Message message) {
+    /**
+     * Produces a message by adding it tho the buffer array. Must be used in conjunction with boolean canProduce()
+     * @param message The message you want to add to the message buffer
+     */
+    public void produce(Message message) {
         synchronized (monitor) {
             System.out.println("Produire");
             if (canProduce()) {
-                Ti[ini] = message;
-                ini = (ini + 1) % Ni;
-                nbmessi++;
+                buffer[in] = message;
+                in = (in + 1) % BUFFER_SIZE;
+                nbmess++;
             } else {
                 System.out.println("Buffer overflow");
             }
         }
     }
 
-    private void sur_reception_de_JETON(int val) {
+    /**
+     * This method is triggered when a message corresponding to the token is received.
+     * @param tokenValue The value of the token when received
+     * */
+    private void uponReceiptOfToken(int tokenValue) {
         synchronized (monitor) {
-            tempi = Math.min(nbmessi - nbauti, val);
-            int value = val;
-            value -= tempi;
-            nbauti += tempi;
-            if (value > SEUILi) {
-                envoyer_JETON_a_producteur(value);
+            temp = Math.min(nbmess - nbaut, tokenValue);
+            int value = tokenValue;
+            value -= temp;
+            nbaut += temp;
+            if (value > THRESHOLD) {
+                sendTokenToProducer(value);
             } else {
-                envoyer_JETON_a_consommateur(value);
+                sendTokenToConsumer(value);
             }
         }
     }
 
-    private void envoyer_JETON_a_producteur(int val) {
+    /**
+     * Sends the token to the next producer
+     * @param tokenValue The value of the token being sent
+     */
+    private void sendTokenToProducer(int tokenValue) {
         synchronized (monitor) {
-            Message message = new Message(Target.nextProducer, ContentType.token, Integer.toString(val));
+            Message message = new Message(Target.nextProducer, ContentType.token, Integer.toString(tokenValue));
             CLIENT_SOCKET.sendMessage(message);
             System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
         }
     }
 
-    private void envoyer_JETON_a_consommateur(int val) {
+    /**
+     * Sends the token to the consumer
+     * @param tokenValue The value of the token being sent
+     */
+    private void sendTokenToConsumer(int tokenValue) {
         synchronized (monitor) {
-            Message message = new Message(Target.consumer, ContentType.token, Integer.toString(val));
+            Message message = new Message(Target.consumer, ContentType.token, Integer.toString(tokenValue));
             CLIENT_SOCKET.sendMessage(message);
             System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
         }
     }
 
-    private void envoyer_message(Message message) {
+    /**
+     * Sends a message
+     * @param message The message being sent
+     */
+    private void sendMessage(Message message) {
         synchronized (monitor) {
             System.out.println("Producer " + NAME + " sends MESSAGE: " + message.toJSON());
             CLIENT_SOCKET.sendMessage(message);

@@ -10,16 +10,16 @@ public class Consumer {
     private final MultiServerSocket MULTI_SERVER_SOCKET;
     private final String NAME;
 
-    private int N = 10;
-    private Message[] T = new Message[N];
+    private final int BUFFER_SIZE = 10;
+    private Message[] buffer = new Message[BUFFER_SIZE];
     private int in = 0;
     private int out = 0;
     private int nbmess = 0;
     private int nbcell = 0;
-    private final int SEUIL = 5;
-    private boolean present = false;
-    private int p = 0;
-    private int prochain = 0;
+    private final int THRESHOLD = 5;
+    private boolean tokenPresent = false;
+    private int nbOfProducers = 0;
+    private int next = 0;
 
     private boolean tokenStarted = false;
     private final Object monitor = new Object();
@@ -30,9 +30,13 @@ public class Consumer {
         MULTI_SERVER_SOCKET.start();
     }
 
-    public void sur_reception_de(Message message) {
+    /**
+     * Deals with the receipt of a message
+     * @param message The message being received
+     */
+    public void uponReceipt(Message message) {
         System.out.println("Consumer " + NAME + " receives: " + message.toJSON());
-        if (p > 0) {
+        if (nbOfProducers > 0) {
 
             if (message.getContentType().equals(ContentType.token)) {
 
@@ -40,77 +44,92 @@ public class Consumer {
                     passTokenToNextProducer(message);
                 } else {
                     int tokenValue = Integer.parseInt(message.getContent());
-                    sur_reception_de_JETON(tokenValue);
+                    uponReceiptOfToken(tokenValue);
                 }
 
             } else if (message.getContentType().equals(ContentType.app)) {
-                sur_reception_de_APP(message);
+                uponReceiptOfAppMessage(message);
             }
         }
     }
 
-    public boolean peutConsommer() {
+    /** Indicates whether there are messages in the buffer that can be consumed */
+    public boolean canConsume() {
         synchronized (monitor) {
             return nbmess > 0;
         }
     }
-
-    public Message consommer() {
+    
+    /** Consumes a message. Must be used in conjunction with the method boolean canConsume() */
+    public Message consume() {
         synchronized (monitor) {
             if (nbmess > 0) {
-                System.out.println("Consommation");
-                Message m = T[out];
-                out = (out + 1) % N;
+                System.out.println("Consumming");
+                Message message = buffer[out];
+                out = (out + 1) % BUFFER_SIZE;
                 nbmess--;
                 nbcell++;
-                if (present && nbcell > SEUIL) {
-                    envoyer_token_a(prochain, nbcell);
-                    present = false;
+                if (tokenPresent && nbcell > THRESHOLD) {
+                    sendTokenTo(next, nbcell);
+                    tokenPresent = false;
                     nbcell = 0;
                 }
 
-                return m;
+                return message;
             }
 
-            System.out.println("Consommation impossible");
+            System.out.println("Cannot consume");
             return null;
         }
     }
 
-
-    public void sur_reception_de_APP(Message message) {
+    /**
+     * This method is triggered when an app message is received
+     * @param message The app message received
+     * */
+    private void uponReceiptOfAppMessage(Message message) {
         synchronized (monitor) {
             System.out.println(message.toJSON());
-            T[in] = message;
-            in = (in + 1) % N;
+            buffer[in] = message;
+            in = (in + 1) % BUFFER_SIZE;
             nbmess++;
         }
     }
-
-    private void sur_reception_de_JETON(int val) {
+    
+    /** 
+     * This method is triggered when a message corresponding to the token is received.
+     * @param val The value of the token when received
+     * */
+    private void uponReceiptOfToken(int val) {
         synchronized (monitor) {
-            prochain = (prochain + 1) % p;
+            next = (next + 1) % nbOfProducers;
             nbcell += val;
-            if (nbcell > SEUIL) {
-                envoyer_token_a(prochain, nbcell);
+            if (nbcell > THRESHOLD) {
+                sendTokenTo(next, nbcell);
                 nbcell = 0;
             } else {
-                present = true;
+                tokenPresent = true;
             }
         }
     }
-
-    private void envoyer_token_a(int producerNumber, int valJeton) {
+    
+    /**
+     * Sends the token to a specific producer
+     * @param producerNumber The number of the producer the token is being sent to
+     * @param tokenValue The value of the token being sent
+     * */
+    private void sendTokenTo(int producerNumber, int tokenValue) {
         System.out.println("Producer number " + producerNumber);
-        Message message = new Message(Target.producer, ContentType.token, Integer.toString(valJeton));
+        Message message = new Message(Target.producer, ContentType.token, Integer.toString(tokenValue));
         System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
 
+    /** Adds a producer and starts the token system if needed */
     public void addProducer() {
         synchronized (monitor) {
             System.out.println("Add producer");
-            p++;
+            nbOfProducers++;
 
             if (!tokenStarted) {
                 startToken();
@@ -118,16 +137,21 @@ public class Consumer {
         }
     }
 
+    /** Starts the token system by sending the first token message */
     private void startToken() {
         tokenStarted = true;
-        envoyer_token_a(prochain, N);
+        sendTokenTo(next, BUFFER_SIZE);
     }
 
+    /**
+     * Sends the token to the next producer in the token ring.
+     * @param message The message containing the token being sent.
+     */
     private void passTokenToNextProducer(Message message) {
         synchronized (monitor) {
-            prochain = (prochain + 1) % p;
+            next = (next + 1) % nbOfProducers;
             MULTI_SERVER_SOCKET.sendMessageToClient(
-                    prochain,
+                    next,
                     new Message(Target.producer, ContentType.token, message.getContent())
             );
             System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());

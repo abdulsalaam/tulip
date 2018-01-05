@@ -58,11 +58,19 @@ public class MultiServerSocketThread extends Thread {
         }
     }
 
+    /**
+     * Sends a message object to the client socket
+     * @param message The message being sent
+     */
     void sendMessage(Message message) {
         String rawMessage = message.toJSON();
         out.println(rawMessage);
     }
 
+    /**
+     * Deals with the reception of a line of text from the client
+     * @param rawMessage The message being received, in the form of a line of text
+     */
     private void uponReceipt(String rawMessage) {
         Message message = Message.fromJSON(rawMessage);
         MULTI_SERVER_SOCKET.uponReceipt(message);

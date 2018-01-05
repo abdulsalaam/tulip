@@ -17,11 +17,10 @@ public class MultiServerSocket extends Thread {
 
     private Consumer CONSUMER;
 
-    /**
-     * The port the server socket listens to
-     */
+    /** The port the server socket listens to */
     private final int PORT;
 
+    /** The list of the MultiServerSocketThread corresponding to the socket clients connected */
     private List<MultiServerSocketThread> clients = new ArrayList<>();
 
     private final Object monitor = new Object();
@@ -58,9 +57,9 @@ public class MultiServerSocket extends Thread {
     }
 
     /**
-     * Send a message to a specific client
-     * @param clientNumber
-     * @param message
+     * Sends a message to a specific client
+     * @param clientNumber The position of the client on the list of the connected client
+     * @param message The message object to send to the client
      */
     public void sendMessageToClient(int clientNumber, Message message) {
         synchronized (monitor) {
@@ -75,6 +74,10 @@ public class MultiServerSocket extends Thread {
         }
     }
 
+    /**
+     * Deals with the receipt of a message
+     * @param message The message being received
+     */
     void uponReceipt(Message message) {
         synchronized (monitor) {
             while (CONSUMER == null) {
@@ -84,10 +87,15 @@ public class MultiServerSocket extends Thread {
                     e.printStackTrace();
                 }
             }
-            CONSUMER.sur_reception_de(message);
+            CONSUMER.uponReceipt(message);
         }
     }
 
+    /**
+     * Each time a client server connects to the server socket, it adds the corresponding multiServerSocketThread to the
+     * list of clients.
+     * @param multiServerSocketThread The multiServerSocketThread corresponding to the client connecting
+     */
     void addClient(MultiServerSocketThread multiServerSocketThread) {
         synchronized (monitor) {
             while (CONSUMER == null || clients == null) {

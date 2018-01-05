@@ -69,16 +69,20 @@ public class ClientSocket extends Thread {
     }
 
     /**
-     * Send a message to the server
-     * @param message
+     * Sends a message to the server
+     * @param message The message you want to send to the server
      */
     public void sendMessage(Message message) {
         String rawMessage = message.toJSON();
         out.println(rawMessage);
     }
 
+    /**
+     * Deals with the receipt of a line of text
+     * @param rawMessage The message in the form a line of text
+     */
     private void uponReceipt(String rawMessage) {
         Message message = Message.fromJSON(rawMessage);
-        PRODUCER.sur_reception_de(message);
+        PRODUCER.uponReceipt(message);
     }
 }

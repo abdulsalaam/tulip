@@ -23,19 +23,19 @@ public class Main {
         while (true) {
 
             if (producer1.canProduce()) {
-                producer1.produire(new Message(Target.consumer, ContentType.app, "Echo " + counter1));
+                producer1.produce(new Message(Target.consumer, ContentType.app, "Echo " + counter1));
                 counter1++;
             }
 
             if (producer2.canProduce()) {
-                producer2.produire(
+                producer2.produce(
                         new Message(Target.consumer, ContentType.app, "Echo " + counter2)
                 );
                 counter2++;
             }
 
-            if (consumer.peutConsommer()) {
-                consumer.consommer();
+            if (consumer.canConsume()) {
+                consumer.consume();
             }
 
         }
