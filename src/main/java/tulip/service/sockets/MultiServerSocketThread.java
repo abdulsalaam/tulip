@@ -60,15 +60,11 @@ public class MultiServerSocketThread extends Thread {
 
     void sendMessage(Message message) {
         String rawMessage = message.toJSON();
-        synchronized (monitor) {
-            out.println(rawMessage);
-        }
+        out.println(rawMessage);
     }
 
     private void uponReceipt(String rawMessage) {
-        synchronized (monitor) {
-            Message message = Message.fromJSON(rawMessage);
-            MULTI_SERVER_SOCKET.uponReceipt(message);
-        }
+        Message message = Message.fromJSON(rawMessage);
+        MULTI_SERVER_SOCKET.uponReceipt(message);
     }
 }

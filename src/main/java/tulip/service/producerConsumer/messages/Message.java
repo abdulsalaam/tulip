@@ -76,4 +76,24 @@ public class Message implements Serializable {
 
         return message;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+
+        Message message = (Message) o;
+
+        if (target != message.target) { return false; }
+        if (contentType != message.contentType) { return false; }
+        return content.equals(message.content);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = target.hashCode();
+        result = 31 * result + contentType.hashCode();
+        result = 31 * result + content.hashCode();
+        return result;
+    }
 }

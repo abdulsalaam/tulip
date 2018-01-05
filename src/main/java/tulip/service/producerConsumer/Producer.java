@@ -35,7 +35,7 @@ public class Producer extends Thread {
             while (true) {
                 synchronized (monitor) {
                     try {
-                        monitor.wait(100);
+                        monitor.wait(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -94,19 +94,25 @@ public class Producer extends Thread {
     }
 
     private void envoyer_JETON_a_producteur(int val) {
-        Message message = new Message(Target.nextProducer, ContentType.token, Integer.toString(val));
-        CLIENT_SOCKET.sendMessage(message);
-        System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+        synchronized (monitor) {
+            Message message = new Message(Target.nextProducer, ContentType.token, Integer.toString(val));
+            CLIENT_SOCKET.sendMessage(message);
+            System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+        }
     }
 
     private void envoyer_JETON_a_consommateur(int val) {
-        Message message = new Message(Target.consumer, ContentType.token, Integer.toString(val));
-        CLIENT_SOCKET.sendMessage(message);
-        System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+        synchronized (monitor) {
+            Message message = new Message(Target.consumer, ContentType.token, Integer.toString(val));
+            CLIENT_SOCKET.sendMessage(message);
+            System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+        }
     }
 
     private void envoyer_message(Message message) {
-        System.out.println("Producer " + NAME + " sends MESSAGE: " + message.toJSON());
-        CLIENT_SOCKET.sendMessage(message);
+        synchronized (monitor) {
+            System.out.println("Producer " + NAME + " sends MESSAGE: " + message.toJSON());
+            CLIENT_SOCKET.sendMessage(message);
+        }
     }
 }

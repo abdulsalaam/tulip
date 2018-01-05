@@ -32,7 +32,6 @@ public class Consumer {
 
     public void sur_reception_de(Message message) {
         System.out.println("Consumer " + NAME + " receives: " + message.toJSON());
-
         if (p > 0) {
 
             if (message.getContentType().equals(ContentType.token)) {
@@ -47,7 +46,6 @@ public class Consumer {
             } else if (message.getContentType().equals(ContentType.app)) {
                 sur_reception_de_APP(message);
             }
-
         }
     }
 
