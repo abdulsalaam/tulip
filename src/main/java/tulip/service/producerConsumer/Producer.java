@@ -35,7 +35,7 @@ public class Producer extends Thread {
             while (true) {
                 synchronized (monitor) {
                     try {
-                        monitor.wait(500);
+                        monitor.wait(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
