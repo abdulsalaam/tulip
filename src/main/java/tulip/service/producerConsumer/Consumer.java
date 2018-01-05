@@ -10,13 +10,13 @@ public class Consumer {
     private final MultiServerSocket MULTI_SERVER_SOCKET;
     private final String NAME;
 
-    private int N = 3;
+    private int N = 10;
     private Message[] T = new Message[N];
     private int in = 0;
     private int out = 0;
     private int nbmess = 0;
     private int nbcell = 0;
-    private final int SEUIL = 2;
+    private final int SEUIL = 5;
     private boolean present = false;
     private int p = 0;
     private int prochain = 0;
@@ -33,23 +33,21 @@ public class Consumer {
     public void sur_reception_de(Message message) {
         System.out.println("Consumer " + NAME + " receives: " + message.toJSON());
 
-        synchronized (monitor) {
-            if (p > 0) {
+        if (p > 0) {
 
-                if (message.getContentType().equals(ContentType.token)) {
+            if (message.getContentType().equals(ContentType.token)) {
 
-                    if (message.getTarget().equals(Target.nextProducer)) {
-                        passTokenToNextProducer(message);
-                    } else {
-                        int tokenValue = Integer.parseInt(message.getContent());
-                        sur_reception_de_JETON(tokenValue);
-                    }
-
-                } else if (message.getContentType().equals(ContentType.app)) {
-                    sur_reception_de_APP(message);
+                if (message.getTarget().equals(Target.nextProducer)) {
+                    passTokenToNextProducer(message);
+                } else {
+                    int tokenValue = Integer.parseInt(message.getContent());
+                    sur_reception_de_JETON(tokenValue);
                 }
 
+            } else if (message.getContentType().equals(ContentType.app)) {
+                sur_reception_de_APP(message);
             }
+
         }
     }
 
@@ -61,9 +59,8 @@ public class Consumer {
 
     public Message consommer() {
         synchronized (monitor) {
-            System.out.println("Consommation");
             if (nbmess > 0) {
-
+                System.out.println("Consommation");
                 Message m = T[out];
                 out = (out + 1) % N;
                 nbmess--;
@@ -77,6 +74,7 @@ public class Consumer {
                 return m;
             }
 
+            System.out.println("Consommation impossible");
             return null;
         }
     }
@@ -105,6 +103,7 @@ public class Consumer {
     }
 
     private void envoyer_token_a(int producerNumber, int valJeton) {
+        System.out.println("Producer number " + producerNumber);
         Message message = new Message(Target.producer, ContentType.token, Integer.toString(valJeton));
         System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);

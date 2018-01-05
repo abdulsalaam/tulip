@@ -74,7 +74,9 @@ public class ClientSocket extends Thread {
      */
     public void sendMessage(Message message) {
         String rawMessage = message.toJSON();
-        out.println(rawMessage);
+        synchronized (monitor) {
+            out.println(rawMessage);
+        }
     }
 
     private void uponReceipt(String rawMessage) {

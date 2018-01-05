@@ -59,8 +59,8 @@ public class MultiServerSocketThread extends Thread {
     }
 
     void sendMessage(Message message) {
+        String rawMessage = message.toJSON();
         synchronized (monitor) {
-            String rawMessage = message.toJSON();
             out.println(rawMessage);
         }
     }
