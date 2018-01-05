@@ -9,31 +9,37 @@ import tulip.service.producerConsumer.messages.Target;
 public class Main {
 
     public static void main(String[] args) {
-        try {
-            Consumer consumer = new Consumer("0");
-            Producer producer1 = new Producer("1");
-            Producer producer2 = new Producer("2");
+        launch();
+    }
 
-                if (producer1.canProduce()) {
-                    producer1.produire(new Message(Target.consumer, ContentType.app, "Echo " + 1));
-                }
+    public static void launch() {
 
-                if (consumer.peutConsommer()) {
-                    System.out.println("Consume " + consumer.consommer());
-                }
+        Consumer consumer = new Consumer("0");
+        Producer producer1 = new Producer("1");
+        Producer producer2 = new Producer("2");
 
-//                if (producer2.canProduce()) {
-//                    producer2.produire(
-//                            new Message(Target.consumer, ContentType.app, "Echo " + 2)
-//                    );
-//                }
-//
-//                if (consumer.peutConsommer()) {
-//                    System.out.println("Consume " + consumer.consommer());
-//                }
-        } catch (Exception e) {
-            e.printStackTrace();
+        int counter1 = 0;
+        int counter2 = 0;
+        while (true) {
+
+            if (producer1.canProduce()) {
+                producer1.produire(new Message(Target.consumer, ContentType.app, "Echo " + counter1));
+                counter1++;
+            }
+
+            if (producer2.canProduce()) {
+                producer2.produire(
+                        new Message(Target.consumer, ContentType.app, "Echo " + counter2)
+                );
+                counter2++;
+            }
+
+            if (consumer.peutConsommer()) {
+                consumer.consommer();
+            }
+
         }
+
     }
 
 }

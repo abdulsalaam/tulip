@@ -29,6 +29,9 @@ public class MultiServerSocket extends Thread {
     public MultiServerSocket(Consumer consumer, int port) {
         this.CONSUMER = consumer;
         this.PORT = port;
+        synchronized (monitor) {
+            monitor.notifyAll();
+        }
     }
 
     @Override
@@ -60,15 +63,42 @@ public class MultiServerSocket extends Thread {
      * @param message
      */
     public void sendMessageToClient(int clientNumber, Message message) {
-        clients.get(clientNumber).sendMessage(message);
+        synchronized (monitor) {
+            while (clients == null) {
+                try {
+                    monitor.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            clients.get(clientNumber).sendMessage(message);
+        }
     }
 
     void uponReceipt(Message message) {
-        CONSUMER.sur_reception_de(message);
+        synchronized (monitor) {
+            while (CONSUMER == null) {
+                try {
+                    monitor.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            CONSUMER.sur_reception_de(message);
+        }
     }
 
-    public void addClient(MultiServerSocketThread multiServerSocketThread) {
-        clients.add(multiServerSocketThread);
-        CONSUMER.addProducer();
+    void addClient(MultiServerSocketThread multiServerSocketThread) {
+        synchronized (monitor) {
+            while (CONSUMER == null || clients == null) {
+                try {
+                    monitor.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            clients.add(multiServerSocketThread);
+            CONSUMER.addProducer();
+        }
     }
 }

@@ -21,7 +21,9 @@ public class MultiServerSocketThread extends Thread {
     private PrintWriter out;
     private BufferedReader in;
 
-    public MultiServerSocketThread(MultiServerSocket multiServerSocket, Socket socket) {
+    private final Object monitor = new Object();
+
+    MultiServerSocketThread(MultiServerSocket multiServerSocket, Socket socket) {
         this.MULTI_SERVER_SOCKET = multiServerSocket;
         this.socket = socket;
     }
@@ -56,13 +58,17 @@ public class MultiServerSocketThread extends Thread {
         }
     }
 
-    public void sendMessage(Message message) {
-        String rawMessage = message.toJSON();
-        out.println(rawMessage);
+    void sendMessage(Message message) {
+        synchronized (monitor) {
+            String rawMessage = message.toJSON();
+            out.println(rawMessage);
+        }
     }
 
     private void uponReceipt(String rawMessage) {
-        Message message = Message.fromJSON(rawMessage);
-        MULTI_SERVER_SOCKET.uponReceipt(message);
+        synchronized (monitor) {
+            Message message = Message.fromJSON(rawMessage);
+            MULTI_SERVER_SOCKET.uponReceipt(message);
+        }
     }
 }

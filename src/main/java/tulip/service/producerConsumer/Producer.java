@@ -5,7 +5,7 @@ import tulip.service.sockets.ClientSocket;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 
-public class Producer {
+public class Producer extends Thread {
 
     private final ClientSocket CLIENT_SOCKET;
     private String name;
@@ -16,8 +16,10 @@ public class Producer {
     private int outi = 0;
     private int nbmessi = 0;
     private int nbauti = 0;
-    private int tempi;
-    private final int SEUILi = 3;
+    private int tempi = 0;
+    private final int SEUILi = 1;
+
+    private final Object monitor = new Object();
 
     public Producer(String name) {
         this.name = name;
@@ -26,74 +28,80 @@ public class Producer {
         new Facteur().start();
     }
 
-    public void sur_reception_de(Message message) {
-
-        // System.out.println("Producer " + name + " receives: " + message.toJSON());
-
-        if (message.getContentType().equals(ContentType.token)) {
-            int tokenValue = Integer.parseInt(message.getContent());
-            sur_reception_de_JETON(tokenValue);
-        }
-
-    }
-
-    public boolean canProduce() {
-        return nbmessi < Ni;
-    }
-
-    public void produire(Message message) {
-
-        if (canProduce()) {
-            Ti[ini] = message;
-            ini = (ini + 1) % Ni;
-            nbmessi++;
-        } else {
-            System.out.println("Buffer overflow");
-        }
-    }
-
-    public void sur_reception_de_JETON(int val) {
-        tempi = Math.min(nbmessi - nbauti, val);
-        val -= tempi;
-        nbauti += tempi;
-        if (val > SEUILi) {
-            envoyer_JETON_a_producteur(val);
-        } else {
-            envoyer_JETON_a_consommateur(val);
-        }
-    }
-
-    public class Facteur extends Thread {
+    private class Facteur extends Thread {
 
         @Override
         public void run() {
             while (true) {
-                if (nbauti > 0) {
-                    CLIENT_SOCKET.sendMessage(Ti[outi]);
-                    outi = (outi + 1) % Ni;
-                    nbauti--;
-                    nbmessi--;
+                synchronized (monitor) {
+                    if (nbauti > 0) {
+                        envoyer_message(Ti[outi]);
+                        outi = (outi + 1) % Ni;
+                        nbauti--;
+                        nbmessi--;
+                    }
                 }
             }
         }
     }
 
-    public void envoyer_JETON_a_producteur(int val) {
-
-        Message message = new Message(Target.nextProducer, ContentType.token, Integer.toString(val));
-
-        CLIENT_SOCKET.sendMessage(message);
-
-        // System.out.println("Producer " + name + " sends TOKEN: " + message.toJSON());
+    public void sur_reception_de(Message message) {
+        synchronized (monitor) {
+            System.out.println("Producer " + name + " receives: " + message.toJSON());
+            if (message.getContentType().equals(ContentType.token)) {
+                int tokenValue = Integer.parseInt(message.getContent());
+                sur_reception_de_JETON(tokenValue);
+            }
+        }
     }
 
-    public void envoyer_JETON_a_consommateur(int val) {
+    public boolean canProduce() {
+        synchronized (monitor) {
+            return nbmessi < Ni;
+        }
+    }
 
-        Message message = new Message(Target.consumer, ContentType.token, Integer.toString(val));
+    public void produire(Message message) {
+        synchronized (monitor) {
+            System.out.println("Produire");
+            if (canProduce()) {
+                Ti[ini] = message;
+                ini = (ini + 1) % Ni;
+                nbmessi++;
+            } else {
+                System.out.println("Buffer overflow");
+            }
+        }
+    }
 
+    private void sur_reception_de_JETON(int val) {
+        synchronized (monitor) {
+            tempi = Math.min(nbmessi - nbauti, val);
+            int value = val;
+            value -= tempi;
+            nbauti += tempi;
+            if (value > SEUILi) {
+                envoyer_JETON_a_producteur(value);
+            } else {
+                envoyer_JETON_a_consommateur(value);
+            }
+        }
+    }
+
+    private void envoyer_JETON_a_producteur(int val) {
+        Message message = new Message(Target.nextProducer, ContentType.token, Integer.toString(val));
         CLIENT_SOCKET.sendMessage(message);
+        System.out.println("Producer " + name + " sends TOKEN: " + message.toJSON());
+    }
 
-        // System.out.println("Producer " + name + " sends TOKEN: " + message.toJSON());
+    private void envoyer_JETON_a_consommateur(int val) {
+        Message message = new Message(Target.consumer, ContentType.token, Integer.toString(val));
+        CLIENT_SOCKET.sendMessage(message);
+        System.out.println("Producer " + name + " sends TOKEN: " + message.toJSON());
+    }
 
+    private void envoyer_message(Message message) {
+        System.out.println("Producer " + name + " sends MESSAGE: " + message.toJSON());
+        CLIENT_SOCKET.sendMessage(message);
     }
 }

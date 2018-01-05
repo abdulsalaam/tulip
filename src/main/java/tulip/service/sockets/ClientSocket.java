@@ -26,6 +26,8 @@ public class ClientSocket extends Thread {
     private PrintWriter out;
     private BufferedReader in;
 
+    private final Object monitor = new Object();
+
     public ClientSocket(Producer producer, String host, int port) {
         this.PRODUCER = producer;
         this.HOST = host;
