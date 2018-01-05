@@ -1,4 +1,4 @@
-package tulip.manageOrder;
+package tulip.app.order;
 
 import java.util.Date;
 
@@ -16,6 +16,12 @@ public class PurchaseOrder extends Order {
 
     /**
      * Constructs a PurchaseOrder
+     * @param id
+     * @param client
+     * @param broker
+     * @param emissionDate
+     * @param desiredNbOfStock
+     * @param maxPurchasingPrice
      */
     public PurchaseOrder(int id, String client, String broker, Date emissionDate, int desiredNbOfStock, double maxPurchasingPrice) {
         super(id, client, broker, emissionDate, desiredNbOfStock);
@@ -24,6 +30,9 @@ public class PurchaseOrder extends Order {
 
     /**
      * Processes the purchase order
+     * @param actualNbOfStocks
+     * @param processingDate
+     * @param actualPurchasingPrice
      */
     public void processOrder(int actualNbOfStocks, Date processingDate, double actualPurchasingPrice) {
         super.processOrder(actualNbOfStocks, processingDate);

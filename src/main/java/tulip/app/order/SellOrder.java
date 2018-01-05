@@ -1,9 +1,9 @@
-package tulip.manageOrder;
+package tulip.app.order;
 
 import java.util.Date;
 
 /**
- * Represent a sell order
+ * Represents a sell order
  * @author Thibaud Martinez
  */
 public class SellOrder extends Order {
@@ -16,6 +16,12 @@ public class SellOrder extends Order {
 
     /**
      * Constructs a PurchaseOrder
+     * @param id
+     * @param client
+     * @param broker
+     * @param emissionDate
+     * @param desiredNbOfStock
+     * @param minSellingPrice
      */
     public SellOrder(int id, String client, String broker, Date emissionDate, int desiredNbOfStock, double minSellingPrice) {
         super(id, client, broker, emissionDate, desiredNbOfStock);
@@ -24,6 +30,9 @@ public class SellOrder extends Order {
 
     /**
      * Processes the sell order
+     * @param actualNbOfStocks
+     * @param processingDate
+     * @param actualSellingPrice
      */
     public void processOrder(int actualNbOfStocks, Date processingDate, double actualSellingPrice) {
         super.processOrder(actualNbOfStocks, processingDate);

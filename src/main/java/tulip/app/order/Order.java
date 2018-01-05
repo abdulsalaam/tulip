@@ -1,4 +1,4 @@
-package tulip.manageOrder;
+package tulip.app.order;
 
 import java.util.Date;
 
@@ -49,6 +49,8 @@ public abstract class Order {
     /**
      * Processes the order ie. fills the processing date, changes the order state to processed and indicates the number
      * of stocks purchased or sold.
+     * @param actualNbOfStocks
+     * @param processingDate
      */
     void processOrder(int actualNbOfStocks, Date processingDate) {
         this.processingDate = processingDate;
