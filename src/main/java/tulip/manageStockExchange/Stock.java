@@ -4,6 +4,7 @@ import java.util.Date;
 
 import tulip.manageClient.Portfolio;
 
+
 public class Stock {
 	/**
 	 * a counter to give a unique ID to each stock created

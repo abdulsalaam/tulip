@@ -56,7 +56,7 @@ public class ClientSocket extends Thread {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             // Sends a registration request to the server
-            send(new Message(CLIENT_SOCKET_NAME, "", ContentType.registrationRequest, CLIENT_SOCKET_NAME));
+            send(new Message(CLIENT_SOCKET_NAME, "", ContentType.registrationClientRequest, CLIENT_SOCKET_NAME));
 
             try {
                 String fromServer;
@@ -67,7 +67,7 @@ public class ClientSocket extends Thread {
                     if (!isRegistered) {
 
                         // If the message received is a registration acknowledgment
-                        if (msgFromServer.getContentType().equals(ContentType.registrationAcknowledgement)) {
+                        if (msgFromServer.getContentType().equals(ContentType.registrationClientAcknowledgement)) {
                             registerServerSocket(msgFromServer.getContent());
                             System.out.println("ClientSocket \"" + CLIENT_SOCKET_NAME + "\": successful registration");
 

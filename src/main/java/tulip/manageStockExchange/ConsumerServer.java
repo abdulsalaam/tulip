@@ -1,5 +1,4 @@
 package tulip.manageStockExchange;
-
 import tulip.sockets.MultiServerSocket;
 /**
  * This class is a more specific Producer. Indeed, this producer behaves by considering a stockExchange market.

@@ -75,11 +75,23 @@ public abstract class Order {
         return desiredNbOfStocks;
     }
 
+    public OrderState getState() {
+        return state;
+    }
+    
+    public void setState(String stateName) {
+    		this.state = OrderState.valueOf(stateName);
+    }
+    
     public int getActualNbOfStocks() {
         return actualNbOfStocks;
     }
 
     public int getId() {
         return id;
+    }
+    
+    public String getBroker() {
+        return broker ;
     }
 }

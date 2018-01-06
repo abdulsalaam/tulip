@@ -113,24 +113,19 @@ public class StockExchange extends MultiServerSocket implements ManageStockExcha
 	
 	
 	/**
-	 *  this method officially closes the market. 
-	 *  in a v2, we can imagine saving (in a config .txt file) the market state/list of registered brokers. 
-	 *  Here, to make it easier to manipulate, we simply reset the all stock exchange and close the socket connection to stop listening to a client request.
+	 *  this method updates the stock prices for the registered companies. 
 	 */
 	public void updateStockPrices() {
 		
 		for (Company company : companies) {
-			//we recover the supply/demand for company browsed
+			/** we recover the supply/demand for company browsed */
 			ArrayList<Integer> supplyAndDemandForCompany = supplyAndDemand.get(company) ; 
 			
-			//update of the price stock with the mathematic formula 
+			/** update of the price stock with the mathematical formula */
 			double deltaPrice = (supplyAndDemandForCompany.get(0) - supplyAndDemandForCompany.get(1) ) / company.nbStocksEmitted ; 
 			double newPrice = company.stockPrice * (1 + deltaPrice) ; 
 			company.stockPrice = newPrice ; 
 		}
-		
-		//notify the brokers ?? no just during the deconnection phase
-		// notifyBrokerOfPriceChanges() ; 
 	}
 	
 	
@@ -719,6 +714,7 @@ public class StockExchange extends MultiServerSocket implements ManageStockExcha
 	 * method that will close the stockExchange and perform all the action needed to do so 
 	 * updating stock prices, interrupting every thread that serves a client of this server (so a Broker), closing the ServerSocket
 	 * and finally interrupting the current Thread related to our server.
+	 *  in a v2, we can imagine saving (in a config .txt file) the market state/list of registered brokers. 
 	 */
 	public void closeStockExchange() {
 		
@@ -760,13 +756,15 @@ public class StockExchange extends MultiServerSocket implements ManageStockExcha
 		return false ; 
 	}
 	
-	
-	
+	/**
+	 * method that will remove a Broker (identified by his name) in the stockExchange
+	 * @param nameBroker the name of the Broker we want to remove from the market
+	 */
 	public void removeBroker(String nameBroker){
 		if (brokersAndNumberOfClients.containsKey(nameBroker)) {
 			brokersAndNumberOfClients.remove(nameBroker) ; 
 			
-			//we verify that it remains registered brokers. Otherwise, we close the market. 
+			/**we verify that it remains registered brokers. Otherwise, we close the market. */
 			if (brokersAndNumberOfClients.isEmpty()) {
 				System.out.println("emptyMap, every broker has been disconnected. So we can close the market ") ; 
 				closeStockExchange();
@@ -819,9 +817,43 @@ public class StockExchange extends MultiServerSocket implements ManageStockExcha
 			stockValue = company.stockPrice ; 
 			marketState.put(name, stockValue) ; 
 		}
-		
 		return marketState ; 
 	}
+	
+	
+	/**
+	 * method that will read the market state, parse it to JSONArray and send it to the broker which wants to disconnect
+	 */
+	
+	public void sendMarketStateClientThread(MultiServerSocketThread threadClient) {
+		Map<String, Double> marketState = readMarketState() ; 
+		
+		/** creation of the JSONArray related to the market state map*/
+		String contentMarketState = ""; 
+		
+		/** create the JSONArray which represents the market state : for each company, we map its stockPrice. */
+		for (String company : marketState.keySet()) {
+			ObjectNode objectNode = mapper.createObjectNode();
+			objectNode.put("nameCompany", company); 				
+			objectNode.put("priceStock", String.valueOf(marketState.get(company)));
+			arrayNode.add(objectNode);
+		}
+		
+		/** create the string related to the JSONArray we just created. */
+		try {
+			contentMarketState = mapper.writeValueAsString(arrayNode) ;
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		} 
+		
+		/** we put the server's reply message in the thread's dedicated field */	
+		threadClient.replyFromServerWithOPCode.put("replyMessage", contentMarketState) ;
+		threadClient.replyFromServerWithOPCode.put("OP_CODE", "marketState") ;
+		
+	}
+	
+	
+	
 
 	/**
 	 * method that will place a SellOrder

@@ -38,6 +38,18 @@ public class SellOrder extends Order {
     public double getActualAmount() {
         return actualSellingPrice * getActualNbOfStocks();
     }
+    
+    public double getMinSellingPrice() {
+        return minSellingPrice ;
+    }
+    
+    public double getActualSellingPrice() {
+        return actualSellingPrice ;
+    }
+    
+    public void setActualSellingPrice(double actualSellingPrice) {
+		this.actualSellingPrice = actualSellingPrice ; 
+}
 
     @Override
     public String toString() {

@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+
+import tulip.manageOrder.Order;
+import tulip.manageStockExchange.Consumer;
 
 /**
  * A MultiServerSocket listens to a port and each time a ClientSocket wants to communicate on this port, it creates
@@ -25,7 +30,7 @@ public class MultiServerSocket extends Thread {
     private final int PORT;
 
     /** Maps the name of each registered client to its corresponding MultiServerSocketThread */
-    private Map<String, MultiServerSocketThread> registeredClients = new ConcurrentHashMap<>();
+    protected Map<String, MultiServerSocketThread> registeredClients = new ConcurrentHashMap<>();
 
     /** Indicates whether the token system has been started by sending a the token */
     private boolean tokenStarted = false;
@@ -34,10 +39,15 @@ public class MultiServerSocket extends Thread {
     private Iterator<Map.Entry<String, MultiServerSocketThread>> tokenIterator;
 
     private final Object monitor = new Object();
+    
+    //added
+    protected Consumer CONSUMER ; //initialized in the real type of MultiServerSocket
+    protected BlockingQueue<Order> orders ; 
 
     public MultiServerSocket(String serverSocketName, int port) {
         SERVER_SOCKET_NAME = serverSocketName;
         PORT = port;
+        orders = new ArrayBlockingQueue<Order>(100) ; 
     }
 
     @Override
@@ -82,6 +92,7 @@ public class MultiServerSocket extends Thread {
         }
     }
 
+    
     /**
      * The MultiServerSocket passes the token to the next client on the token system.
      * This method is called by the MultiServerSocketThread which currently has the token.
@@ -102,10 +113,73 @@ public class MultiServerSocket extends Thread {
         }
     }
 
+    
     /**
      * Resets the token iterator
      */
     public void resetTokenIterator() {
         tokenIterator = registeredClients.entrySet().iterator();
     }
+    
+    
+    
+    
+    
+    //-----------GETTERS & SETTERS ----------------------
+    public MultiServerSocket getServer() {
+    		return this ; 
+    }
+    
+    public Map<String, MultiServerSocketThread> getRegisteredClients() {
+		return registeredClients;
+	}
+
+	public void setRegisteredClients(Map<String, MultiServerSocketThread> registeredClients) {
+		this.registeredClients = registeredClients;
+	}
+
+	public boolean isTokenStarted() {
+		return tokenStarted;
+	}
+
+	public void setTokenStarted(boolean tokenStarted) {
+		this.tokenStarted = tokenStarted;
+	}
+
+	public Iterator<Map.Entry<String, MultiServerSocketThread>> getTokenIterator() {
+		return tokenIterator;
+	}
+
+	public void setTokenIterator(Iterator<Map.Entry<String, MultiServerSocketThread>> tokenIterator) {
+		this.tokenIterator = tokenIterator;
+	}
+
+	public Consumer getConsumer() {
+		return CONSUMER;
+	}
+
+	public void setConsumer(Consumer consumer) {
+		this.CONSUMER = consumer;
+	}
+
+	public BlockingQueue<Order> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(BlockingQueue<Order> orders) {
+		this.orders = orders;
+	}
+
+	public String getSERVER_SOCKET_NAME() {
+		return SERVER_SOCKET_NAME;
+	}
+
+	public int getPORT() {
+		return PORT;
+	}
+
+	public Object getMonitor() {
+		return monitor;
+	}
+
 }

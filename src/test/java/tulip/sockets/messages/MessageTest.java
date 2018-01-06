@@ -14,7 +14,7 @@ public class MessageTest {
 
         ObjectMapper mapper = new ObjectMapper();
 
-            Message messageSent = new Message("Thibaud", "Yanis", ContentType.registrationRequest, "{ \"client\" : \"Thibaud\" }");
+            Message messageSent = new Message("Thibaud", "Yanis", ContentType.registrationClientRequest, "{ \"client\" : \"Thibaud\" }");
             String jsonSent = messageSent.toJSON();
 
             // Prettily print json message

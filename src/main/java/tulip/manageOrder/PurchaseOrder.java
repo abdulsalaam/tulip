@@ -48,6 +48,20 @@ public class PurchaseOrder extends Order {
     public double getActualAmount() {
         return actualPurchasingPrice * getActualNbOfStocks();
     }
+    
+    
+    public double getMaxPurchasingPrice() {
+        return maxPurchasingPrice;
+    }
+    
+    public double getActualPurchasingPrice() {
+        return actualPurchasingPrice ;
+    }
+    
+    public void setActualPurchasingPrice(double actualPurchasingPrice) {
+    		this.actualPurchasingPrice = actualPurchasingPrice ; 
+    }
+    
 
     @Override
     public String toString() {
