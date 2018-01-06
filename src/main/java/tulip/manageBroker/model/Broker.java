@@ -52,6 +52,7 @@ public class Broker {
     public void registerClient(){
         // add parameter Client client
         // clients.add(client);
+        System.out.println("Register client");
     }
 
     /**
