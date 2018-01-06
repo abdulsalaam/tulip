@@ -255,6 +255,11 @@ public class MultiServerSocketThread extends Thread {
                                     
                 				}
                 				
+                				else if (replyFromServerWithOPCode.get("OP_CODE").equals("floatingStocks")) {
+                					send(new Message(SERVER_SOCKET_NAME, clientSocketName, ContentType.purchasedWithFloatingStocksAcknowledgment, replyFromServerWithOPCode.get("replyMessage")));
+                                    
+                				}
+                				
                 				/**
                 				 * once we replied to the broker (order treated), we finished our work
                 				 */
@@ -265,7 +270,7 @@ public class MultiServerSocketThread extends Thread {
                 				StockExchange theStockExchange = (StockExchange)MULTI_SERVER_SOCKET ; 
                 				
                 				/**
-                				 *  Sends a registration acknowledgment to the client (who is a broker)
+                				 *  Sends a disconnection acknowledgment to the client (who is a broker)
                 				 */
                              send(new Message(SERVER_SOCKET_NAME, clientSocketName, ContentType.deconnectAcknowledgment, SERVER_SOCKET_NAME));
                              
@@ -294,6 +299,25 @@ public class MultiServerSocketThread extends Thread {
                 				isRegisterd = false ; 
                 			  break ; 	
                 			
+                			case stateMarket : 
+                				StockExchange myStockExchange = (StockExchange)MULTI_SERVER_SOCKET ; 
+                				   
+                             /**
+                             * we call the action to get the market state from the server
+                             */
+                				myStockExchange.sendMarketStateClientThread(this) ; 
+                                
+                             /**
+                              * we recover the JSON (in String format) of the state market under the key "replyMessage" of the map
+                              * we then create a message filled with this content and we send it to our client (Broker that asked for logout)
+                              */
+                				String stateMarketRequest = replyFromServerWithOPCode.get("replyMessage") ; 
+                				send(new Message(SERVER_SOCKET_NAME, clientSocketName, ContentType.stateMarketAcknowledgment, stateMarketRequest ));
+                            
+                				
+                				break ;  
+                				
+                			  
                 			default :
                 				break ; 
                 				

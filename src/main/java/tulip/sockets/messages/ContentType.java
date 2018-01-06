@@ -6,15 +6,23 @@ package tulip.sockets.messages;
 public enum ContentType {
     registrationClientRequest,
     registrationClientAcknowledgement,
+    
     registrationBrokerRequest,
     registrationBrokerAcknowledgement,
+    
     token,
+    
     order, 
-    stateMarket,
     orderAcknowledgment, 
     orderImpossible, 
-    updateStockPrice, 
     agreementAcknowledgment, 
+    purchasedWithFloatingStocksAcknowledgment,
+    
+    stateMarket,
+    stateMarketAcknowledgment,
+    
+    updateStockPrice, 
+    
     deconnect, 
     deconnectAcknowledgment
 }

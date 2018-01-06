@@ -703,7 +703,7 @@ public class StockExchange extends MultiServerSocket implements ManageStockExcha
 		/**we put the reply message of the server in the dedicated map of the thread
 		 * responsible for the client's request treatment and that submitted the order */
 		threadOrder.replyFromServerWithOPCode.put("replyMessage", jsonOrder) ;
-		threadOrder.replyFromServerWithOPCode.put("OP_CODE", new Boolean(true).toString()) ;
+		threadOrder.replyFromServerWithOPCode.put("OP_CODE", "floatingStocks") ;
 		
 		/**we wake this thread up by changing its values of isActionDone boolean. It will run the method for replying*/
 		threadOrder.isActionDone = true ; 
@@ -823,6 +823,7 @@ public class StockExchange extends MultiServerSocket implements ManageStockExcha
 	
 	/**
 	 * method that will read the market state, parse it to JSONArray and send it to the broker which wants to disconnect
+	 * @param threadClient the reference of the MultiServerSocketThread for putting the message in the right field
 	 */
 	
 	public void sendMarketStateClientThread(MultiServerSocketThread threadClient) {
