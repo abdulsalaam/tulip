@@ -3,6 +3,11 @@ package tulip.app.broker.model;
 import tulip.app.order.Order;
 import tulip.app.order.PurchaseOrder;
 import tulip.app.order.SellOrder;
+import tulip.service.producerConsumer.Consumer;
+import tulip.service.producerConsumer.Producer;
+import tulip.service.producerConsumer.messages.ContentType;
+import tulip.service.producerConsumer.messages.Message;
+import tulip.service.producerConsumer.messages.Target;
 
 import java.util.*;
 
@@ -24,6 +29,10 @@ public class Broker {
     private int sellOrderCounter;
     /** Counts the purchase orders proceeded by the broker */
     private int purchaseOrderCounter;
+    /** Producer role for the broker (with Stock Exchange) */
+    Producer brokerProducer = new Producer(name);
+    /** Consumer role for the broker (with Client) */
+    Consumer brokerConsumer = new Consumer(name);
 
     /**
      * Constructor
@@ -42,7 +51,7 @@ public class Broker {
      * Sends registering request to stock exchange
      */
     public void registerToStockExchange() {
-        // Send request to StockExchange and wait for acquittal
+        brokerProducer.produce(new Message(Target.consumer, ContentType.app, "registering request"));
         this.isRegistered = true;
     }
 
@@ -50,9 +59,6 @@ public class Broker {
      * Registers a client
      */
     public void registerClient(){
-        // add parameter Client client
-        // clients.add(client);
-        System.out.println("Register client");
     }
 
     /**
@@ -60,15 +66,13 @@ public class Broker {
      * market state information
      */
     public void requestMarketState(){
-        // send request to Stock exchange
-    }
+        brokerProducer.produce(new Message(Target.consumer, ContentType.app, "registering request"));    }
 
     /**
-     * Checks whether a client is registered or not
+     * Checks whether a client is registered or notf
      * @return true if the client is registered, false otherwise
      */
     public boolean checkClientRegistered(){
-        // add parameter Client client
         return false;
     }
 
@@ -105,7 +109,9 @@ public class Broker {
      * After an agreement has been made, notifies the client that the order
      * has been proceeded.
      */
-    public void notifyClientOfTransaction(){}
+    public void notifyClientOfTransaction(){
+        brokerProducer.produce(new Message(Target.producer, ContentType.app, "Notification"));
+    }
 
     // Improvement : put getActualAmount in Order class
     /**
