@@ -1,4 +1,4 @@
-package tulip.app.client;
+package tulip.app.client.model;
 
 import java.util.HashMap;
 import java.util.Map;

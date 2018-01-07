@@ -1,4 +1,4 @@
-package tulip.app.client;
+package tulip.app.client.model;
 
 
 import tulip.app.order.PurchaseOrder;
@@ -49,7 +49,7 @@ public class Client {
 
     }
 
-    private void requestMarketState() {}
+    public void requestMarketState() {}
 
     private void placeSellOrder(String company, int nbOfStocks, double minSellingPrice) {
         if (sellOrderIsLegal(company, nbOfStocks)) {
@@ -170,5 +170,6 @@ public class Client {
 
     }
 
+    public void notifyOfTransaction(){}
     private void closeTheDay() {}
 }
