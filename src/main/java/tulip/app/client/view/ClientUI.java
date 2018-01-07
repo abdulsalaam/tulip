@@ -10,14 +10,11 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import tulip.app.broker.model.Broker;
 import tulip.app.client.model.Client;
 
 import java.util.ArrayList;
@@ -36,7 +33,7 @@ public class ClientUI extends Application{
         map.put("Basecamp", 250.0);
         map.put("Tesla", 596.70);
         map.put("Facebook", 450.0);
-        map.put("Google", 270.0);
+        map.put("Alphabet", 270.0);
         map.put("Apple", 430.0);
         map.put("Spotify", 220.0);
         map.put("LVMH", 550.0);
@@ -101,7 +98,7 @@ public class ClientUI extends Application{
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 client.requestMarketState();
-                showStage(map);
+                showMarketState(map);
             }
         });
 
@@ -109,11 +106,9 @@ public class ClientUI extends Application{
             public void handle(ActionEvent event) { client.notifyOfTransaction();}
         });
 
-
-
         // Style and final set up
         root.setStyle(
-                "-fx-background-color: linear-gradient(CornFlowerBlue, MediumSpringGreen);-fx-background-image: url('pineappleSoft.png');-fx-background-size: cover");
+                "-fx-background-image: url('pineappleSoft.png');-fx-background-size: cover");
 
         root.getChildren().add(grid);
 
@@ -122,10 +117,10 @@ public class ClientUI extends Application{
         primaryStage.show();
 
     }
-    public static void showStage(Map<String, Double> map){
+    public static void showMarketState(Map<String, Double> map){
 
-            Stage stage = new Stage();
-            stage.setTitle("Current Market State");
+            Stage MarketPopUp = new Stage();
+            MarketPopUp.setTitle("Current Market State");
             final CategoryAxis xAxis = new CategoryAxis();
             final NumberAxis yAxis = new NumberAxis();
             final BarChart<String,Number> bc =
@@ -133,8 +128,7 @@ public class ClientUI extends Application{
             bc.setStyle(
                     "-fx-background-color: white;"
             );
-            xAxis.setLabel("Company");
-            yAxis.setLabel("Value");
+
             xAxis.setTickLabelFill(Color.WHITE);
             yAxis.setTickLabelFill(Color.WHITE);
 
@@ -149,8 +143,8 @@ public class ClientUI extends Application{
                     "-fx-background-image: url('background.png');-fx-background-size: cover");
             Scene scene  = new Scene(bc,800,600);
             bc.getData().addAll(serie);
-            stage.setScene(scene);
-            stage.show();
+            MarketPopUp.setScene(scene);
+            MarketPopUp.show();
     }
 
 
