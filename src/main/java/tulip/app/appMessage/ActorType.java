@@ -1,4 +1,7 @@
 package tulip.app.appMessage;
 
-public class ActorType {
+public enum ActorType {
+    stockExchange,
+    broker,
+    client
 }

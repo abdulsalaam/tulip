@@ -15,19 +15,17 @@ import java.util.List;
  **/
 public class MultiServerSocket extends Thread {
 
-    private Consumer CONSUMER;
-
-    /** The port the server socket listens to */
-    private final int PORT;
+    private final Consumer CONSUMER;
+    private final ServerSocket SERVER_SOCKET;
 
     /** The list of the MultiServerSocketThread corresponding to the socket clients connected */
     private List<MultiServerSocketThread> clients = new ArrayList<>();
 
     private final Object monitor = new Object();
 
-    public MultiServerSocket(Consumer consumer, int port) {
+    public MultiServerSocket(Consumer consumer, ServerSocket serverSocket) {
         this.CONSUMER = consumer;
-        this.PORT = port;
+        this.SERVER_SOCKET = serverSocket;
         synchronized (monitor) {
             monitor.notifyAll();
         }
@@ -38,13 +36,13 @@ public class MultiServerSocket extends Thread {
 
         System.out.println("MultiServerSocket starting");
 
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+        try {
             while (true) {
 
-                // A new client socket initiates a connection with MultiServerSocket
-                // Creates a new multiServerSocketThread with the socket
+                // When a new client socket initiates a connection with the MultiServerSocket
+                // it creates a new multiServerSocketThread to handle the connection with the socket
                 MultiServerSocketThread multiServerSocketThread =
-                        new MultiServerSocketThread(this, serverSocket.accept());
+                        new MultiServerSocketThread(this, SERVER_SOCKET.accept());
 
                 // Starts the thread
                 multiServerSocketThread.start();

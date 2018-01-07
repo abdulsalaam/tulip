@@ -11,10 +11,10 @@ import java.net.Socket;
 
 import static org.junit.Assert.*;
 
-public class ConsumerProducerTest {
+public class producerConsumerTest {
 
     @Test
-    public void consumerProducerTest() {
+    public void producerConsumerTest() {
 
         final String HOST = "127.0.0.1";
         final int PORT = 4000;

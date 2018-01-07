@@ -1,4 +1,13 @@
 package tulip.app.appMessage;
 
-public class AppMessageContentType {
+public enum AppMessageContentType {
+    registrationRequest,
+    registrationAcknowledgment,
+    marketStateRequest,
+    marketStateReply,
+    purchaseOrder,
+    sellOrder,
+    purchaseOrderProcessed,
+    sellOrderProcessed,
+    endOfDayNotification
 }

@@ -1,4 +1,4 @@
-package tulip.service.launchers;
+package tulip.service;
 
 import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
@@ -7,6 +7,8 @@ import tulip.service.producerConsumer.messages.Message;
 import tulip.service.producerConsumer.messages.Target;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Main {
 
@@ -20,9 +22,14 @@ public class Main {
         final int PORT = 4000;
 
         try {
-            Consumer consumer = new Consumer("0", );
-            Producer producer1 = new Producer("1");
-            Producer producer2 = new Producer("2");
+
+            ServerSocket serverSocket = new ServerSocket(PORT);
+            Socket socket1 = new Socket(HOST, PORT);
+            Socket socket2 = new Socket(HOST, PORT);
+
+            Consumer consumer = new Consumer("0", serverSocket);
+            Producer producer1 = new Producer("1", socket1);
+            Producer producer2 = new Producer("2", socket2);
 
             int counter1 = 0;
             int counter2 = 0;

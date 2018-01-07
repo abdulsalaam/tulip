@@ -15,23 +15,15 @@ import java.net.Socket;
 public class ClientSocket extends Thread {
 
     private final Producer PRODUCER;
-
-    /** The address of the host the client socket connects to */
-    private final String HOST;
-
-    /** The port the client socket connects to */
-    private final int PORT;
-
-    private Socket socket;
+    private final Socket SOCKET;
     private PrintWriter out;
     private BufferedReader in;
 
     private final Object monitor = new Object();
 
-    public ClientSocket(Producer producer, String host, int port) {
+    public ClientSocket(Producer producer, Socket socket) {
         this.PRODUCER = producer;
-        this.HOST = host;
-        this.PORT = port;
+        this.SOCKET = socket;
     }
 
     @Override
@@ -39,10 +31,8 @@ public class ClientSocket extends Thread {
         System.out.println("ClientSocket starting" );
 
         try {
-
-            socket = new Socket(HOST, PORT);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new PrintWriter(SOCKET.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(SOCKET.getInputStream()));
 
             try {
                 String fromServer;
@@ -59,7 +49,6 @@ public class ClientSocket extends Thread {
             out.close();
             try {
                 in.close();
-                socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
