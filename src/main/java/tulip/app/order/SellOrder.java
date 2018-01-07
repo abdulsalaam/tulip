@@ -15,28 +15,28 @@ public class SellOrder extends Order {
     private double actualSellingPrice;
 
     /**
-     * Constructs a PurchaseOrder
-     * @param id
-     * @param client
-     * @param broker
-     * @param emissionDate
-     * @param desiredNbOfStock
-     * @param minSellingPrice
+     * Constructs a sellOrder
      */
-    public SellOrder(int id, String client, String broker, Date emissionDate, int desiredNbOfStock, double minSellingPrice) {
-        super(id, client, broker, emissionDate, desiredNbOfStock);
+    public SellOrder(int id, String company, String client, String broker, Date emissionDate, int desiredNbOfStock,
+                     double minSellingPrice) {
+        super(id, company, client, broker, emissionDate, desiredNbOfStock);
         this.minSellingPrice = minSellingPrice;
     }
 
     /**
      * Processes the sell order
-     * @param actualNbOfStocks
-     * @param processingDate
-     * @param actualSellingPrice
      */
     public void processOrder(int actualNbOfStocks, Date processingDate, double actualSellingPrice) {
         super.processOrder(actualNbOfStocks, processingDate);
         this.actualSellingPrice = actualSellingPrice;
+    }
+
+    public double getDesiredAmount() {
+        return minSellingPrice * getDesiredNbOfStocks();
+    }
+
+    public double getActualAmount() {
+        return actualSellingPrice * getActualNbOfStocks();
     }
 
     @Override

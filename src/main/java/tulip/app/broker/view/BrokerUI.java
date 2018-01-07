@@ -91,6 +91,7 @@ public class BrokerUI extends Application{
         }
 
         // Text fields
+        TextField company = new TextField ("Company");
         TextField client = new TextField ("Client");
         TextField nbStock = new TextField ("Number of stocks");
         TextField purchasingPrice = new TextField ("Price");
@@ -107,7 +108,7 @@ public class BrokerUI extends Application{
         placePurchaseOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 broker.placePurchaseOrder(
-                        client.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(purchasingPrice.getText()
+                        company.getText(), client.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(purchasingPrice.getText()
                         ));
             }
         });
@@ -115,7 +116,7 @@ public class BrokerUI extends Application{
         placeSellOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 broker.placeSellOrder(
-                        client.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(purchasingPrice.getText()
+                        company.getText(), client.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(purchasingPrice.getText()
                         ));
             }
         });
@@ -129,9 +130,10 @@ public class BrokerUI extends Application{
         root.setStyle(
                 "-fx-background-color: linear-gradient(CornFlowerBlue, MediumSpringGreen);-fx-background-image: url('tulipFlower.jpg');-fx-background-size: cover");
 
-        grid.add(client, 3, 3);
-        grid.add(nbStock, 3, 4);
-        grid.add(purchasingPrice, 3, 5);
+        grid.add(company, 3, 3);
+        grid.add(client, 3, 4);
+        grid.add(nbStock, 3, 5);
+        grid.add(purchasingPrice, 3, 6);
         root.getChildren().add(grid);
 
         primaryStage.setScene(scene);

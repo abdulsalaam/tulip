@@ -82,9 +82,9 @@ public class Broker {
      * @param nbOfStocks is the number of stocks the client wants to sell
      * @param minSellingPrice is the minimum price to which the client is willing to sell
      */
-    public void placeSellOrder(String client, int nbOfStocks, double minSellingPrice){
+    public void placeSellOrder(String company, String client, int nbOfStocks, double minSellingPrice){
         pendingOrders.add(
-                new SellOrder(++sellOrderCounter, client, name, new Date(), nbOfStocks, minSellingPrice)
+                new SellOrder(++sellOrderCounter,company, client, name, new Date(), nbOfStocks, minSellingPrice)
         );
     }
 
@@ -94,9 +94,9 @@ public class Broker {
      * @param nbOfStocks is the number of stocks requested by the client
      * @param maxPurchasingPrice is the maximum price to which the client is willing to buy
      */
-    public void placePurchaseOrder(String client, int nbOfStocks, double maxPurchasingPrice) {
+    public void placePurchaseOrder(String company, String client, int nbOfStocks, double maxPurchasingPrice) {
         pendingOrders.add(
-                new PurchaseOrder(++purchaseOrderCounter, client, name, new Date(), nbOfStocks, maxPurchasingPrice)
+                new PurchaseOrder(++purchaseOrderCounter, company, client, name, new Date(), nbOfStocks, maxPurchasingPrice)
         );
     }
 
