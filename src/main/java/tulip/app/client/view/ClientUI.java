@@ -5,9 +5,15 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -15,15 +21,29 @@ import tulip.app.broker.model.Broker;
 import tulip.app.client.model.Client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ClientUI extends Application{
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
     private static Client client;
+    private static Map<String, Double> map = new HashMap<>();
 
     public static void main(String [] args) {
+        map.put("Basecamp", 250.0);
+        map.put("Tesla", 596.70);
+        map.put("Facebook", 450.0);
+        map.put("Google", 270.0);
+        map.put("Apple", 430.0);
+        map.put("Spotify", 220.0);
+        map.put("LVMH", 550.0);
+        map.put("Ecosia", 120.0);
+        map.put("Biocop", 140.0);
+        map.put("Veolia", 245.8);
+        map.put("Samsung", 240.0);
         client = new Client("Emma");
         Application.launch();
     }
@@ -79,12 +99,16 @@ public class ClientUI extends Application{
 
         // Actions
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) { client.requestMarketState();}
+            public void handle(ActionEvent event) {
+                client.requestMarketState();
+                showStage(map);
+            }
         });
 
         notifyOfTransactionBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) { client.notifyOfTransaction();}
         });
+
 
 
         // Style and final set up
@@ -97,6 +121,36 @@ public class ClientUI extends Application{
 
         primaryStage.show();
 
+    }
+    public static void showStage(Map<String, Double> map){
+
+            Stage stage = new Stage();
+            stage.setTitle("Current Market State");
+            final CategoryAxis xAxis = new CategoryAxis();
+            final NumberAxis yAxis = new NumberAxis();
+            final BarChart<String,Number> bc =
+                    new BarChart<String,Number>(xAxis,yAxis);
+            bc.setStyle(
+                    "-fx-background-color: white;"
+            );
+            xAxis.setLabel("Company");
+            yAxis.setLabel("Value");
+            xAxis.setTickLabelFill(Color.WHITE);
+            yAxis.setTickLabelFill(Color.WHITE);
+
+            XYChart.Series serie = new XYChart.Series();
+
+            for(Map.Entry<String, Double> stock : map.entrySet()) {
+                serie.getData().add(new XYChart.Data(stock.getKey(), stock.getValue()));
+            }
+
+
+            bc.setStyle(
+                    "-fx-background-image: url('background.png');-fx-background-size: cover");
+            Scene scene  = new Scene(bc,800,600);
+            bc.getData().addAll(serie);
+            stage.setScene(scene);
+            stage.show();
     }
 
 
