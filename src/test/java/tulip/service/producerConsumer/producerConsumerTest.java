@@ -24,9 +24,14 @@ public class producerConsumerTest {
             Socket socket1 = new Socket(HOST, PORT);
             Socket socket2 = new Socket(HOST, PORT);
 
+            ProducerMessenger producerMessenger = new ProducerMessenger() {
+                @Override
+                public void uponReceiptOfAppMessage(Message message) {}
+            };
+            
             Consumer consumer = new Consumer("0", serverSocket);
-            Producer producer1 = new Producer("1", socket1);
-            Producer producer2 = new Producer("2", socket2);
+            Producer producer1 = new Producer("1", socket1, producerMessenger);
+            Producer producer2 = new Producer("2", socket2, producerMessenger);
 
             Message m1 = new Message(Target.consumer, ContentType.app, "Message 1");
             producer1.produce(m1);

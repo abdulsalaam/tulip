@@ -2,6 +2,7 @@ package tulip.service;
 
 import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
+import tulip.service.producerConsumer.ProducerMessenger;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 import tulip.service.producerConsumer.messages.Target;
@@ -21,6 +22,11 @@ public class Main {
         final String HOST = "127.0.0.1";
         final int PORT = 4000;
 
+        ProducerMessenger producerMessenger = new ProducerMessenger() {
+            @Override
+            public void uponReceiptOfAppMessage(Message message) {}
+        };
+
         try {
 
             ServerSocket serverSocket = new ServerSocket(PORT);
@@ -28,8 +34,8 @@ public class Main {
             Socket socket2 = new Socket(HOST, PORT);
 
             Consumer consumer = new Consumer("0", serverSocket);
-            Producer producer1 = new Producer("1", socket1);
-            Producer producer2 = new Producer("2", socket2);
+            Producer producer1 = new Producer("1", socket1, producerMessenger);
+            Producer producer2 = new Producer("2", socket2, producerMessenger);
 
             int counter1 = 0;
             int counter2 = 0;
