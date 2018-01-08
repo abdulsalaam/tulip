@@ -61,7 +61,10 @@ public class Message implements Serializable {
         return content;
     }
 
-    /** Returns the JSON representation of the message */
+    /**
+     * Translates the message into JSON
+     * @return the JSON representation of the message
+     */
     public String toJSON() {
         String json = null;
 
@@ -74,7 +77,9 @@ public class Message implements Serializable {
         return json;
     }
 
-    /** Constructs a Message object from a JSON string */
+    /** Constructs a Message object from a JSON string
+     * @return the Message object constructed
+     */
     public static Message fromJSON(String json) {
         Message message = null;
 
