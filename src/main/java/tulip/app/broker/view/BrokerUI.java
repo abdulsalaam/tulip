@@ -24,6 +24,9 @@ import tulip.app.MarketState;
 import tulip.app.broker.model.Broker;
 import tulip.app.order.Order;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +38,11 @@ public class BrokerUI extends Application{
     private static Broker broker;
 
     public static void main(String [] args) {
-        broker = new Broker("Leonardo");
+        try {
+            broker = new Broker("Leonardo", new ServerSocket(), new Socket());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Application.launch();
     }
 
@@ -77,17 +84,13 @@ public class BrokerUI extends Application{
             buttons.add(requestMarketStateBtn);
             grid.add(requestMarketStateBtn, 1, 1);
 
-        Button placePurchaseOrderBtn = new Button("Purchase order");
-            buttons.add(placePurchaseOrderBtn);
-            grid.add(placePurchaseOrderBtn, 3,3);
-
-        Button placeSellOrderBtn = new Button("Sell order");
-            grid.add(placeSellOrderBtn, 5,3);
-            buttons.add(placeSellOrderBtn);
+        Button placeOrderBtn = new Button("Process order");
+            buttons.add(placeOrderBtn);
+            grid.add(placeOrderBtn, 3,1);
 
         Button showPendingOrdersBtn = new Button("Show pending orders");
             buttons.add(requestMarketStateBtn);
-            grid.add(showPendingOrdersBtn, 1, 3);
+            grid.add(showPendingOrdersBtn, 5, 1);
 
         int index = 0;
         for(Button button : buttons) {
@@ -107,15 +110,9 @@ public class BrokerUI extends Application{
 
         });
 
-        placePurchaseOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
+        placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                broker.placePurchaseOrder();
-            }
-        });
-
-        placeSellOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                broker.placeSellOrder();
+                broker.placeOrder();
             }
         });
 

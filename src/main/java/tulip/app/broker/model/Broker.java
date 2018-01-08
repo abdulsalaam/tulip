@@ -48,21 +48,14 @@ public class Broker implements ProducerMessenger {
      * Constructor
      * @param name is the name of the broker
      */
-    public Broker(String name) {
+    public Broker(String name, ServerSocket serverSocket, Socket socket) {
         this.name = name;
         this.isRegistered = false;
         this.cash = 0;
         this.commissionRate = 0.1;
         this.clients = new ArrayList<>();
         this.pendingOrders = new ArrayList<>();
-        ServerSocket serverSocket = null;
-        try {
-            serverSocket = new ServerSocket();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         brokerConsumer = new Consumer(this.name, serverSocket);
-        Socket socket = new Socket();
         brokerProducer = new Producer(this.name, socket, this);
     }
 
@@ -135,31 +128,18 @@ public class Broker implements ProducerMessenger {
     }
 
     /**
-     * Proceeds a sell order
+     * Proceeds an order
      */
-    public void placeSellOrder() {
-        String sellOrderJson = pendingOrders.get(0).toJSON();
+    public void placeOrder() {
+        String orderJson = pendingOrders.get(0).toJSON();
         if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
-                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.sellOrder, sellOrderJson
+                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.order, orderJson
             ));
         }
         pendingOrders.remove(0);
     }
 
-    /**
-     * Proceeds a purchase order
-     */
-    public void placePurchaseOrder() {
-        String purchaseOrderJson = pendingOrders.get(0).toJSON();
-        if(brokerProducer.canProduce()) {
-            brokerProducer.produce(new AppMessage(
-                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.sellOrder, purchaseOrderJson
-            ));
-        }
-        pendingOrders.remove(0);
-
-    }
 
     /**
      * After an agreement has been made, notifies the client that the order
@@ -168,7 +148,7 @@ public class Broker implements ProducerMessenger {
     private void notifyOfTransaction(String clientName) {
         if(brokerProducer.canProduce()){
             brokerProducer.produce(new AppMessage(
-                    this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.purchaseOrder, ""
+                    this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.order, ""
 
             ));
         }
@@ -198,16 +178,11 @@ public class Broker implements ProducerMessenger {
 
     @Override
     public void uponReceiptOfAppMessage(AppMessage appMessage) {
-        switch (appMessage.getAppMessageContentType()){
+        switch (appMessage.getAppMessageContentType()) {
 
-            case sellOrder:
-                Order sellOrder = Order.fromJSON(appMessage.getContent());
-                pendingOrders.add(sellOrder);
-                break;
-
-            case purchaseOrder:
-                Order purchaseOrder = Order.fromJSON(appMessage.getContent());
-                pendingOrders.add(purchaseOrder);
+            case order:
+                Order order = Order.fromJSON(appMessage.getContent());
+                pendingOrders.add(order);
                 break;
 
             case marketStateReply:
@@ -234,17 +209,12 @@ public class Broker implements ProducerMessenger {
                 closedClients.add(appMessage.getContent());
                 break;
 
-            case sellOrderProcessed:
-                Order ProcessedPurchaseOrder = Order.fromJSON(appMessage.getContent());
-                notifyOfTransaction(ProcessedPurchaseOrder.getClient());
-                calculateCommission(ProcessedPurchaseOrder);
+            case orderProcessed:
+                Order processedOrder = Order.fromJSON(appMessage.getContent());
+                notifyOfTransaction(processedOrder.getClient());
+                calculateCommission(processedOrder);
                 break;
 
-            case purchaseOrderProcessed:
-                Order ProcessedSellOrder = Order.fromJSON(appMessage.getContent());
-                notifyOfTransaction(ProcessedSellOrder.getClient());
-                calculateCommission(ProcessedSellOrder);
-                break;
         }
     }
 
