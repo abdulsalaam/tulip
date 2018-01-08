@@ -1,79 +1,142 @@
 package tulip.app.client.model;
 
+import tulip.app.MarketState;
+import tulip.app.appMessage.ActorType;
+import tulip.app.appMessage.AppMessage;
+import tulip.app.appMessage.AppMessageContentType;
+import tulip.app.exceptions.IllegalOrderException;
+import tulip.app.exceptions.RegistrationException;
+import tulip.app.order.Order;
+import tulip.app.order.OrderType;
+import tulip.service.producerConsumer.Producer;
+import tulip.service.producerConsumer.ProducerMessenger;
 
-import tulip.app.order.PurchaseOrder;
-import tulip.app.order.SellOrder;
-
+import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-public class Client {
+public class Client implements ProducerMessenger {
 
-    private String name;
+    private final String NAME;
 
-    private Portfolio portfolio;
+    private Portfolio portfolio = new Portfolio();
 
     private String broker;
 
-    private boolean isRegistered;
+    private boolean isRegistered = false;
 
     private double cash;
 
-    private List<SellOrder> pendingSellOrders;
+    private List<Order> pendingSellOrders = new ArrayList<>();
 
-    private List<PurchaseOrder> pendingPurchaseOrders;
+    private List<Order> pendingPurchaseOrders = new ArrayList<>();
+
+    private List<Order> archivedOrders = new ArrayList<>();
 
     private final double COMMISSION_RATE = 0.1;
 
-    private int sellOrderCounter;
+    private int sellOrderCounter = 0;
 
-    private int purchaseOrderCounter;
+    private int purchaseOrderCounter = 0;
 
-    public Client(String name) {
-        this.name = name;
-        this.portfolio = new Portfolio();
-        this.isRegistered = false;
-        this.cash = 0;
-        this.pendingSellOrders = new ArrayList<>();
-        this.pendingPurchaseOrders = new ArrayList<>();
+    /** Current market state (list of companies and associated prices */
+    private MarketState marketState = new MarketState();
+
+    private Producer producer;
+
+    public Client(String name, double cash, Socket socket) {
+        this.cash = cash;
+        this.NAME = name;
+        this.producer = new Producer(name, socket, this);
+    }
+
+    @Override
+    public void uponReceiptOfAppMessage(AppMessage appMessage) {
+
+        switch (appMessage.getAppMessageContentType()) {
+
+            case registrationAcknowledgment:
+                this.isRegistered = true;
+                this.broker = appMessage.getContent();
+                break;
+
+            case marketStateReply:
+                this.marketState = MarketState.fromJSON(appMessage.getContent());
+                break;
+
+            case orderProcessed:
+                Order order = Order.fromJSON(appMessage.getContent());
+
+                if (order.getOrderType().equals(OrderType.purchase)) {
+                    processPurchaseOrder(order);
+                } else {
+                    processSellOrder(order);
+                }
+                break;
+        }
     }
 
     private void registerToBroker() {
 
-        // todo: Send message to broker
-
-        this.isRegistered = true;
-        // this.broker =
-
-    }
-
-    public void requestMarketState() {}
-
-    private void placeSellOrder(String company, int nbOfStocks, double minSellingPrice) {
-        if (sellOrderIsLegal(company, nbOfStocks)) {
-            pendingSellOrders.add(
-                    new SellOrder(++sellOrderCounter, company, name, broker, new Date(), nbOfStocks, minSellingPrice)
+        if (producer.canProduce()) {
+            producer.produce(
+                    new AppMessage(NAME, ActorType.client, "", ActorType.broker,
+                            AppMessageContentType.registrationRequest, NAME)
             );
-
-            // todo: transmit order to broker
-        } else {
-            System.out.println("Illegal sell order");
         }
     }
 
-    private void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice) {
-        if (purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice)) {
-            pendingPurchaseOrders.add(
-                    new PurchaseOrder(++purchaseOrderCounter, company, name, broker, new Date(), nbOfStocks, maxPurchasingPrice)
-            );
+    public void requestMarketState() throws RegistrationException {
 
-            // todo: transmit order to broker
-        } else {
-            System.out.println("Illegal purchase order");
+        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+
+        if (producer.canProduce()) {
+            producer.produce(
+                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                            AppMessageContentType.marketStateRequest, "")
+            );
+        }
+    }
+
+    private void placeSellOrder(String company, int nbOfStocks, double minSellingPrice)
+            throws RegistrationException, IllegalOrderException {
+
+        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+
+        if (!sellOrderIsLegal(company, nbOfStocks)) { throw new IllegalOrderException("Illegal sell order"); }
+
+        Order sellOrder =
+                new Order(++sellOrderCounter, OrderType.sell, company, NAME, broker, minSellingPrice, nbOfStocks);
+
+        if (producer.canProduce()) {
+            producer.produce(
+                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                            AppMessageContentType.order, sellOrder.toJSON())
+            );
         }
 
+        pendingSellOrders.add(sellOrder);
+
+    }
+
+    private void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice)
+            throws RegistrationException, IllegalOrderException {
+
+        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+
+        if (purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice)) { throw new IllegalOrderException("Illegal pruchase order"); }
+
+        Order purchaseOrder =
+                new Order(++purchaseOrderCounter, OrderType.purchase, company, NAME, broker, maxPurchasingPrice, nbOfStocks);
+
+        if (producer.canProduce()) {
+            producer.produce(
+                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                            AppMessageContentType.order, purchaseOrder.toJSON())
+            );
+        }
+
+        pendingSellOrders.add(purchaseOrder);
     }
 
     /**
@@ -108,7 +171,7 @@ public class Client {
      */
     private int stocksInSellOrders(String company) {
         int stocksInSellOrders = 0;
-        for (SellOrder sellOrder : pendingSellOrders) {
+        for (Order sellOrder : pendingSellOrders) {
             if (sellOrder.getCompany().equals(company)) {
                 stocksInSellOrders += sellOrder.getDesiredNbOfStocks();
             }
@@ -126,7 +189,7 @@ public class Client {
         int amountOfPurchaseOrders = 0;
 
         // Computes the total amount without commission
-        for (PurchaseOrder purchaseOrder : pendingPurchaseOrders) {
+        for (Order purchaseOrder : pendingPurchaseOrders) {
             amountOfPurchaseOrders += purchaseOrder.getDesiredAmount();
         }
 
@@ -136,40 +199,45 @@ public class Client {
         return amountOfPurchaseOrders;
     }
 
-    private void processSellOrder(int id, int actualNbOfStock, Date processingDate, double actualSellingPrice, double commission) {
+    private void processSellOrder(Order order) {
 
-        // todo: to improve
-        Iterator<SellOrder> iterator = pendingSellOrders.iterator();
-        while (iterator.hasNext()) {
-            SellOrder sellOrder = iterator.next();
-            if (sellOrder.getId() == id) {
-                sellOrder.processOrder(actualNbOfStock, processingDate, actualSellingPrice);
-                iterator.remove();
+        // Update cash
+        cash += order.getActualAmount() * (1 - COMMISSION_RATE);
 
-                // Update cash
-                cash += sellOrder.getActualAmount() * (1 - commission);
-            }
-        }
+        // Update portfolio
+        portfolio.removeStocks(order.getCompany(), order.getActualNbOfStocks());
+
+        // Remove the order from the list of the pending sell orders
+        pendingSellOrders.removeIf(o -> o.getId() == order.getId());
+
+        archivedOrders.add(order);
 
     }
 
-    private void processPurchaseOrder(int id, int actualNbOfStock, Date processingDate, double actualPurchasingPrice, double commission) {
+    private void processPurchaseOrder(Order order) {
 
-        // todo: to improve
-        Iterator<PurchaseOrder> iterator = pendingPurchaseOrders.iterator();
-        while (iterator.hasNext()) {
-            PurchaseOrder purchaseOrder = iterator.next();
-            if (purchaseOrder.getId() == id) {
-                purchaseOrder.processOrder(actualNbOfStock, processingDate, actualPurchasingPrice);
-                iterator.remove();
+        // Update cash
+        cash -= order.getActualAmount() * (1 + COMMISSION_RATE);
 
-                // Update cash
-                cash -= purchaseOrder.getActualAmount() * (1 + commission);
-            }
-        }
+        // Update portfolio
+        portfolio.addStocks(order.getCompany(), order.getActualNbOfStocks());
+
+        // Remove the order from the list of the pending purchase orders
+        pendingPurchaseOrders.removeIf(o -> o.getId() == order.getId());
+
+        archivedOrders.add(order);
 
     }
 
-    public void notifyOfTransaction(){}
-    private void closeTheDay() {}
+    public void closeTheDay() throws RegistrationException {
+
+        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+
+        if (producer.canProduce()) {
+            producer.produce(
+                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                            AppMessageContentType.endOfDayNotification, ""
+            ));
+        }
+    }
 }
