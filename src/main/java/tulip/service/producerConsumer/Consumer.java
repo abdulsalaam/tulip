@@ -75,9 +75,13 @@ public class Consumer {
      * @param name The name of the producer the app message is being sent to
      * @param appMessage The appMessage being sent
      * */
-    public void sendAppMessageTo(String name, AppMessage appMessage) {
+    public void sendAppMessageTo(String name, AppMessage appMessage) throws IllegalStateException {
 
-        int producerNumber = nameToProducerNumber.get(name);
+        if (!nameToProducerNumber.containsKey(name)) {
+            throw new IllegalStateException();
+        }
+
+        Integer producerNumber = nameToProducerNumber.get(name);
         String rawAppMessage = appMessage.toJSON();
         Message message = new Message(NAME, Target.producer, ContentType.token, rawAppMessage);
         System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
