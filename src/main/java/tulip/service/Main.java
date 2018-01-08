@@ -27,7 +27,9 @@ public class Main {
 
         ProducerMessenger producerMessenger = new ProducerMessenger() {
             @Override
-            public void uponReceiptOfAppMessage(AppMessage appMessage) {}
+            public void uponReceiptOfAppMessage(AppMessage appMessage) {
+                System.out.println("uponReceiptOfAppMessage called");
+            }
         };
 
         try {
@@ -36,9 +38,9 @@ public class Main {
             Socket socket1 = new Socket(HOST, PORT);
             Socket socket2 = new Socket(HOST, PORT);
 
-            Consumer consumer = new Consumer("0", serverSocket);
-            Producer producer1 = new Producer("A", socket1, producerMessenger);
-            Producer producer2 = new Producer("B", socket2, producerMessenger);
+            Consumer consumer = new Consumer("Christopher", serverSocket);
+            Producer producer1 = new Producer("Peter", socket1, producerMessenger);
+            Producer producer2 = new Producer("Harrisson", socket2, producerMessenger);
 
             int counter1 = 0;
             int counter2 = 0;
@@ -53,13 +55,19 @@ public class Main {
 
                 if (producer2.canProduce()) {
                     producer2.produce(
-                            new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter2)
+                            new AppMessage("Harrisson", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter2)
                     );
                     counter2++;
                 }
 
                 if (consumer.canConsume()) {
                     consumer.consume();
+                    if (consumer.producerIsRegistered("Harrisson")) {
+                        consumer.sendAppMessageTo(
+                                "Harrisson",
+                                new AppMessage("Christopher", ActorType.stockExchange, "Harrisson", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter2)
+                        );
+                    }
                 }
 
             }
