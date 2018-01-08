@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.client.model.Client;
 
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +42,7 @@ public class ClientUI extends Application{
         map.put("Biocoop", 140.0);
         map.put("Veolia", 245.8);
         map.put("Samsung", 240.0);
-        client = new Client("Emma");
+        client = new Client("Emma", 3000, new Socket());
         Application.launch();
     }
 

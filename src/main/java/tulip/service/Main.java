@@ -48,14 +48,14 @@ public class Main {
 
                 if (producer1.canProduce()) {
                     producer1.produce(
-                            new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter1)
+                            new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Echo " + counter1)
                     );
                     counter1++;
                 }
 
                 if (producer2.canProduce()) {
                     producer2.produce(
-                            new AppMessage("Harrisson", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter2)
+                            new AppMessage("Harrisson", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
                     );
                     counter2++;
                 }
@@ -65,7 +65,7 @@ public class Main {
                     if (consumer.producerIsRegistered("Harrisson")) {
                         consumer.sendAppMessageTo(
                                 "Harrisson",
-                                new AppMessage("Christopher", ActorType.stockExchange, "Harrisson", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter2)
+                                new AppMessage("Christopher", ActorType.stockExchange, "Harrisson", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
                         );
                     }
                 }

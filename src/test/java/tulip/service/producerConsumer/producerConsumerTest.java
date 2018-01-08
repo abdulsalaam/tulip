@@ -37,7 +37,7 @@ public class producerConsumerTest {
             Producer producer2 = new Producer("B", socket2, producerMessenger);
 
             AppMessage appMessageSent = new AppMessage("Peter", ActorType.client, "", ActorType.broker,
-                    AppMessageContentType.purchaseOrder, "Application message 0");
+                    AppMessageContentType.order, "Application message 0");
 
 
             producer1.produce(appMessageSent);
@@ -51,10 +51,10 @@ public class producerConsumerTest {
             }
 
             AppMessage[] appMessagesSent = {
-                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 1"),
-                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 2"),
-                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 3"),
-                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 4")
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Application message 1"),
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Application message 2"),
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Application message 3"),
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Application message 4")
             };
 
             producer1.produce(appMessagesSent[0]);
