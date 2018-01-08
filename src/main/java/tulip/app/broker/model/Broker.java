@@ -180,7 +180,8 @@ public class Broker implements ProducerMessenger {
         switch (message.getAppMessageContentType()){
 
             case sellOrder:
-                // Add to pending orders
+                Order order = new Order(0, null, null, null, null, 0, 0);
+                order.fromJSON(message.toJSON());
                 break;
 
             case purchaseOrder:
