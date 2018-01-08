@@ -74,7 +74,7 @@ public class Broker implements ProducerMessenger {
     /**
      * Registers a client
      */
-    public void registerClient(String clientName){
+    private void registerClient(String clientName) {
         if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.registrationAcknowledgment, ""
@@ -86,8 +86,8 @@ public class Broker implements ProducerMessenger {
      * Sends request to stock exchange in order to retrieve
      * market state information
      */
-    public void requestMarketState(){
-        if(brokerProducer.canProduce()){
+    public void requestMarketState() {
+        if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.marketStateRequest, ""
             ));
@@ -98,7 +98,7 @@ public class Broker implements ProducerMessenger {
      * Checks whether a client is registered or not
      * @return true if the client is registered, false otherwise
      */
-    public boolean checkClientRegistered(String clientName){
+    private boolean checkClientRegistered(String clientName) {
         for(String s : clients) {
             if(s.equals(clientName)) {
                 return true;
@@ -113,7 +113,7 @@ public class Broker implements ProducerMessenger {
      * @param nbOfStocks is the number of stocks the client wants to sell
      * @param minSellingPrice is the minimum price to which the client is willing to sell
      */
-    public void placeSellOrder(String company, String client, int nbOfStocks, double minSellingPrice){
+    public void placeSellOrder(String company, String client, int nbOfStocks, double minSellingPrice) {
         if(checkClientRegistered(client)) {
             Order sellOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, minSellingPrice, nbOfStocks);
             pendingOrders.add(sellOrder);
@@ -139,7 +139,7 @@ public class Broker implements ProducerMessenger {
      * After an agreement has been made, notifies the client that the order
      * has been proceeded.
      */
-    private void notifyOfTransaction(String clientName){
+    private void notifyOfTransaction(String clientName) {
         if(brokerProducer.canProduce()){
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.purchaseOrder, ""
@@ -153,7 +153,7 @@ public class Broker implements ProducerMessenger {
      * his cach accordingly
      * @param order the order from which the commission is calculated
      */
-    public void calculateCommission(Order order){
+    public void calculateCommission(Order order) {
         double commission = order.getActualAmount() * commissionRate;
         this.cash += commission;
     }
@@ -163,7 +163,7 @@ public class Broker implements ProducerMessenger {
      * and informs the stock exchange
      */
     public void closeTheDay(){
-        if(brokerProducer.canProduce()){
+        if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
             ));
