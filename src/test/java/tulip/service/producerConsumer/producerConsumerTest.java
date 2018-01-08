@@ -34,7 +34,7 @@ public class producerConsumerTest {
             Producer producer2 = new Producer("B", socket2, producerMessenger);
 
             Message m1 = new Message(Target.consumer, ContentType.app, "Message 1");
-            producer1.produce(m1);
+            producer1.produce(m1.getContent());
 
             while (true) {
                 if (consumer.canConsume()) {
@@ -50,10 +50,10 @@ public class producerConsumerTest {
 
             Message[] messagesSent = {m2, m3, m4, m5};
 
-            producer1.produce(m2);
-            producer2.produce(m3);
-            producer2.produce(m4);
-            producer1.produce(m5);
+            producer1.produce(m2.getContent());
+            producer2.produce(m3.getContent());
+            producer2.produce(m4.getContent());
+            producer1.produce(m5.getContent());
 
             Message[] messagesReceived = new Message[4];
             int index = 0;

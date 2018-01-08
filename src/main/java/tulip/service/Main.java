@@ -42,14 +42,12 @@ public class Main {
             while (true) {
 
                 if (producer1.canProduce()) {
-                    producer1.produce(new Message(Target.consumer, ContentType.app, "Echo " + counter1));
+                    producer1.produce("Echo " + counter1);
                     counter1++;
                 }
 
                 if (producer2.canProduce()) {
-                    producer2.produce(
-                            new Message(Target.consumer, ContentType.app, "Echo " + counter2)
-                    );
+                    producer2.produce("Echo " + counter2);
                     counter2++;
                 }
 

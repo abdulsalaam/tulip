@@ -42,12 +42,13 @@ public class Producer extends Thread {
 
     /**
      * Produces a message by adding it tho the buffer array. Must be used in conjunction with boolean canProduce()
-     * @param message The message you want to add to the message buffer
+     * @param rawAppMessage The app message to be sent in the form of a json String
      */
-    public void produce(Message message) {
+    public void produce(String rawAppMessage) {
         synchronized (monitor) {
             System.out.println("Produire");
             if (canProduce()) {
+                Message message = new Message(Target.consumer, ContentType.app, rawAppMessage);
                 buffer[in] = message;
                 in = (in + 1) % BUFFER_SIZE;
                 nbmess++;
