@@ -1,14 +1,18 @@
 package tulip.service.producerConsumer;
 
+import tulip.app.appMessage.AppMessage;
 import tulip.service.producerConsumer.messages.Target;
 import tulip.service.sockets.ClientSocket;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 
+import java.net.Socket;
+
 public class Producer extends Thread {
 
-    private final ClientSocket CLIENT_SOCKET;
     private final String NAME;
+    private final ClientSocket CLIENT_SOCKET;
+    private final ProducerMessenger PRODUCER_MESSENGER;
 
     private final int BUFFER_SIZE = 10;
     private Message[] buffer = new Message[BUFFER_SIZE];
@@ -21,11 +25,37 @@ public class Producer extends Thread {
 
     private final Object monitor = new Object();
 
-    public Producer(String name) {
+    public Producer(String name, Socket socket, ProducerMessenger producerMessenger) {
         this.NAME = name;
-        this.CLIENT_SOCKET = new ClientSocket(this,"127.0.0.1", 4000);
+        this.CLIENT_SOCKET = new ClientSocket(this,socket);
+        this.PRODUCER_MESSENGER = producerMessenger;
         this.CLIENT_SOCKET.start();
         new Postman().start();
+    }
+
+    /** Indicates whether there is room in the buffer */
+    public boolean canProduce() {
+        synchronized (monitor) {
+            return nbmess < BUFFER_SIZE;
+        }
+    }
+
+    /**
+     * Produces a message by adding it tho the buffer array. Must be used in conjunction with boolean canProduce()
+     * @param rawAppMessage The app message to be sent in the form of a json String
+     */
+    public void produce(String rawAppMessage) {
+        synchronized (monitor) {
+            System.out.println("Produire");
+            if (canProduce()) {
+                Message message = new Message(Target.consumer, ContentType.app, rawAppMessage);
+                buffer[in] = message;
+                in = (in + 1) % BUFFER_SIZE;
+                nbmess++;
+            } else {
+                System.out.println("Buffer overflow");
+            }
+        }
     }
 
     /**
@@ -59,33 +89,15 @@ public class Producer extends Thread {
     public void uponReceipt(Message message) {
         synchronized (monitor) {
             System.out.println("Producer " + NAME + " receives: " + message.toJSON());
+
+            // If the message corresponds to a token
             if (message.getContentType().equals(ContentType.token)) {
                 int tokenValue = Integer.parseInt(message.getContent());
                 uponReceiptOfToken(tokenValue);
-            }
-        }
-    }
 
-    /** Indicates whether there is room in the buffer */
-    public boolean canProduce() {
-        synchronized (monitor) {
-            return nbmess < BUFFER_SIZE;
-        }
-    }
-
-    /**
-     * Produces a message by adding it tho the buffer array. Must be used in conjunction with boolean canProduce()
-     * @param message The message you want to add to the message buffer
-     */
-    public void produce(Message message) {
-        synchronized (monitor) {
-            System.out.println("Produire");
-            if (canProduce()) {
-                buffer[in] = message;
-                in = (in + 1) % BUFFER_SIZE;
-                nbmess++;
-            } else {
-                System.out.println("Buffer overflow");
+            // If the message corresponds to an app message
+            } else if (message.getContentType().equals(ContentType.app)) {
+                PRODUCER_MESSENGER.uponReceiptOfAppMessage(message);
             }
         }
     }

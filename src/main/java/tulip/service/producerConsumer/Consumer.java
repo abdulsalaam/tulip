@@ -5,10 +5,17 @@ import tulip.service.producerConsumer.messages.Target;
 import tulip.service.sockets.MultiServerSocket;
 import tulip.service.producerConsumer.messages.Message;
 
+import java.net.ServerSocket;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Consumer {
 
-    private final MultiServerSocket MULTI_SERVER_SOCKET;
     private final String NAME;
+    private final MultiServerSocket MULTI_SERVER_SOCKET;
+
+    /** Map a name to a producer number */
+    private Map<String, Integer> nameToProducerNumber = new ConcurrentHashMap<>();
 
     private final int BUFFER_SIZE = 10;
     private Message[] buffer = new Message[BUFFER_SIZE];
@@ -19,15 +26,62 @@ public class Consumer {
     private final int THRESHOLD = 5;
     private boolean tokenPresent = false;
     private int nbOfProducers = 0;
-    private int next = 0;
+    private int nextProducer = 0;
 
     private boolean tokenStarted = false;
     private final Object monitor = new Object();
 
-    public Consumer(String name) {
+    public Consumer(String name, ServerSocket serverSocket) {
         this.NAME = name;
-        MULTI_SERVER_SOCKET = new MultiServerSocket(this,4000);
+        MULTI_SERVER_SOCKET = new MultiServerSocket(this,serverSocket);
         MULTI_SERVER_SOCKET.start();
+    }
+
+    /** Indicates whether there are messages in the buffer that can be consumed */
+    public boolean canConsume() {
+        synchronized (monitor) {
+            return nbmess > 0;
+        }
+    }
+
+    /** Consumes a message. Must be used in conjunction with the method boolean canConsume() */
+    public Message consume() {
+        synchronized (monitor) {
+            if (nbmess > 0) {
+                System.out.println("Consumming");
+                Message message = buffer[out];
+                out = (out + 1) % BUFFER_SIZE;
+                nbmess--;
+                nbcell++;
+                if (tokenPresent && nbcell > THRESHOLD) {
+                    sendTokenTo(nextProducer, nbcell);
+                    tokenPresent = false;
+                    nbcell = 0;
+                }
+
+                return message;
+            }
+
+            System.out.println("Cannot consume");
+            return null;
+        }
+    }
+
+    /**
+     * Sends an app message to a specific producer
+     * NB: Since the producer-consumer system is unidirectional, this method does not use it. The app message is sent
+     * regardless of the flow control.
+     * @param name The name of the producer the app message is being sent to
+     * @param rawAppMessage The appMessage being sent
+     * */
+    public void sendAppMessageTo(String name, String rawAppMessage) {
+
+        int producerNumber = nameToProducerNumber.get(name);
+
+        System.out.println("Producer number " + producerNumber);
+        Message message = new Message(Target.producer, ContentType.token, rawAppMessage);
+        System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
+        MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
 
     /**
@@ -53,36 +107,6 @@ public class Consumer {
         }
     }
 
-    /** Indicates whether there are messages in the buffer that can be consumed */
-    public boolean canConsume() {
-        synchronized (monitor) {
-            return nbmess > 0;
-        }
-    }
-    
-    /** Consumes a message. Must be used in conjunction with the method boolean canConsume() */
-    public Message consume() {
-        synchronized (monitor) {
-            if (nbmess > 0) {
-                System.out.println("Consumming");
-                Message message = buffer[out];
-                out = (out + 1) % BUFFER_SIZE;
-                nbmess--;
-                nbcell++;
-                if (tokenPresent && nbcell > THRESHOLD) {
-                    sendTokenTo(next, nbcell);
-                    tokenPresent = false;
-                    nbcell = 0;
-                }
-
-                return message;
-            }
-
-            System.out.println("Cannot consume");
-            return null;
-        }
-    }
-
     /**
      * This method is triggered when an app message is received
      * @param message The app message received
@@ -102,10 +126,10 @@ public class Consumer {
      * */
     private void uponReceiptOfToken(int val) {
         synchronized (monitor) {
-            next = (next + 1) % nbOfProducers;
+            nextProducer = (nextProducer + 1) % nbOfProducers;
             nbcell += val;
             if (nbcell > THRESHOLD) {
-                sendTokenTo(next, nbcell);
+                sendTokenTo(nextProducer, nbcell);
                 nbcell = 0;
             } else {
                 tokenPresent = true;
@@ -140,7 +164,7 @@ public class Consumer {
     /** Starts the token system by sending the first token message */
     private void startToken() {
         tokenStarted = true;
-        sendTokenTo(next, BUFFER_SIZE);
+        sendTokenTo(nextProducer, BUFFER_SIZE);
     }
 
     /**
@@ -149,12 +173,16 @@ public class Consumer {
      */
     private void passTokenToNextProducer(Message message) {
         synchronized (monitor) {
-            next = (next + 1) % nbOfProducers;
+            nextProducer = (nextProducer + 1) % nbOfProducers;
             MULTI_SERVER_SOCKET.sendMessageToClient(
-                    next,
+                    nextProducer,
                     new Message(Target.producer, ContentType.token, message.getContent())
             );
             System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         }
+    }
+
+    public void registerProducer(String name, int producerNumber) {
+        nameToProducerNumber.put(name, producerNumber);
     }
 }
