@@ -76,13 +76,13 @@ public class Order implements Serializable {
     /**
      * Constructor
      */
-    Order(@JsonProperty("id") int id,
-          @JsonProperty("orderType") OrderType orderType,
-          @JsonProperty("company") String company,
-          @JsonProperty("client") String client,
-          @JsonProperty("broker") String broker,
-          @JsonProperty("desiredPrice") double desiredPrice,
-          @JsonProperty("desiredNbOfStocks") int desiredNbOfStocks) {
+    public Order(@JsonProperty("id") int id,
+                 @JsonProperty("orderType") OrderType orderType,
+                 @JsonProperty("company") String company,
+                 @JsonProperty("client") String client,
+                 @JsonProperty("broker") String broker,
+                 @JsonProperty("desiredPrice") double desiredPrice,
+                 @JsonProperty("desiredNbOfStocks") int desiredNbOfStocks) {
         this.id = id;
         this.orderType = orderType;
         this.company = company;
