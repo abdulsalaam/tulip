@@ -10,6 +10,7 @@ import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
 import tulip.service.producerConsumer.ProducerMessenger;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -38,14 +39,10 @@ public class Broker implements ProducerMessenger {
     private int purchaseOrderCounter;
     /** Current market state (list of companies and associated prices */
     private MarketState marketState = new MarketState();
-
-
-
-    ServerSocket serverSocket;
-    Consumer brokerConsumer = new Consumer("broker", serverSocket);
-    Socket socket;
-    Producer brokerProducer = new Producer("broker", socket, this);
-
+    /** Consumer role of the broker */
+    Consumer brokerConsumer;
+    /** Producer role of the broker */
+    Producer brokerProducer;
 
     /**
      * Constructor
@@ -58,6 +55,15 @@ public class Broker implements ProducerMessenger {
         this.commissionRate = 0.1;
         this.clients = new ArrayList<>();
         this.pendingOrders = new ArrayList<>();
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        brokerConsumer = new Consumer(this.name, serverSocket);
+        Socket socket = new Socket();
+        brokerProducer = new Producer(this.name, socket, this);
     }
 
     /**
@@ -93,12 +99,26 @@ public class Broker implements ProducerMessenger {
      * Sends request to stock exchange in order to retrieve
      * market state information
      */
-    public void requestMarketState() {
+    public MarketState requestMarketState() {
         if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.marketStateRequest, ""
             ));
         }
+        // TEST
+
+        marketState.put("Basecamp", 250.0);
+        marketState.put("Tesla", 596.70);
+        marketState.put("Facebook", 450.0);
+        marketState.put("Alphabet", 270.0);
+        marketState.put("Apple", 430.0);
+        marketState.put("Spotify", 220.0);
+        marketState.put("LVMH", 550.0);
+        marketState.put("Ecosia", 120.0);
+        marketState.put("Biocop", 140.0);
+        marketState.put("Veolia", 245.8);
+        marketState.put("Samsung", 240.0);
+        return marketState;
     }
 
     /**
@@ -159,7 +179,7 @@ public class Broker implements ProducerMessenger {
      * his cach accordingly
      * @param order the order from which the commission is calculated
      */
-    public void calculateCommission(Order order) {
+    private void calculateCommission(Order order) {
         double commission = order.getActualAmount() * commissionRate;
         this.cash += commission;
     }
@@ -168,7 +188,7 @@ public class Broker implements ProducerMessenger {
      * When all his clients close the day, the closer closes it as well
      * and informs the stock exchange
      */
-    public void closeTheDay(){
+    private void closeTheDay(){
         if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
@@ -226,5 +246,12 @@ public class Broker implements ProducerMessenger {
                 calculateCommission(ProcessedSellOrder);
                 break;
         }
+    }
+
+    public List<Order> getPendingOrders() {
+        pendingOrders.add(new Order(23, OrderType.purchase, "Basecamp", "Titus", this.name, 120, 350));
+        pendingOrders.add(new Order(23, OrderType.purchase, "Alphabet", "Bobo", this.name, 180, 950));
+        pendingOrders.add(new Order(23, OrderType.purchase, "Sony", "Leonardo", this.name, 100, 390));
+        return pendingOrders;
     }
 }
