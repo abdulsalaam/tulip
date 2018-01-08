@@ -38,7 +38,7 @@ public class ClientUI extends Application{
         map.put("Spotify", 220.0);
         map.put("LVMH", 550.0);
         map.put("Ecosia", 120.0);
-        map.put("Biocop", 140.0);
+        map.put("Biocoop", 140.0);
         map.put("Veolia", 245.8);
         map.put("Samsung", 240.0);
         client = new Client("Emma");
@@ -94,18 +94,18 @@ public class ClientUI extends Application{
         }
 
 
-        // Actions
+       /* // Actions
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.requestMarketState();
+                //client.requestMarketState();
                 showMarketState(map);
             }
         });
 
         notifyOfTransactionBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) { client.notifyOfTransaction();}
+           // public void handle(ActionEvent event) { client.notifyOfTransaction();}
         });
-
+*/
         // Style and final set up
         root.setStyle(
                 "-fx-background-image: url('pineappleSoft.png');-fx-background-size: cover");

@@ -6,6 +6,10 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -16,10 +20,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import tulip.app.MarketState;
 import tulip.app.broker.model.Broker;
+import tulip.app.order.Order;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class BrokerUI extends Application{
 
@@ -64,25 +71,23 @@ public class BrokerUI extends Application{
         GridPane.setHalignment(title, HPos.CENTER);
 
         // Buttons
-        Button registerClientBtn = new Button("Register a client");
-            buttons.add(registerClientBtn);
-            grid.add(registerClientBtn, 1, 1);
+
 
         Button requestMarketStateBtn = new Button("Request market state");
             buttons.add(requestMarketStateBtn);
-            grid.add(requestMarketStateBtn, 5, 2);
+            grid.add(requestMarketStateBtn, 1, 1);
 
         Button placePurchaseOrderBtn = new Button("Purchase order");
             buttons.add(placePurchaseOrderBtn);
-            grid.add(placePurchaseOrderBtn, 3,1);
+            grid.add(placePurchaseOrderBtn, 3,3);
 
         Button placeSellOrderBtn = new Button("Sell order");
-            grid.add(placeSellOrderBtn, 3,2);
+            grid.add(placeSellOrderBtn, 5,3);
             buttons.add(placeSellOrderBtn);
 
-        Button notifyOfTransactionBtn = new Button("Notify of transaction");
-            buttons.add(notifyOfTransactionBtn);
-            grid.add(notifyOfTransactionBtn, 1, 2);
+        Button showPendingOrdersBtn = new Button("Show pending orders");
+            buttons.add(requestMarketStateBtn);
+            grid.add(showPendingOrdersBtn, 1, 3);
 
         int index = 0;
         for(Button button : buttons) {
@@ -91,55 +96,104 @@ public class BrokerUI extends Application{
         }
 
         // Text fields
-        TextField company = new TextField ("Company");
-        TextField client = new TextField ("Client");
-        TextField nbStock = new TextField ("Number of stocks");
-        TextField purchasingPrice = new TextField ("Price");
+
 
         // Actions
-        registerClientBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) { broker.registerClient();}
-        });
 
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) { broker.requestMarketState();}
+            public void handle(ActionEvent event) {
+                showMarketState(broker.requestMarketState());
+            }
+
         });
 
         placePurchaseOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                broker.placePurchaseOrder(
-                        company.getText(), client.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(purchasingPrice.getText()
-                        ));
+                broker.placePurchaseOrder();
             }
         });
 
         placeSellOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                broker.placeSellOrder(
-                        company.getText(), client.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(purchasingPrice.getText()
-                        ));
+                broker.placeSellOrder();
             }
         });
 
-        notifyOfTransactionBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) { broker.notifyOfTransaction();}
-        });
+        showPendingOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                showPendingOrders(broker.getPendingOrders());
+            }
 
+        });
 
         // Style and final set up
         root.setStyle(
-                "-fx-background-color: linear-gradient(CornFlowerBlue, MediumSpringGreen);-fx-background-image: url('tulipFlower.jpg');-fx-background-size: cover");
+                "-fx-background-image: url('tulipFlower.jpg');-fx-background-size: cover");
 
-        grid.add(company, 3, 3);
-        grid.add(client, 3, 4);
-        grid.add(nbStock, 3, 5);
-        grid.add(purchasingPrice, 3, 6);
         root.getChildren().add(grid);
-
         primaryStage.setScene(scene);
-
         primaryStage.show();
 
+    }
+
+    public static void showMarketState(MarketState marketState){
+
+        Stage MarketPopUp = new Stage();
+        MarketPopUp.setTitle("Current Market State");
+        final CategoryAxis xAxis = new CategoryAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        final BarChart<String,Number> bc =
+                new BarChart<String,Number>(xAxis,yAxis);
+        bc.setStyle(
+                "-fx-background-color: white;"
+        );
+
+        xAxis.setTickLabelFill(Color.WHITE);
+        yAxis.setTickLabelFill(Color.WHITE);
+
+        XYChart.Series serie = new XYChart.Series();
+
+        for(Map.Entry<String, Double> stock : marketState.entrySet()) {
+            serie.getData().add(new XYChart.Data(stock.getKey(), stock.getValue()));
+        }
+
+
+        bc.setStyle(
+                "-fx-background-image: url('background.png');-fx-background-size: cover");
+        Scene scene  = new Scene(bc,800,600);
+        bc.getData().addAll(serie);
+        MarketPopUp.setScene(scene);
+        MarketPopUp.show();
+    }
+
+    public static void showPendingOrders(List<Order> pendingOrders){
+
+        Stage MarketPopUp = new Stage();
+        MarketPopUp.setTitle("Pending Orders");
+        final CategoryAxis xAxis = new CategoryAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        final BarChart<String,Number> bc =
+                new BarChart<String,Number>(xAxis,yAxis);
+        bc.setStyle(
+                "-fx-background-color: white;"
+        );
+
+        xAxis.setTickLabelFill(Color.WHITE);
+        yAxis.setTickLabelFill(Color.WHITE);
+
+        XYChart.Series serie = new XYChart.Series();
+
+        for(Order order : pendingOrders) {
+            serie.getData().add(new XYChart.Data(order.getCompany(), order.getDesiredNbOfStocks()));
+        }
+
+
+        bc.setStyle(
+                "-fx-background-image: url('background.png');-fx-background-size: cover");
+        Scene scene  = new Scene(bc,800,600);
+        bc.getData().addAll(serie);
+        MarketPopUp.setScene(scene);
+        MarketPopUp.show();
     }
 
 
