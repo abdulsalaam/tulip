@@ -76,7 +76,7 @@ public class MultiServerSocket extends Thread {
      * Deals with the receipt of a message
      * @param message The message being received
      */
-    void uponReceipt(Message message) {
+    void uponReceipt(Message message, int clientNumber) {
         synchronized (monitor) {
             while (CONSUMER == null) {
                 try {
@@ -85,7 +85,7 @@ public class MultiServerSocket extends Thread {
                     e.printStackTrace();
                 }
             }
-            CONSUMER.uponReceipt(message);
+            CONSUMER.uponReceipt(message, clientNumber);
         }
     }
 

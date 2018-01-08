@@ -7,6 +7,7 @@ import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 
 import java.net.Socket;
+import java.nio.BufferOverflowException;
 
 public class Producer extends Thread {
 
@@ -42,18 +43,19 @@ public class Producer extends Thread {
 
     /**
      * Produces a message by adding it tho the buffer array. Must be used in conjunction with boolean canProduce()
-     * @param rawAppMessage The app message to be sent in the form of a json String
+     * @param appMessage The app message to be sent in the form of a json String
      */
-    public void produce(String rawAppMessage) {
+    public void produce(AppMessage appMessage) throws BufferOverflowException {
         synchronized (monitor) {
             System.out.println("Produire");
             if (canProduce()) {
-                Message message = new Message(Target.consumer, ContentType.app, rawAppMessage);
+                String rawAppMessage = appMessage.toJSON();
+                Message message = new Message(NAME, Target.consumer, ContentType.app, rawAppMessage);
                 buffer[in] = message;
                 in = (in + 1) % BUFFER_SIZE;
                 nbmess++;
             } else {
-                System.out.println("Buffer overflow");
+                throw new BufferOverflowException();
             }
         }
     }
@@ -97,7 +99,8 @@ public class Producer extends Thread {
 
             // If the message corresponds to an app message
             } else if (message.getContentType().equals(ContentType.app)) {
-                PRODUCER_MESSENGER.uponReceiptOfAppMessage(message);
+                AppMessage appMessage = AppMessage.fromJSON(message.getContent());
+                PRODUCER_MESSENGER.uponReceiptOfAppMessage(appMessage);
             }
         }
     }
@@ -126,7 +129,7 @@ public class Producer extends Thread {
      */
     private void sendTokenToProducer(int tokenValue) {
         synchronized (monitor) {
-            Message message = new Message(Target.nextProducer, ContentType.token, Integer.toString(tokenValue));
+            Message message = new Message(NAME, Target.nextProducer, ContentType.token, Integer.toString(tokenValue));
             CLIENT_SOCKET.sendMessage(message);
             System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
         }
@@ -138,7 +141,7 @@ public class Producer extends Thread {
      */
     private void sendTokenToConsumer(int tokenValue) {
         synchronized (monitor) {
-            Message message = new Message(Target.consumer, ContentType.token, Integer.toString(tokenValue));
+            Message message = new Message(NAME, Target.consumer, ContentType.token, Integer.toString(tokenValue));
             CLIENT_SOCKET.sendMessage(message);
             System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
         }

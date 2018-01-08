@@ -1,5 +1,8 @@
 package tulip.service;
 
+import tulip.app.appMessage.ActorType;
+import tulip.app.appMessage.AppMessage;
+import tulip.app.appMessage.AppMessageContentType;
 import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
 import tulip.service.producerConsumer.ProducerMessenger;
@@ -24,7 +27,7 @@ public class Main {
 
         ProducerMessenger producerMessenger = new ProducerMessenger() {
             @Override
-            public void uponReceiptOfAppMessage(Message message) {}
+            public void uponReceiptOfAppMessage(AppMessage appMessage) {}
         };
 
         try {
@@ -34,20 +37,24 @@ public class Main {
             Socket socket2 = new Socket(HOST, PORT);
 
             Consumer consumer = new Consumer("0", serverSocket);
-            Producer producer1 = new Producer("1", socket1, producerMessenger);
-            Producer producer2 = new Producer("2", socket2, producerMessenger);
+            Producer producer1 = new Producer("A", socket1, producerMessenger);
+            Producer producer2 = new Producer("B", socket2, producerMessenger);
 
             int counter1 = 0;
             int counter2 = 0;
             while (true) {
 
                 if (producer1.canProduce()) {
-                    producer1.produce("Echo " + counter1);
+                    producer1.produce(
+                            new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter1)
+                    );
                     counter1++;
                 }
 
                 if (producer2.canProduce()) {
-                    producer2.produce("Echo " + counter2);
+                    producer2.produce(
+                            new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Echo " + counter2)
+                    );
                     counter2++;
                 }
 
