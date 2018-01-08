@@ -129,11 +129,8 @@ public class Broker implements ProducerMessenger {
 
     /**
      * Proceeds a purchase order
-     * @param client is the name of the ordering client
-     * @param nbOfStocks is the number of stocks requested by the client
-     * @param maxPurchasingPrice is the maximum price to which the client is willing to buy
      */
-    public void placePurchaseOrder(String company, String client, int nbOfStocks, double maxPurchasingPrice) {
+    public void placePurchaseOrder() {
         String purchaseOrderJson = pendingOrders.get(0).toJSON();
         if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
