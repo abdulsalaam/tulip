@@ -15,7 +15,7 @@ public class Consumer {
     private final MultiServerSocket MULTI_SERVER_SOCKET;
 
     /** Map a name to a producer number */
-    private Map<String, Integer> NameToProducerNumber = new ConcurrentHashMap<>();
+    private Map<String, Integer> nameToProducerNumber = new ConcurrentHashMap<>();
 
     private final int BUFFER_SIZE = 10;
     private Message[] buffer = new Message[BUFFER_SIZE];
@@ -71,12 +71,15 @@ public class Consumer {
      * Sends an app message to a specific producer
      * NB: Since the producer-consumer system is unidirectional, this method does not use it. The app message is sent
      * regardless of the flow control.
-     * @param producerNumber The number of the producer the app message is being sent to
-     * @param appMessage The appMessage being sent
+     * @param name The name of the producer the app message is being sent to
+     * @param rawAppMessage The appMessage being sent
      * */
-    private void sendAppMessageTo(int producerNumber, String appMessage) {
+    public void sendAppMessageTo(String name, String rawAppMessage) {
+
+        int producerNumber = nameToProducerNumber.get(name);
+
         System.out.println("Producer number " + producerNumber);
-        Message message = new Message(Target.producer, ContentType.token, appMessage);
+        Message message = new Message(Target.producer, ContentType.token, rawAppMessage);
         System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
@@ -180,6 +183,6 @@ public class Consumer {
     }
 
     public void registerProducer(String name, int producerNumber) {
-        NameToProducerNumber.put(name, producerNumber);
+        nameToProducerNumber.put(name, producerNumber);
     }
 }
