@@ -1,5 +1,6 @@
 package tulip.app.broker.model;
 
+import tulip.app.MarketState;
 import tulip.app.appMessage.ActorType;
 import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
@@ -36,7 +37,7 @@ public class Broker implements ProducerMessenger {
     /** Counts the purchase orders proceeded by the broker */
     private int purchaseOrderCounter;
 
-    private Map<String, Double> marketState = new HashMap<>();
+    private MarketState marketState = new MarketState();
 
 
 
@@ -182,14 +183,13 @@ public class Broker implements ProducerMessenger {
                 break;
 
             case marketStateReply:
-                // Add all elements of the map to this map
+                marketState = MarketState.fromJSON(appMessage.getContent());
                 break;
 
             case marketStateRequest:
                 if (brokerProducer.canProduce()) {
                     brokerProducer.produce(new AppMessage(
-                            this.name, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toString()
-
+                            this.name, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
                     ));
                 }
                 break;
@@ -215,9 +215,6 @@ public class Broker implements ProducerMessenger {
                 Order ProcessedSellOrder = Order.fromJSON(appMessage.getContent());
                 notifyOfTransaction(ProcessedSellOrder.getClient());
                 break;
-
-
-
         }
     }
 }
