@@ -83,7 +83,7 @@ public class Consumer {
 
         Integer producerNumber = nameToProducerNumber.get(name);
         String rawAppMessage = appMessage.toJSON();
-        Message message = new Message(NAME, Target.producer, ContentType.token, rawAppMessage);
+        Message message = new Message(NAME, Target.producer, ContentType.app, rawAppMessage);
         System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
