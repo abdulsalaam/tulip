@@ -7,6 +7,7 @@ import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 
 import java.net.Socket;
+import java.nio.BufferOverflowException;
 
 public class Producer extends Thread {
 
@@ -44,7 +45,7 @@ public class Producer extends Thread {
      * Produces a message by adding it tho the buffer array. Must be used in conjunction with boolean canProduce()
      * @param appMessage The app message to be sent in the form of a json String
      */
-    public void produce(AppMessage appMessage) {
+    public void produce(AppMessage appMessage) throws BufferOverflowException {
         synchronized (monitor) {
             System.out.println("Produire");
             if (canProduce()) {
@@ -54,7 +55,7 @@ public class Producer extends Thread {
                 in = (in + 1) % BUFFER_SIZE;
                 nbmess++;
             } else {
-                System.out.println("Buffer overflow");
+                throw new BufferOverflowException();
             }
         }
     }

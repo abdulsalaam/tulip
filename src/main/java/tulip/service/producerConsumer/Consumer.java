@@ -7,6 +7,7 @@ import tulip.service.sockets.MultiServerSocket;
 import tulip.service.producerConsumer.messages.Message;
 
 import java.net.ServerSocket;
+import java.nio.BufferUnderflowException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,7 +47,7 @@ public class Consumer {
     }
 
     /** Consumes an AppMessage. Must be used in conjunction with the method boolean canConsume() */
-    public AppMessage consume() {
+    public AppMessage consume() throws BufferUnderflowException {
         synchronized (monitor) {
             if (nbmess > 0) {
                 System.out.println("Consume");
@@ -63,8 +64,7 @@ public class Consumer {
                 return AppMessage.fromJSON(message.getContent());
             }
 
-            System.out.println("Cannot consume");
-            return null;
+            throw new BufferUnderflowException();
         }
     }
 
