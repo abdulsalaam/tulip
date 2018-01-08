@@ -5,9 +5,7 @@ public enum AppMessageContentType {
     registrationAcknowledgment,
     marketStateRequest,
     marketStateReply,
-    purchaseOrder,
-    sellOrder,
-    purchaseOrderProcessed,
-    sellOrderProcessed,
+    order,
+    orderProcessed,
     endOfDayNotification
 }
