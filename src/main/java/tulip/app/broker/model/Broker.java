@@ -36,7 +36,7 @@ public class Broker implements ProducerMessenger {
     private int sellOrderCounter;
     /** Counts the purchase orders proceeded by the broker */
     private int purchaseOrderCounter;
-
+    /** Current market state (list of companies and associated prices */
     private MarketState marketState = new MarketState();
 
 
@@ -114,9 +114,11 @@ public class Broker implements ProducerMessenger {
      * @param minSellingPrice is the minimum price to which the client is willing to sell
      */
     public void placeSellOrder(String company, String client, int nbOfStocks, double minSellingPrice){
-        Order sellOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, minSellingPrice, nbOfStocks);
-        pendingOrders.add(sellOrder);
-        calculateCommission(sellOrder);
+        if(checkClientRegistered(client)) {
+            Order sellOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, minSellingPrice, nbOfStocks);
+            pendingOrders.add(sellOrder);
+            calculateCommission(sellOrder);
+        }
     }
 
     /**
@@ -135,7 +137,7 @@ public class Broker implements ProducerMessenger {
      * After an agreement has been made, notifies the client that the order
      * has been proceeded.
      */
-    public void notifyOfTransaction(String clientName){
+    private void notifyOfTransaction(String clientName){
         if(brokerProducer.canProduce()){
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.purchaseOrder, ""
@@ -144,8 +146,6 @@ public class Broker implements ProducerMessenger {
         }
     }
 
-
-    // Improvement : put getActualAmount in Order class
     /**
      * After proceeding an order, the broker calculates its commission and updates
      * his cach accordingly
