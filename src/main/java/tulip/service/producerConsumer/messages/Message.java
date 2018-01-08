@@ -18,12 +18,9 @@ public class Message implements Serializable {
     /** ObjectMapper used to serialize and deserialize */
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    /**
-     * The number of the producer sending the message. This field is filled by the MultiServerSocket thread ie. on the
-     * server side.
-     * Producers are not aware of their number.
-     * producerNumber will keep the value -1 if the message is sent by the consumer */
-    private int producerNumber;
+    /** The name of the sender of the message */
+    @JsonProperty("sender")
+    private String sender;
 
     /** The target of the message */
     @JsonProperty("target")
@@ -38,13 +35,18 @@ public class Message implements Serializable {
     private String content;
 
     @JsonCreator
-    public Message(@JsonProperty("target") Target target,
+    public Message(@JsonProperty("sender") String sender,
+                   @JsonProperty("target") Target target,
                    @JsonProperty("contentType") ContentType contentType,
                    @JsonProperty("content") String content) {
-        this.producerNumber = -1;
+        this.sender = sender;
         this.target = target;
         this.contentType = contentType;
         this.content = content;
+    }
+
+    public String getSender() {
+        return sender;
     }
 
     public Target getTarget() {
@@ -105,11 +107,4 @@ public class Message implements Serializable {
         return result;
     }
 
-    public int getProducerNumber() {
-        return producerNumber;
-    }
-
-    public void setProducerNumber(int producerNumber) {
-        this.producerNumber = producerNumber;
-    }
 }

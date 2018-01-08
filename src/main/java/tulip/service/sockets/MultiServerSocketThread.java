@@ -74,10 +74,7 @@ public class MultiServerSocketThread extends Thread {
      */
     private void uponReceipt(String rawMessage) {
         Message message = Message.fromJSON(rawMessage);
-
-        // Indicates the producer number corresponding of the sender of the message
-        message.setProducerNumber(clientNumber);
-        MULTI_SERVER_SOCKET.uponReceipt(message);
+        MULTI_SERVER_SOCKET.uponReceipt(message, clientNumber);
     }
 
     public int getClientNumber() {

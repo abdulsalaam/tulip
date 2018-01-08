@@ -1,6 +1,9 @@
 package tulip.service.producerConsumer;
 
 import org.junit.Test;
+import tulip.app.appMessage.ActorType;
+import tulip.app.appMessage.AppMessage;
+import tulip.app.appMessage.AppMessageContentType;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 import tulip.service.producerConsumer.messages.Target;
@@ -26,41 +29,45 @@ public class producerConsumerTest {
 
             ProducerMessenger producerMessenger = new ProducerMessenger() {
                 @Override
-                public void uponReceiptOfAppMessage(Message message) {}
+                public void uponReceiptOfAppMessage(AppMessage appMessage) {}
             };
 
             Consumer consumer = new Consumer("C", serverSocket);
             Producer producer1 = new Producer("A", socket1, producerMessenger);
             Producer producer2 = new Producer("B", socket2, producerMessenger);
 
-            Message m1 = new Message(Target.consumer, ContentType.app, "Message 1");
-            producer1.produce(m1.getContent());
+            AppMessage appMessageSent = new AppMessage("Peter", ActorType.client, "", ActorType.broker,
+                    AppMessageContentType.purchaseOrder, "Application message 0");
+
+
+            producer1.produce(appMessageSent);
 
             while (true) {
                 if (consumer.canConsume()) {
-                    assertTrue(consumer.consume().equals(m1));
+                    AppMessage appMessageReceived = consumer.consume();
+                    assertTrue(appMessageReceived.equals(appMessageSent));
                     break;
                 }
             }
 
-            Message m2 = new Message(Target.consumer, ContentType.app, "Message 2");
-            Message m3 = new Message(Target.consumer, ContentType.app, "Message 3");
-            Message m4 = new Message(Target.consumer, ContentType.app, "Message 4");
-            Message m5 = new Message(Target.consumer, ContentType.app, "Message 5");
+            AppMessage[] appMessagesSent = {
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 1"),
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 2"),
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 3"),
+                    new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.purchaseOrder, "Application message 4")
+            };
 
-            Message[] messagesSent = {m2, m3, m4, m5};
+            producer1.produce(appMessagesSent[0]);
+            producer2.produce(appMessagesSent[1]);
+            producer2.produce(appMessagesSent[2]);
+            producer1.produce(appMessagesSent[3]);
 
-            producer1.produce(m2.getContent());
-            producer2.produce(m3.getContent());
-            producer2.produce(m4.getContent());
-            producer1.produce(m5.getContent());
-
-            Message[] messagesReceived = new Message[4];
+            AppMessage[] appMessagesReceived = new AppMessage[4];
             int index = 0;
 
             while (true) {
                 if (consumer.canConsume()) {
-                    messagesReceived[index++] = consumer.consume();
+                    appMessagesReceived[index++] = consumer.consume();
                 }
 
                 if (index == 4) {
@@ -69,11 +76,11 @@ public class producerConsumerTest {
             }
 
             int k = 0;
-            for (Message mSent: messagesSent) {
-                System.out.println("Message sent: " + mSent.toJSON());
-                for (Message mReceived: messagesReceived) {
-                    System.out.println("Message received: " + mReceived.toJSON());
-                    if (mSent.equals(mReceived)) {
+            for (AppMessage appMessSent: appMessagesSent) {
+                System.out.println("App message sent: " + appMessSent.toJSON());
+                for (AppMessage appMessReceived: appMessagesReceived) {
+                    System.out.println("App message received: " + appMessReceived.toJSON());
+                    if (appMessSent.equals(appMessReceived)) {
                         k++;
                     }
                 }

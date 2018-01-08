@@ -1,5 +1,6 @@
 package tulip.service.producerConsumer;
 
+import tulip.app.appMessage.AppMessage;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Target;
 import tulip.service.sockets.MultiServerSocket;
@@ -44,11 +45,11 @@ public class Consumer {
         }
     }
 
-    /** Consumes a message. Must be used in conjunction with the method boolean canConsume() */
-    public Message consume() {
+    /** Consumes an AppMessage. Must be used in conjunction with the method boolean canConsume() */
+    public AppMessage consume() {
         synchronized (monitor) {
             if (nbmess > 0) {
-                System.out.println("Consumming");
+                System.out.println("Consume");
                 Message message = buffer[out];
                 out = (out + 1) % BUFFER_SIZE;
                 nbmess--;
@@ -59,7 +60,7 @@ public class Consumer {
                     nbcell = 0;
                 }
 
-                return message;
+                return AppMessage.fromJSON(message.getContent());
             }
 
             System.out.println("Cannot consume");
@@ -72,14 +73,13 @@ public class Consumer {
      * NB: Since the producer-consumer system is unidirectional, this method does not use it. The app message is sent
      * regardless of the flow control.
      * @param name The name of the producer the app message is being sent to
-     * @param rawAppMessage The appMessage being sent
+     * @param appMessage The appMessage being sent
      * */
-    public void sendAppMessageTo(String name, String rawAppMessage) {
+    public void sendAppMessageTo(String name, AppMessage appMessage) {
 
         int producerNumber = nameToProducerNumber.get(name);
-
-        System.out.println("Producer number " + producerNumber);
-        Message message = new Message(Target.producer, ContentType.token, rawAppMessage);
+        String rawAppMessage = appMessage.toJSON();
+        Message message = new Message(NAME, Target.producer, ContentType.token, rawAppMessage);
         System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
@@ -88,10 +88,18 @@ public class Consumer {
      * Deals with the receipt of a message
      * @param message The message being received
      */
-    public void uponReceipt(Message message) {
+    public void uponReceipt(Message message, int producerNumber) {
         System.out.println("Consumer " + NAME + " receives: " + message.toJSON());
         if (nbOfProducers > 0) {
 
+            // Checks if the producer is already registered
+            if (!nameToProducerNumber.containsKey(message.getSender())) {
+
+                // If needed, map the name of the sender to its producerNumber
+                nameToProducerNumber.put(message.getSender(), producerNumber);
+            }
+
+            // If the message corresponds to a token
             if (message.getContentType().equals(ContentType.token)) {
 
                 if (message.getTarget().equals(Target.nextProducer)) {
@@ -101,6 +109,7 @@ public class Consumer {
                     uponReceiptOfToken(tokenValue);
                 }
 
+            // If the message is an app message
             } else if (message.getContentType().equals(ContentType.app)) {
                 uponReceiptOfAppMessage(message);
             }
@@ -144,7 +153,7 @@ public class Consumer {
      * */
     private void sendTokenTo(int producerNumber, int tokenValue) {
         System.out.println("Producer number " + producerNumber);
-        Message message = new Message(Target.producer, ContentType.token, Integer.toString(tokenValue));
+        Message message = new Message(NAME, Target.producer, ContentType.token, Integer.toString(tokenValue));
         System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
@@ -176,13 +185,9 @@ public class Consumer {
             nextProducer = (nextProducer + 1) % nbOfProducers;
             MULTI_SERVER_SOCKET.sendMessageToClient(
                     nextProducer,
-                    new Message(Target.producer, ContentType.token, message.getContent())
+                    new Message(NAME, Target.producer, ContentType.token, message.getContent())
             );
             System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         }
-    }
-
-    public void registerProducer(String name, int producerNumber) {
-        nameToProducerNumber.put(name, producerNumber);
     }
 }

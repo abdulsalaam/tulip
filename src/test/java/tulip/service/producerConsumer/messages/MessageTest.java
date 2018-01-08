@@ -13,7 +13,7 @@ public class MessageTest {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        Message messageSent = new Message(Target.producer, ContentType.app,"{ \"client\" : \"Thibaud\" }");
+        Message messageSent = new Message("Sofia", Target.producer, ContentType.app,"{ \"client\" : \"Thibaud\" }");
         String jsonSent = messageSent.toJSON();
 
         // Prettily print json message

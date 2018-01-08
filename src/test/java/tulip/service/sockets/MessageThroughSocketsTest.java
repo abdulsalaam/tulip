@@ -19,7 +19,7 @@ public class MessageThroughSocketsTest {
 
     CountDownLatch latch = new CountDownLatch(2);
 
-    Message messageSent = new Message(Target.producer, ContentType.app,"{ \"order\" : \"hello\" }");
+    Message messageSent = new Message("Sofia", Target.producer, ContentType.app,"{ \"order\" : \"hello\" }");
 
     @Test
     public void messageThroughSocketsTest() {
