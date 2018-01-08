@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class MarketState extends HashMap<String, Integer> {
+public class MarketState extends HashMap<String, Double> {
 
     /** ObjectMapper used to serialize and deserialize */
     private static final ObjectMapper mapper = new ObjectMapper();

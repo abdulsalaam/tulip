@@ -10,8 +10,8 @@ public class MarketStateTest {
     public void marketState() {
 
         MarketState marketStateSent = new MarketState();
-        marketStateSent.put("Google", 120);
-        marketStateSent.put("Apple", 240);
+        marketStateSent.put("Google", 120.0);
+        marketStateSent.put("Apple", 240.0);
         String json = marketStateSent.toJSON();
         System.out.println(json);
         MarketState marketStateReceived = MarketState.fromJSON(json);
