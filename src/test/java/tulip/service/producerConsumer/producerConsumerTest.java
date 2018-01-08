@@ -85,7 +85,5 @@ public class producerConsumerTest {
             e.printStackTrace();
         }
 
-
-
     }
 }

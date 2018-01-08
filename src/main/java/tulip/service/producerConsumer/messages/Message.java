@@ -18,6 +18,11 @@ public class Message implements Serializable {
     /** ObjectMapper used to serialize and deserialize */
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * The number of the producer sending the message. This field is filled by the MultiServerSocket thread ie. on the
+     * server side.
+     * Producers are not aware of their number.
+     * producerNumber will keep the value -1 if the message is sent by the consumer */
     private int producerNumber;
 
     /** The target of the message */
