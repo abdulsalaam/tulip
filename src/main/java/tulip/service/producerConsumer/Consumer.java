@@ -6,11 +6,16 @@ import tulip.service.sockets.MultiServerSocket;
 import tulip.service.producerConsumer.messages.Message;
 
 import java.net.ServerSocket;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Consumer {
 
     private final String NAME;
     private final MultiServerSocket MULTI_SERVER_SOCKET;
+
+    /** Map a name to a producer number */
+    private Map<String, Integer> NameToProducerNumber = new ConcurrentHashMap<>();
 
     private final int BUFFER_SIZE = 10;
     private Message[] buffer = new Message[BUFFER_SIZE];
@@ -21,7 +26,7 @@ public class Consumer {
     private final int THRESHOLD = 5;
     private boolean tokenPresent = false;
     private int nbOfProducers = 0;
-    private int next = 0;
+    private int nextProducer = 0;
 
     private boolean tokenStarted = false;
     private final Object monitor = new Object();
@@ -49,7 +54,7 @@ public class Consumer {
                 nbmess--;
                 nbcell++;
                 if (tokenPresent && nbcell > THRESHOLD) {
-                    sendTokenTo(next, nbcell);
+                    sendTokenTo(nextProducer, nbcell);
                     tokenPresent = false;
                     nbcell = 0;
                 }
@@ -118,10 +123,10 @@ public class Consumer {
      * */
     private void uponReceiptOfToken(int val) {
         synchronized (monitor) {
-            next = (next + 1) % nbOfProducers;
+            nextProducer = (nextProducer + 1) % nbOfProducers;
             nbcell += val;
             if (nbcell > THRESHOLD) {
-                sendTokenTo(next, nbcell);
+                sendTokenTo(nextProducer, nbcell);
                 nbcell = 0;
             } else {
                 tokenPresent = true;
@@ -156,7 +161,7 @@ public class Consumer {
     /** Starts the token system by sending the first token message */
     private void startToken() {
         tokenStarted = true;
-        sendTokenTo(next, BUFFER_SIZE);
+        sendTokenTo(nextProducer, BUFFER_SIZE);
     }
 
     /**
@@ -165,12 +170,16 @@ public class Consumer {
      */
     private void passTokenToNextProducer(Message message) {
         synchronized (monitor) {
-            next = (next + 1) % nbOfProducers;
+            nextProducer = (nextProducer + 1) % nbOfProducers;
             MULTI_SERVER_SOCKET.sendMessageToClient(
-                    next,
+                    nextProducer,
                     new Message(Target.producer, ContentType.token, message.getContent())
             );
             System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         }
+    }
+
+    public void registerProducer(String name, int producerNumber) {
+        NameToProducerNumber.put(name, producerNumber);
     }
 }

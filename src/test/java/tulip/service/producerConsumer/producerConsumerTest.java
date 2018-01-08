@@ -28,10 +28,10 @@ public class producerConsumerTest {
                 @Override
                 public void uponReceiptOfAppMessage(Message message) {}
             };
-            
-            Consumer consumer = new Consumer("0", serverSocket);
-            Producer producer1 = new Producer("1", socket1, producerMessenger);
-            Producer producer2 = new Producer("2", socket2, producerMessenger);
+
+            Consumer consumer = new Consumer("C", serverSocket);
+            Producer producer1 = new Producer("A", socket1, producerMessenger);
+            Producer producer2 = new Producer("B", socket2, producerMessenger);
 
             Message m1 = new Message(Target.consumer, ContentType.app, "Message 1");
             producer1.produce(m1);

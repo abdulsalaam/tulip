@@ -16,6 +16,7 @@ public class MultiServerSocketThread extends Thread {
 
     /** The MultiServerSocket behind this MultiServerSocketThread */
     private MultiServerSocket MULTI_SERVER_SOCKET;
+    private int clientNumber;
 
     private Socket socket;
     private PrintWriter out;
@@ -73,6 +74,17 @@ public class MultiServerSocketThread extends Thread {
      */
     private void uponReceipt(String rawMessage) {
         Message message = Message.fromJSON(rawMessage);
+
+        // Indicates the producer number corresponding of the sender of the message
+        message.setProducerNumber(clientNumber);
         MULTI_SERVER_SOCKET.uponReceipt(message);
+    }
+
+    public int getClientNumber() {
+        return clientNumber;
+    }
+
+    public void setClientNumber(int clientNumber) {
+        this.clientNumber = clientNumber;
     }
 }

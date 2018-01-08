@@ -18,6 +18,8 @@ public class Message implements Serializable {
     /** ObjectMapper used to serialize and deserialize */
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    private int producerNumber;
+
     /** The target of the message */
     @JsonProperty("target")
     private Target target;
@@ -34,6 +36,7 @@ public class Message implements Serializable {
     public Message(@JsonProperty("target") Target target,
                    @JsonProperty("contentType") ContentType contentType,
                    @JsonProperty("content") String content) {
+        this.producerNumber = -1;
         this.target = target;
         this.contentType = contentType;
         this.content = content;
@@ -95,5 +98,13 @@ public class Message implements Serializable {
         result = 31 * result + contentType.hashCode();
         result = 31 * result + content.hashCode();
         return result;
+    }
+
+    public int getProducerNumber() {
+        return producerNumber;
+    }
+
+    public void setProducerNumber(int producerNumber) {
+        this.producerNumber = producerNumber;
     }
 }

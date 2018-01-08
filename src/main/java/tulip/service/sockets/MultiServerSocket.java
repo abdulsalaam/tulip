@@ -104,6 +104,8 @@ public class MultiServerSocket extends Thread {
                 }
             }
             clients.add(multiServerSocketThread);
+            System.out.println(clients.toString());
+            multiServerSocketThread.setClientNumber(clients.indexOf(multiServerSocketThread));
             CONSUMER.addProducer();
         }
     }
