@@ -3,15 +3,11 @@ package tulip.app.broker.model;
 import tulip.app.appMessage.ActorType;
 import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
-import tulip.app.client.model.Client;
 import tulip.app.order.Order;
 import tulip.app.order.OrderType;
 import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
 import tulip.service.producerConsumer.ProducerMessenger;
-import tulip.service.producerConsumer.messages.ContentType;
-import tulip.service.producerConsumer.messages.Message;
-import tulip.service.producerConsumer.messages.Target;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -27,8 +23,12 @@ public class Broker implements ProducerMessenger {
     private double cash;
     /** Commission rate applied by the broker on each transaction */
     private double commissionRate;
-    /** Clients list of the broker */
+    /** (Registered) clients list of the broker */
     private List<String> clients = new ArrayList<>();
+    /** (Not yet registered) prospects of the broker requesting registration */
+    private List<String> clientsRequestingRegistration = new ArrayList<>();
+    /** Clients of the broker who closed the day */
+    private List<String> closedClients = new ArrayList<>();
     /** Orders (which can be both purchases and sellings) not yet proceeded */
     private List<Order> pendingOrders = new ArrayList<>();
     /** Counts the selling orders proceeded by the broker */
@@ -38,9 +38,7 @@ public class Broker implements ProducerMessenger {
 
     private Map<String, Double> marketState = new HashMap<>();
 
-    private List<String> clientsRequestingRegistration = new ArrayList<>();
 
-    private List<String> clientsRegistered = new ArrayList<>();
 
     ServerSocket serverSocket;
     Consumer brokerConsumer = new Consumer("broker", serverSocket);
@@ -76,8 +74,6 @@ public class Broker implements ProducerMessenger {
      * Registers a client
      */
     public void registerClient(String clientName){
-        //String clientToRegister = clientsRequestingRegistration.get(0);
-
         if(brokerProducer.canProduce()) {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.registrationAcknowledgment, ""
@@ -102,7 +98,7 @@ public class Broker implements ProducerMessenger {
      * @return true if the client is registered, false otherwise
      */
     public boolean checkClientRegistered(String clientName){
-        for(String s : clientsRegistered) {
+        for(String s : clients) {
             if(s.equals(clientName)) {
                 return true;
             }
@@ -117,9 +113,9 @@ public class Broker implements ProducerMessenger {
      * @param minSellingPrice is the minimum price to which the client is willing to sell
      */
     public void placeSellOrder(String company, String client, int nbOfStocks, double minSellingPrice){
-        pendingOrders.add(
-                new Order(++sellOrderCounter, OrderType.purchase, company, client, name, minSellingPrice, nbOfStocks)
-        );
+        Order sellOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, minSellingPrice, nbOfStocks);
+        pendingOrders.add(sellOrder);
+        calculateCommission(sellOrder);
     }
 
     /**
@@ -129,9 +125,9 @@ public class Broker implements ProducerMessenger {
      * @param maxPurchasingPrice is the maximum price to which the client is willing to buy
      */
     public void placePurchaseOrder(String company, String client, int nbOfStocks, double maxPurchasingPrice) {
-        pendingOrders.add(
-                new Order(++purchaseOrderCounter, OrderType.purchase, company, client, name, maxPurchasingPrice, nbOfStocks)
-        );
+        Order purchaselOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, maxPurchasingPrice, nbOfStocks);
+        pendingOrders.add(purchaselOrder);
+        calculateCommission(purchaselOrder);
     }
 
     /**
@@ -159,33 +155,30 @@ public class Broker implements ProducerMessenger {
         this.cash += commission;
     }
 
-
-    /**
-     * Sends to the client the updated stock values
-     */
-    public void notifyClientsOfPriceChanges(){
-
-    }
-
     /**
      * When all his clients close the day, the closer closes it as well
      * and informs the stock exchange
      */
     public void closeTheDay(){
-
+        if(brokerProducer.canProduce()){
+            brokerProducer.produce(new AppMessage(
+                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
+            ));
+        }
     }
 
     @Override
-    public void uponReceiptOfAppMessage(AppMessage message) {
-        switch (message.getAppMessageContentType()){
+    public void uponReceiptOfAppMessage(AppMessage appMessage) {
+        switch (appMessage.getAppMessageContentType()){
 
             case sellOrder:
-                Order order = new Order(0, null, null, null, null, 0, 0);
-                order.fromJSON(message.toJSON());
+                Order sellOrder = Order.fromJSON(appMessage.getContent());
+                pendingOrders.add(sellOrder);
                 break;
 
             case purchaseOrder:
-                // Add to pending orders
+                Order purchaseOrder = Order.fromJSON(appMessage.getContent());
+                pendingOrders.add(purchaseOrder);
                 break;
 
             case marketStateReply:
@@ -195,7 +188,7 @@ public class Broker implements ProducerMessenger {
             case marketStateRequest:
                 if (brokerProducer.canProduce()) {
                     brokerProducer.produce(new AppMessage(
-                            this.name, ActorType.broker, message.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toString()
+                            this.name, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toString()
 
                     ));
                 }
@@ -206,11 +199,22 @@ public class Broker implements ProducerMessenger {
                 break;
 
             case registrationRequest:
-                registerClient(message.getSender());
+                registerClient(appMessage.getSender());
                 break;
 
             case endOfDayNotification:
-                // Add to list
+                closedClients.add(appMessage.getContent());
+                break;
+
+            case sellOrderProcessed:
+                Order ProcessedPurchaseOrder = Order.fromJSON(appMessage.getContent());
+                notifyOfTransaction(ProcessedPurchaseOrder.getClient());
+                break;
+
+            case purchaseOrderProcessed:
+                Order ProcessedSellOrder = Order.fromJSON(appMessage.getContent());
+                notifyOfTransaction(ProcessedSellOrder.getClient());
+                break;
 
 
 
