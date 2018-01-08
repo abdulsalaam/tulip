@@ -128,9 +128,11 @@ public class Broker implements ProducerMessenger {
      * @param maxPurchasingPrice is the maximum price to which the client is willing to buy
      */
     public void placePurchaseOrder(String company, String client, int nbOfStocks, double maxPurchasingPrice) {
-        Order purchaselOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, maxPurchasingPrice, nbOfStocks);
-        pendingOrders.add(purchaselOrder);
-        calculateCommission(purchaselOrder);
+        if(checkClientRegistered(client)) {
+            Order purchaselOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, maxPurchasingPrice, nbOfStocks);
+            pendingOrders.add(purchaselOrder);
+            calculateCommission(purchaselOrder);
+        }
     }
 
     /**
