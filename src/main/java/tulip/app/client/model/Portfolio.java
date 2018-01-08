@@ -1,24 +1,23 @@
 package tulip.app.client.model;
 
 import java.util.HashMap;
-import java.util.Map;
 
-public class Portfolio {
+public class Portfolio extends HashMap<String, Integer> {
 
-        private Map<String, Integer> stocksForEachCompany = new HashMap<>();
+    void addStocks(String company, int nbOfStocksToAdd) {
+        put(company, get(company) + nbOfStocksToAdd);
+    }
 
-        void addStock(String company) {}
+    void removeStocks(String company, int nbOfStocksToRemove) {
+        put(company, get(company) - nbOfStocksToRemove);
+    }
 
-        void removeStock(String company) {}
-
-        /**
-         * Returns the number of stocks owned for a given company
-         * @param company The company for which you want to get the number of stocks owned
-         * @return The number of stocks owned
-         */
-        int getNbOfStocks(String company) {
-            return stocksForEachCompany.get(company);
-        }
+    /**
+     * Returns the number of stocks owned for a given company
+     * @param company The company for which you want to get the number of stocks owned
+     * @return The number of stocks owned
+     */
+    int getNbOfStocks(String company) { return get(company); }
 
 }
 
