@@ -77,13 +77,13 @@ public class Consumer {
      * */
     public void sendAppMessageTo(String name, AppMessage appMessage) throws IllegalStateException {
 
-        if (!nameToProducerNumber.containsKey(name)) {
+        if (!producerIsRegistered(name)) {
             throw new IllegalStateException();
         }
 
         Integer producerNumber = nameToProducerNumber.get(name);
         String rawAppMessage = appMessage.toJSON();
-        Message message = new Message(NAME, Target.producer, ContentType.token, rawAppMessage);
+        Message message = new Message(NAME, Target.producer, ContentType.app, rawAppMessage);
         System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
@@ -96,8 +96,8 @@ public class Consumer {
         System.out.println("Consumer " + NAME + " receives: " + message.toJSON());
         if (nbOfProducers > 0) {
 
-            // Checks if the producer is already registered
-            if (!nameToProducerNumber.containsKey(message.getSender())) {
+            // Checks if the producer is not registered
+            if (!producerIsRegistered(message.getSender())) {
 
                 // If needed, map the name of the sender to its producerNumber
                 nameToProducerNumber.put(message.getSender(), producerNumber);
@@ -193,5 +193,9 @@ public class Consumer {
             );
             System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         }
+    }
+
+    public boolean producerIsRegistered(String name) {
+        return nameToProducerNumber.containsKey(name);
     }
 }
