@@ -68,6 +68,13 @@ public class Broker implements ProducerMessenger {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationRequest, this.name
             ));
+            while(!isRegistered) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -109,16 +116,15 @@ public class Broker implements ProducerMessenger {
 
     /**
      * Proceeds a sell order
-     * @param client is the name of the ordering client
-     * @param nbOfStocks is the number of stocks the client wants to sell
-     * @param minSellingPrice is the minimum price to which the client is willing to sell
      */
-    public void placeSellOrder(String company, String client, int nbOfStocks, double minSellingPrice) {
-        if(checkClientRegistered(client)) {
-            Order sellOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, minSellingPrice, nbOfStocks);
-            pendingOrders.add(sellOrder);
-            calculateCommission(sellOrder);
+    public void placeSellOrder() {
+        String sellOrderJson = pendingOrders.get(0).toJSON();
+        if(brokerProducer.canProduce()) {
+            brokerProducer.produce(new AppMessage(
+                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.sellOrder, sellOrderJson
+            ));
         }
+        pendingOrders.remove(0);
     }
 
     /**
@@ -128,11 +134,14 @@ public class Broker implements ProducerMessenger {
      * @param maxPurchasingPrice is the maximum price to which the client is willing to buy
      */
     public void placePurchaseOrder(String company, String client, int nbOfStocks, double maxPurchasingPrice) {
-        if(checkClientRegistered(client)) {
-            Order purchaselOrder = new Order(++sellOrderCounter, OrderType.purchase, company, client, name, maxPurchasingPrice, nbOfStocks);
-            pendingOrders.add(purchaselOrder);
-            calculateCommission(purchaselOrder);
+        String purchaseOrderJson = pendingOrders.get(0).toJSON();
+        if(brokerProducer.canProduce()) {
+            brokerProducer.produce(new AppMessage(
+                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.sellOrder, purchaseOrderJson
+            ));
         }
+        pendingOrders.remove(0);
+
     }
 
     /**
@@ -211,11 +220,13 @@ public class Broker implements ProducerMessenger {
             case sellOrderProcessed:
                 Order ProcessedPurchaseOrder = Order.fromJSON(appMessage.getContent());
                 notifyOfTransaction(ProcessedPurchaseOrder.getClient());
+                calculateCommission(ProcessedPurchaseOrder);
                 break;
 
             case purchaseOrderProcessed:
                 Order ProcessedSellOrder = Order.fromJSON(appMessage.getContent());
                 notifyOfTransaction(ProcessedSellOrder.getClient());
+                calculateCommission(ProcessedSellOrder);
                 break;
         }
     }
