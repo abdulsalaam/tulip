@@ -1,4 +1,4 @@
-package tulip.app.stockExchange;
+package tulip.app.stockExchange.model;
 
 import tulip.app.order.Order;
 
