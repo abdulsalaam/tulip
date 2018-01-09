@@ -15,7 +15,6 @@ import java.util.Objects;
  * Represents an order.
  * The client places an order, the order is sent by the broker of the client to the stock exchange, then, the
  * stock exchange processes the order.
- * @author Thibaud Martinez
  */
 public class Order implements Serializable {
 

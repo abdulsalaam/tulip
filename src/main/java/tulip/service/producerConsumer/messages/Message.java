@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * This class is used to communicate through sockets.
+ * This class is used to communicate through sockets on the service layer.
  * Messages are sent over a socket connection by converting a Message in a JSON String at one end of the connection
  * and doing the opposite operation at the other end of the connection.
  * */
@@ -34,6 +34,13 @@ public class Message implements Serializable {
     @JsonProperty("content")
     private String content;
 
+    /**
+     * Constructor
+     * @param sender The name of the sender of the message
+     * @param target The target of the message
+     * @param contentType The type of the content of the message
+     * @param content The content of the message in the form of a String
+     */
     @JsonCreator
     public Message(@JsonProperty("sender") String sender,
                    @JsonProperty("target") Target target,
@@ -77,7 +84,8 @@ public class Message implements Serializable {
         return json;
     }
 
-    /** Constructs a Message object from a JSON string
+    /**
+     * Constructs a Message object from a JSON string
      * @return the Message object constructed
      */
     public static Message fromJSON(String json) {

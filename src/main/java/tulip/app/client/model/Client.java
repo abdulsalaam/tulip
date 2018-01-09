@@ -15,41 +15,69 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a client
+ */
 public class Client implements ProducerMessenger {
 
+    /** The name of the client (unique identifier) */
     private final String NAME;
 
+    /**
+     * The portfolio of the client ie. a map that associates the name of a company with the number of stocks owned by the
+     * client
+     * */
     private Portfolio portfolio = new Portfolio();
 
+    /** The name of the broker of this client (unique identifier) */
     private String broker;
 
+    /** Indicates whether the client is registered to a broker */
     private boolean isRegistered = false;
 
+    /** The amount of cash of the client */
     private double cash;
 
+    /** The list of the sell orders placed by the client and not treated yet */
     private List<Order> pendingSellOrders = new ArrayList<>();
 
+    /** The list of the sell purchased placed by the client and not treated yet */
     private List<Order> pendingPurchaseOrders = new ArrayList<>();
 
+    /** The list of the orders which have been treated */
     private List<Order> archivedOrders = new ArrayList<>();
 
+    /** The commission rate of the broker */
     private final double COMMISSION_RATE = 0.1;
 
+    /** The number of sell orders made so far. Used to generate an id for each sell order */
     private int sellOrderCounter = 0;
 
+    /** The number of purchase order. Used to generate an id for each sell order */
     private int purchaseOrderCounter = 0;
 
-    /** Current market state (list of companies and associated prices */
+    /** The current market state (list of companies and associated prices) */
     private MarketState marketState = new MarketState();
 
+    /** The producer corresponding to the client */
     private Producer producer;
 
+    /**
+     * The constructor of the client
+     * @param name The name of the client (unique identifier)
+     * @param cash The amount of cash the client has
+     * @param socket A socket used to communicate with a broker
+     */
     public Client(String name, double cash, Socket socket) {
         this.cash = cash;
         this.NAME = name;
         this.producer = new Producer(name, socket, this);
     }
 
+    /**
+     * This method is called upon receipt of a message by the producer
+     * @param appMessage The message being received
+     */
     @Override
     public void uponReceiptOfAppMessage(AppMessage appMessage) {
 
@@ -76,6 +104,9 @@ public class Client implements ProducerMessenger {
         }
     }
 
+    /**
+     * Sends a registration message to the broker
+     */
     private void registerToBroker() {
 
         if (producer.canProduce()) {
@@ -86,6 +117,10 @@ public class Client implements ProducerMessenger {
         }
     }
 
+    /**
+     * Sends a request of the market state to the broker
+     * @throws RegistrationException
+     */
     public void requestMarketState() throws RegistrationException {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
@@ -98,6 +133,14 @@ public class Client implements ProducerMessenger {
         }
     }
 
+    /**
+     * Places a sell order.
+     * @param company The company concerned by the sell order
+     * @param nbOfStocks The number of stock of the company you want to sell
+     * @param minSellingPrice The minimum price PER stock you are willing to obtain
+     * @throws RegistrationException thrown when the client is not registered
+     * @throws IllegalOrderException thrown when the client do not have enough stocks available to perform the operation
+     */
     public void placeSellOrder(String company, int nbOfStocks, double minSellingPrice)
             throws RegistrationException, IllegalOrderException {
 
@@ -116,9 +159,16 @@ public class Client implements ProducerMessenger {
         }
 
         pendingSellOrders.add(sellOrder);
-
     }
 
+    /**
+     * Places a purchase order.
+     * @param company The company concerned by the purchase order
+     * @param nbOfStocks The number of stock of the company you want to purchase
+     * @param maxPurchasingPrice The maximum price PER stock you are willing to pay
+     * @throws RegistrationException thrown when the client is not registered
+     * @throws IllegalOrderException thrown when the client do not have enough cash available to perform the operation
+     */
     public void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice)
             throws RegistrationException, IllegalOrderException {
 
@@ -199,6 +249,10 @@ public class Client implements ProducerMessenger {
         return amountOfPurchaseOrders;
     }
 
+    /**
+     * Called upon receipt of a processed sell order to takes into account the processed sell order.
+     * @param order The sell order received
+     */
     private void processSellOrder(Order order) {
 
         // Update cash
@@ -211,9 +265,12 @@ public class Client implements ProducerMessenger {
         pendingSellOrders.removeIf(o -> o.getId() == order.getId());
 
         archivedOrders.add(order);
-
     }
 
+    /**
+     * Called upon receipt of a processed purchase order to takes into account the processed purchase order.
+     * @param order
+     */
     private void processPurchaseOrder(Order order) {
 
         // Update cash
@@ -226,9 +283,12 @@ public class Client implements ProducerMessenger {
         pendingPurchaseOrders.removeIf(o -> o.getId() == order.getId());
 
         archivedOrders.add(order);
-
     }
 
+    /**
+     * Indicates that the client is done with placing order for the day.
+     * @throws RegistrationException thrown when the client is not registered
+     */
     public void closeTheDay() throws RegistrationException {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }

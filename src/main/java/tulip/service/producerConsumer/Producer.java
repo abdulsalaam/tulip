@@ -26,6 +26,12 @@ public class Producer extends Thread {
 
     private final Object monitor = new Object();
 
+    /**
+     * Constructor
+     * @param name The name of the producer (unique identifier)
+     * @param socket The socket used to communicate with the comsumer
+     * @param producerMessenger An object implementing the producerMessenger interface
+     */
     public Producer(String name, Socket socket, ProducerMessenger producerMessenger) {
         this.NAME = name;
         this.CLIENT_SOCKET = new ClientSocket(this,socket);
@@ -34,7 +40,10 @@ public class Producer extends Thread {
         new Postman().start();
     }
 
-    /** Indicates whether there is room in the buffer */
+    /**
+     * Indicates whether there is room in the buffer
+     * @return a boolean indicating whether it is currently possible to produce a message
+     * */
     public boolean canProduce() {
         synchronized (monitor) {
             return nbmess < BUFFER_SIZE;
