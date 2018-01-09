@@ -58,7 +58,7 @@ public class BrokerUI extends Application{
 
         grid = new GridPane();
 
-       // Gridpane
+        // Gridpane
         for (int i = 0; i < 12; i++)
         {
             ColumnConstraints column = new ColumnConstraints(150);
@@ -81,16 +81,16 @@ public class BrokerUI extends Application{
 
 
         Button requestMarketStateBtn = new Button("Request market state");
-            buttons.add(requestMarketStateBtn);
-            grid.add(requestMarketStateBtn, 1, 1);
+        buttons.add(requestMarketStateBtn);
+        grid.add(requestMarketStateBtn, 1, 1);
 
         Button placeOrderBtn = new Button("Process order");
-            buttons.add(placeOrderBtn);
-            grid.add(placeOrderBtn, 3,1);
+        buttons.add(placeOrderBtn);
+        grid.add(placeOrderBtn, 3,1);
 
         Button showPendingOrdersBtn = new Button("Show pending orders");
-            buttons.add(requestMarketStateBtn);
-            grid.add(showPendingOrdersBtn, 5, 1);
+        buttons.add(requestMarketStateBtn);
+        grid.add(showPendingOrdersBtn, 5, 1);
 
         int index = 0;
         for(Button button : buttons) {
@@ -105,7 +105,8 @@ public class BrokerUI extends Application{
 
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                showMarketState(broker.requestMarketState());
+                broker.requestMarketState();
+                showMarketState(broker.getMarketState());
             }
 
         });

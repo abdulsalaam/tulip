@@ -237,7 +237,18 @@ public class Client implements ProducerMessenger {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.endOfDayNotification, ""
-            ));
+                    ));
         }
+    }
+
+    public MarketState getMarketState() {
+        marketState.put("Basecamp", 250.0);
+        marketState.put("Tesla", 596.70);
+        marketState.put("Facebook", 450.0);
+        marketState.put("Alphabet", 270.0);
+        marketState.put("Apple", 430.0);
+        marketState.put("Spotify", 220.0);
+        marketState.put("LVMH", 550.0);
+        return marketState;
     }
 }
