@@ -33,6 +33,11 @@ public class Consumer {
     private boolean tokenStarted = false;
     private final Object monitor = new Object();
 
+    /**
+     * Constructor
+     * @param name The name of the consumer (unique identifier)
+     * @param serverSocket A server socket to communicate with a producer
+     */
     public Consumer(String name, ServerSocket serverSocket) {
         this.NAME = name;
         MULTI_SERVER_SOCKET = new MultiServerSocket(this,serverSocket);
@@ -46,7 +51,11 @@ public class Consumer {
         }
     }
 
-    /** Consumes an AppMessage. Must be used in conjunction with the method boolean canConsume() */
+    /**
+     * Consumes an AppMessage. Must be used in conjunction with the method boolean canConsume()
+     * @return The AppMessage from the buffer
+     * @throws BufferUnderflowException thrown when there is no message to
+     */
     public AppMessage consume() throws BufferUnderflowException {
         synchronized (monitor) {
             if (nbmess > 0) {
@@ -74,12 +83,12 @@ public class Consumer {
      * regardless of the flow control.
      * @param name The name of the producer the app message is being sent to
      * @param appMessage The appMessage being sent
+     * @throws IllegalStateException thrown if the producer to which the message is sent is not registered
      * */
+
     public void sendAppMessageTo(String name, AppMessage appMessage) throws IllegalStateException {
 
-        if (!producerIsRegistered(name)) {
-            throw new IllegalStateException();
-        }
+        if (!producerIsRegistered(name)) { throw new IllegalStateException(); }
 
         Integer producerNumber = nameToProducerNumber.get(name);
         String rawAppMessage = appMessage.toJSON();
@@ -195,6 +204,11 @@ public class Consumer {
         }
     }
 
+    /**
+     * Checks if producer is registered
+     * @param name The name of the producer
+     * @return a boolean indicating whether the producer is registered
+     */
     public boolean producerIsRegistered(String name) {
         return nameToProducerNumber.containsKey(name);
     }

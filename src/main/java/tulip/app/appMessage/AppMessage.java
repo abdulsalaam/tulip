@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.Serializable;
 
+/**
+ * Message used on the application layer
+ */
 public class AppMessage implements Serializable {
 
     /** ObjectMapper used to serialize and deserialize */
