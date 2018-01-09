@@ -1,5 +1,10 @@
 package tulip.app.stockExchange;
 
+import tulip.app.order.Order;
+
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class Company {
 
     /** The name of the company */
@@ -13,6 +18,12 @@ public class Company {
 
     /** The current stock price for this company */
     private double stockPrice ;
+
+    /** Queue of pending purchase orders */
+    private Queue<Order> pendingPurchaseOrders = new LinkedList<>();
+
+    /** Queue of pendind sell orders */
+    private Queue<Order> pendingSellOrders = new LinkedList<>();
 
     /**
      * Constructor
@@ -35,6 +46,30 @@ public class Company {
     }
 
     /**
+     * Computes the total number of stocks available for purchase for this company
+     * @return The number of stocks available for purchase
+     */
+    int nbOfStocksForPurchase() {
+        int nbOfStocksForPurchase = 0;
+        for (Order purchaseOrder: pendingPurchaseOrders) {
+            nbOfStocksForPurchase += purchaseOrder.getDesiredNbOfStocks();
+        }
+        return nbOfStocksForPurchase;
+    }
+
+    /**
+     * Computes the total number of stocks for sale for this company
+     * @return The number of stocks for sale
+     */
+    int nbOfStocksForSale() {
+        int nbOfStocksForSale = 0;
+        for (Order sellOrder: pendingSellOrders) {
+            nbOfStocksForSale += sellOrder.getDesiredNbOfStocks();
+        }
+        return nbOfStocksForSale;
+    }
+
+    /**
      * Used to update the stock price of a company
      * @param stockPrice The new stock price
      */
@@ -42,7 +77,19 @@ public class Company {
         this.stockPrice = stockPrice;
     }
 
+    void addPurchaseOrder(Order purchaseOrder) {
+        pendingPurchaseOrders.add(purchaseOrder)
+    }
+
+    void addSellOrder(Order sellOrder) {
+        pendingSellOrders.add(sellOrder);
+    }
+
     public double getStockPrice() {
         return stockPrice;
+    }
+
+    public int getNB_EMITTED_STOCKS() {
+        return NB_EMITTED_STOCKS;
     }
 }
