@@ -98,7 +98,7 @@ public class Client implements ProducerMessenger {
         }
     }
 
-    private void placeSellOrder(String company, int nbOfStocks, double minSellingPrice)
+    public void placeSellOrder(String company, int nbOfStocks, double minSellingPrice)
             throws RegistrationException, IllegalOrderException {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
@@ -119,7 +119,7 @@ public class Client implements ProducerMessenger {
 
     }
 
-    private void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice)
+    public void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice)
             throws RegistrationException, IllegalOrderException {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
