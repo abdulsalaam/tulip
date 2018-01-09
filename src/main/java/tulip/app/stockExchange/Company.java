@@ -41,4 +41,8 @@ public class Company {
     void updateStockPrice(double stockPrice) {
         this.stockPrice = stockPrice;
     }
+
+    public double getStockPrice() {
+        return stockPrice;
+    }
 }
