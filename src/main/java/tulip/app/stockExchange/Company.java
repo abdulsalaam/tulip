@@ -78,7 +78,7 @@ public class Company {
     }
 
     void addPurchaseOrder(Order purchaseOrder) {
-        pendingPurchaseOrders.add(purchaseOrder)
+        pendingPurchaseOrders.add(purchaseOrder);
     }
 
     void addSellOrder(Order sellOrder) {
