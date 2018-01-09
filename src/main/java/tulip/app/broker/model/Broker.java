@@ -16,7 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
-public class Broker implements ProducerMessenger {
+public class Broker extends Thread implements ProducerMessenger {
 
     /** Name of the broker */
     private String name;
@@ -60,6 +60,46 @@ public class Broker implements ProducerMessenger {
         brokerProducer = new Producer(this.name, socket, this);
     }
 
+    /**
+     * Consumes messages while he can, and treats the ones received from the client,
+     * following the producer-consumer algorithm used
+     */
+    @Override
+    public void run() {
+        while (true) {
+            if (brokerConsumer.canConsume()) {
+                AppMessage appMessage = brokerConsumer.consume();
+                switch (appMessage.getAppMessageContentType()) {
+
+                    case order:
+                        if(checkClientRegistered(appMessage.getSender())) {
+                            Order order = Order.fromJSON(appMessage.getContent());
+                            pendingOrders.add(order);
+                        }
+                        break;
+
+                    case marketStateRequest:
+                        if (brokerProducer.canProduce()) {
+                            brokerProducer.produce(new AppMessage(
+                                    this.name, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
+                            ));
+                        }
+                        break;
+
+                    case registrationRequest:
+                        registerClient(appMessage.getSender());
+                        break;
+
+                    case endOfDayNotification:
+                        closedClients.add(appMessage.getContent());
+                        break;
+
+                }
+
+
+            }
+        }
+    }
     /**
      * Sends registering request to stock exchange
      */
@@ -174,39 +214,20 @@ public class Broker implements ProducerMessenger {
         }
     }
 
+    /**
+     * Treats acquaintances received from stock exchange
+     */
     @Override
     public void uponReceiptOfAppMessage(AppMessage appMessage) {
-        switch (appMessage.getAppMessageContentType()) {
 
-            case order:
-                if(checkClientRegistered(appMessage.getSender())) {
-                    Order order = Order.fromJSON(appMessage.getContent());
-                    pendingOrders.add(order);
-                }
-                break;
+        switch (appMessage.getAppMessageContentType()) {
 
             case marketStateReply:
                 marketState = MarketState.fromJSON(appMessage.getContent());
                 break;
 
-            case marketStateRequest:
-                if (brokerProducer.canProduce()) {
-                    brokerProducer.produce(new AppMessage(
-                            this.name, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
-                    ));
-                }
-                break;
-
             case registrationAcknowledgment:
                 this.isRegistered = true;
-                break;
-
-            case registrationRequest:
-                registerClient(appMessage.getSender());
-                break;
-
-            case endOfDayNotification:
-                closedClients.add(appMessage.getContent());
                 break;
 
             case orderProcessed:
