@@ -130,6 +130,9 @@ public class Broker extends Thread implements ProducerMessenger {
             brokerProducer.produce(new AppMessage(
                     this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.registrationAcknowledgment, ""
             ));
+            brokerProducer.produce(new AppMessage(
+                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationNotification, clientName
+            ));
         }
     }
 
