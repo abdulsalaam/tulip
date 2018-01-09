@@ -96,7 +96,7 @@ public class StockExchange extends Thread {
      * @param nbEmittedStocks The number of emitted stocks for this company
      * @param initialStockPrice The initial stock price
      */
-    private void addCompany(String name, int nbEmittedStocks, double initialStockPrice) {
+    public void addCompany(String name, int nbEmittedStocks, double initialStockPrice) {
         companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
     }
 
@@ -264,7 +264,7 @@ public class StockExchange extends Thread {
      * @return A MarketState object which is an object that inherit from HashMap<String, Double>.
      *         It associates the name of a company with a stock price.
      */
-    private MarketState getMarketState() {
+    public MarketState getMarketState() {
         MarketState marketState = new MarketState();
         for (Map.Entry<String, Company> entry : companies.entrySet()) {
             marketState.put(entry.getKey(), entry.getValue().getStockPrice());
@@ -288,4 +288,25 @@ public class StockExchange extends Thread {
 
         return closedBrokers.size() == brokersAndNbOfClients.size();
     }
+
+    public List<Order> getCurrentDemand() {
+        List<Order> purchaseOrders = new ArrayList<>();
+        for (Company company : companies.values()) {
+            for(Order purchaseOrder : company.getPendingPurchaseOrders()) {
+                purchaseOrders.add(purchaseOrder);
+            }
+        }
+        return purchaseOrders;
+    }
+
+    public List<Order> getCurrentSupply() {
+        List<Order> sellOrders = new ArrayList<>();
+        for (Company company : companies.values()) {
+            for(Order purchaseOrder : company.getPendingSellOrders()) {
+                sellOrders.add(purchaseOrder);
+            }
+        }
+        return sellOrders;
+    }
+
 }

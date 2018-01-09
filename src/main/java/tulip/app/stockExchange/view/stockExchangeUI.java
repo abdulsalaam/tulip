@@ -22,7 +22,11 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.MarketState;
 import tulip.app.client.model.Client;
+import tulip.app.order.Order;
+import tulip.app.stockExchange.model.StockExchange;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +36,10 @@ public class stockExchangeUI extends Application {
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
-    private static Client client;
+    private static StockExchange stockExchange;
 
-    public static void main(String [] args) {
-        client = new Client("Emma", 3000, new Socket());
+    public static void main(String [] args) throws IOException {
+        stockExchange = new StockExchange(new ServerSocket());
         Application.launch();
     }
 
@@ -69,16 +73,20 @@ public class stockExchangeUI extends Application {
         // Buttons
         Button requestMarketStateBtn = new Button("Show market state");
         buttons.add(requestMarketStateBtn);
-        grid.add(requestMarketStateBtn, 1, 1);
+        grid.add(requestMarketStateBtn, 3, 3 );
 
-        Button placeOrderBtn = new Button("Add a company");
-        buttons.add(placeOrderBtn);
-        grid.add(placeOrderBtn, 3, 1);
+        Button addCompanyBtn = new Button("Add a company");
+        buttons.add(addCompanyBtn);
+        grid.add(addCompanyBtn, 5, 1);
 
+        Button demandBtn = new Button("Current demand");
+        buttons.add(demandBtn);
+        grid.add(demandBtn, 1, 1);
 
-        Button closeTheDayBtn = new Button("Process transactions");
-        buttons.add(closeTheDayBtn);
-        grid.add(closeTheDayBtn, 5, 1);
+        Button supplyBtn = new Button("Current supply");
+        buttons.add(supplyBtn);
+        grid.add(supplyBtn, 3, 1);
+
 
         int index = 0;
         for(Button button : buttons) {
@@ -89,22 +97,24 @@ public class stockExchangeUI extends Application {
         // Actions
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.requestMarketState();
-                showMarketState(client.getMarketState());
-            }
-        });
-        placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                showOrderPlacement();
+                showMarketState(stockExchange.getMarketState());
             }
         });
 
-        closeTheDayBtn.setOnAction(new EventHandler<ActionEvent>() {
+        addCompanyBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.closeTheDay();
-                for(Button button : buttons) {
-                    button.setVisible(false);
-                }
+                showCompanyPlacement();
+            }
+        });
+
+        demandBtn.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                showPendingOrders(stockExchange.getCurrentDemand());
+            }
+        });
+        supplyBtn.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                showPendingOrders(stockExchange.getCurrentSupply());
             }
         });
 
@@ -154,7 +164,7 @@ public class stockExchangeUI extends Application {
     TextField nbStock = new TextField ("Number of stocks");
     TextField price = new TextField ("Price");
 
-    public static void showOrderPlacement(){
+    public static void showCompanyPlacement() {
 
         Stage showOrderPlacement = new Stage();
         Group root = new Group();
@@ -174,48 +184,65 @@ public class stockExchangeUI extends Application {
         }
 
         // Text fields
-        final TextField company = new TextField();
-        company.setPromptText("Company");
+        final TextField companyName = new TextField();
+        companyName.setPromptText("Company name");
 
-        final TextField nbStock = new TextField();
-        nbStock.setPromptText("Number of stocks");
+        final TextField nbEmittedStocks = new TextField();
+        nbEmittedStocks.setPromptText("Number of emitted stocks");
 
-        final TextField price = new TextField();
-        price.setPromptText("Price");
+        final TextField initialStockPrice = new TextField();
+        initialStockPrice.setPromptText("Initial stock price");
 
         // Buttons
-        Button purchase = new Button("Purchase");
+        Button addBtn = new Button("Add");
 
-        Button sell = new Button("Sell");
 
         // Actions
-        purchase.setOnAction(new EventHandler<ActionEvent>() {
+        addBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.placePurchaseOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                stockExchange.addCompany(companyName.getText(), Integer.parseInt(nbEmittedStocks.getText()), Integer.parseInt(initialStockPrice.getText()));
             }
         });
 
-        sell.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                client.placeSellOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
-            }
-        });
-
-
-        gridpane.add(company, 0, 1);
-        gridpane.add(nbStock, 0, 2);
-        gridpane.add(price, 0, 3);
-
-        gridpane.add(purchase, 3, 3);
-        gridpane.add(sell, 3, 1);
+        gridpane.add(companyName, 0, 1);
+        gridpane.add(nbEmittedStocks, 0, 2);
+        gridpane.add(initialStockPrice, 0, 3);
+        gridpane.add(addBtn, 3, 1);
 
         root.getChildren().add(gridpane);
         showOrderPlacement.setScene(scene);
         showOrderPlacement.show();
     }
 
+    public static void showPendingOrders(List<Order> pendingOrders){
+
+        Stage MarketPopUp = new Stage();
+        MarketPopUp.setTitle("Pending Orders");
+        final CategoryAxis xAxis = new CategoryAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        final BarChart<String,Number> bc =
+                new BarChart<String,Number>(xAxis,yAxis);
+        bc.setStyle(
+                "-fx-background-color: white;"
+        );
+
+        xAxis.setTickLabelFill(Color.WHITE);
+        yAxis.setTickLabelFill(Color.WHITE);
+
+        XYChart.Series serie = new XYChart.Series();
+
+        for(Order order : pendingOrders) {
+            serie.getData().add(new XYChart.Data(order.getCompany(), order.getDesiredNbOfStocks()));
+        }
 
 
+        bc.setStyle(
+                "-fx-background-image: url('background.png');-fx-background-size: cover");
+        Scene scene  = new Scene(bc,800,600);
+        bc.getData().addAll(serie);
+        MarketPopUp.setScene(scene);
+        MarketPopUp.show();
+    }
 }
 
 
