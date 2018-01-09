@@ -22,13 +22,13 @@ public class Company {
     /** Queue of pending purchase orders */
     private Queue<Order> pendingPurchaseOrders = new LinkedList<>();
 
-    /** Queue of pendind sell orders */
+    /** Queue of pending sell orders */
     private Queue<Order> pendingSellOrders = new LinkedList<>();
 
     /**
      * Constructor
      * @param name The name of the company
-     * @param nbEmittedStocks The number of emitted stock for this company
+     * @param nbEmittedStocks The number of emitted stocks for this company
      * @param initialStockPrice The initial stock price
      */
     Company(String name, int nbEmittedStocks, double initialStockPrice) {
@@ -77,6 +77,15 @@ public class Company {
         this.stockPrice = stockPrice;
     }
 
+
+    /**
+     * Decreases the number of floating stocks when floating stocks are sold
+     * @param nbOfStocksToSell The number of floating stocks being sold
+     */
+    void sellFloatingStocks(int nbOfStocksToSell) {
+        nbFloatingStocks -= nbOfStocksToSell;
+    }
+
     void addPurchaseOrder(Order purchaseOrder) {
         pendingPurchaseOrders.add(purchaseOrder);
     }
@@ -91,5 +100,17 @@ public class Company {
 
     public int getNB_EMITTED_STOCKS() {
         return NB_EMITTED_STOCKS;
+    }
+
+    public Queue<Order> getPendingPurchaseOrders() {
+        return pendingPurchaseOrders;
+    }
+
+    public Queue<Order> getPendingSellOrders() {
+        return pendingSellOrders;
+    }
+
+    public int getNbFloatingStocks() {
+        return nbFloatingStocks;
     }
 }

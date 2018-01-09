@@ -95,12 +95,10 @@ public class Order implements Serializable {
     }
 
     /**
-     * Processes the order ie. fills the processing date, changes the order state to processed, indicates the number
-     * of stocks purchased or sold and fills the actualPrice.
+     * Processes the order ie. fills the processing date, changes the order state to processed, and fills the actualPrice.
      */
-    void processOrder(Date processingDate, int actualNbOfStocks, double actualPrice) {
+    public void processOrder(Date processingDate, double actualPrice) {
         this.processingDate = processingDate;
-        this.actualNbOfStocks = actualNbOfStocks;
         this.actualPrice = actualPrice;
         this.state = OrderState.processed;
     }

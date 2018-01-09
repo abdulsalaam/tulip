@@ -9,11 +9,16 @@ import tulip.app.order.OrderType;
 import tulip.service.producerConsumer.Consumer;
 
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Date;
+
 
 public class StockExchange extends Thread {
 
+    /** The name of the stock exchange */
     private final String NAME = "Stock Exchange";
 
     /**
@@ -24,6 +29,9 @@ public class StockExchange extends Thread {
 
     /** A map which links a broker (identified by his name) to his number of client */
     private Map<String, Integer> brokersAndNbOfClients = new HashMap<>();
+
+    /** A list which indicate wich broker have closed the day */
+    private List<String> closedBrokers = new ArrayList<>();
 
     /** Used for the consumer role of the stockExchange */
     private Consumer consumer;
@@ -46,7 +54,7 @@ public class StockExchange extends Thread {
                 switch (appMessage.getAppMessageContentType()) {
 
                     case registrationRequest:
-                        String brokerName = appMessage.getContent();
+                        String brokerName = appMessage.getRecipient();
                         registerBroker(brokerName);
                         sendRegistrationAcknowledgment(brokerName);
                         break;
@@ -60,29 +68,42 @@ public class StockExchange extends Thread {
                         placeOrder(order);
                         break;
 
+                    case endOfDayNotification:
+                        closeBroker(appMessage.getRecipient());
 
                 }
             }
+
+            if (isClosed()) {
+                updateStockPrices();
+                processTransactions();
+            }
         }
     }
-
-    void openStockExchange() {}
-
-    void closeStockEchange() {}
 
     /**
      * Registers a broker on the stock exchange
      * @param brokerName The name of the broker being registered
      */
-    void registerBroker(String brokerName) {
+    private void registerBroker(String brokerName) {
         brokersAndNbOfClients.put(brokerName, 0);
+    }
+
+    /**
+     * Adds a company to companies
+     * @param name The name of the company
+     * @param nbEmittedStocks The number of emitted stocks for this company
+     * @param initialStockPrice The initial stock price
+     */
+    private void addCompany(String name, int nbEmittedStocks, double initialStockPrice) {
+        companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
     }
 
     /**
      * Sends a registration acknoledgement to a broker
      * @param brokerName The broker to whom the registration acknowledgement is sent
      */
-    void sendRegistrationAcknowledgment(String brokerName) {
+    private void sendRegistrationAcknowledgment(String brokerName) {
         consumer.sendAppMessageTo(
                 brokerName,
                 new AppMessage(NAME, ActorType.stockExchange, brokerName, ActorType.broker,
@@ -94,12 +115,24 @@ public class StockExchange extends Thread {
      * Sends the state of the market to a given broker
      * @param brokerName The broker to whom the MarketState must be sent
      */
-    void sendMarketState(String brokerName) {
+    private void sendMarketState(String brokerName) {
         MarketState marketState = getMarketState();
         consumer.sendAppMessageTo(
                 brokerName,
                 new AppMessage(NAME, ActorType.stockExchange, brokerName, ActorType.broker,
                         AppMessageContentType.marketStateReply, marketState.toJSON())
+        );
+    }
+
+    /**
+     * Transmits a processed order to the broker responsible for this order
+     * @param order The order being sent
+     */
+    private void sendsProcessedOrder(Order order) {
+        consumer.sendAppMessageTo(
+                order.getBroker(),
+                new AppMessage(NAME, ActorType.stockExchange, order.getBroker(), ActorType.broker,
+                        AppMessageContentType.orderProcessed, order.toJSON())
         );
     }
 
@@ -111,12 +144,20 @@ public class StockExchange extends Thread {
         brokersAndNbOfClients.put(brokerName, brokersAndNbOfClients.get(brokerName) + 1);
     }
 
-    /** Indicates whether a broker is registered to the stock exchange */
-    boolean brokerIsRegistered(String brokerName) {
+    /**
+     * Indicates whether a broker is registered to the stock exchange
+     * @param brokerName The name of the broker you want to check
+     * */
+    private boolean brokerIsRegistered(String brokerName) {
         return brokersAndNbOfClients.containsKey(brokerName);
     }
 
-    void placeOrder(Order order) {
+    /**
+     * Upon receipt of an order, this method is called to add the order of the list of pending orders of the concerned
+     * company
+     * @param order The order received
+     */
+    private void placeOrder(Order order) {
 
         // Gets the company corresponding to the order
         Company company = companies.get(order.getCompany());
@@ -132,7 +173,7 @@ public class StockExchange extends Thread {
      * Updates the stock prices of all the companies
      */
     void updateStockPrices() {
-        for (Company company: companies.values()) {
+        for (Company company : companies.values()) {
             double deltaPrice =
                     (company.nbOfStocksForPurchase() - company.nbOfStocksForSale()) / company.getNB_EMITTED_STOCKS();
             double newStockPrice = company.getStockPrice() * (1 + deltaPrice);
@@ -141,24 +182,109 @@ public class StockExchange extends Thread {
     }
 
     /**
-     * Processes all the pending orders for all the companies
+     * Processes all the pending orders for all the companies and sends the processed orders to the brokers
      */
-    void processTransactions() {
+    private void processTransactions() {
 
+        // Iterates over each company
+        for (Company c : companies.values()) {
+
+            // Iterates over purchase orders
+            while (!c.getPendingPurchaseOrders().isEmpty()) {
+
+                // Retrieves and removes the head of the pendingPurchaseOrder queue
+                Order purchaseOrder = c.getPendingPurchaseOrders().poll();
+
+                // If the desired price is inferior or equal to the market price
+                if (purchaseOrder.getDesiredPrice() <= c.getStockPrice()) {
+
+                    // Sells the floating stocks
+                    if (c.getNbFloatingStocks() > 0) {
+                        int floatingStocksSold = Math.min(purchaseOrder.getDesiredNbOfStocks(), c.getNbFloatingStocks());
+                        c.sellFloatingStocks(floatingStocksSold);
+                        purchaseOrder.setActualNbOfStocks(floatingStocksSold);
+                    }
+
+                    // While there are still stock to be purchased, iterates over sell orders
+                    while (purchaseOrder.getDesiredNbOfStocks() > purchaseOrder.getActualNbOfStocks() &&
+                            !c.getPendingSellOrders().isEmpty()) {
+
+                        // Retrieves, but does not remove, the head of the queue
+                        Order sellOrder = c.getPendingSellOrders().peek();
+
+                        // If the market price is inferior to the minimum selling price
+                        if (c.getStockPrice() < sellOrder.getDesiredPrice()) {
+
+                            // Remove the head of the queue
+                            c.getPendingSellOrders().remove();
+
+                            // Sets the sell order as processed
+                            sellOrder.processOrder(new Date(), c.getStockPrice());
+
+                            // Sends the sell order
+                            sendsProcessedOrder(sellOrder);
+
+                        } else {
+
+                            int stocksSold = Math.min(
+                                    purchaseOrder.getDesiredNbOfStocks() - purchaseOrder.getActualNbOfStocks(),
+                                    sellOrder.getDesiredNbOfStocks() - sellOrder.getActualNbOfStocks()
+                            );
+
+                            // For this sell order, if all the stocks for sale have been sold
+                            if (sellOrder.getDesiredNbOfStocks() == sellOrder.getActualNbOfStocks()) {
+                                c.getPendingSellOrders().remove();
+                                sellOrder.processOrder(new Date(), c.getStockPrice());
+                                sendsProcessedOrder(sellOrder);
+
+                            }
+                        }
+                    }
+                }
+
+                // Sets the purchase order as processed
+                purchaseOrder.processOrder(new Date(), c.getStockPrice());
+
+                // Sends the order to the broker
+                sendsProcessedOrder(purchaseOrder);
+            }
+
+            // Processes and sends the remaining sell orders
+            while (!c.getPendingSellOrders().isEmpty()) {
+                Order sellOrder = c.getPendingSellOrders().poll();
+                sellOrder.processOrder(new Date(), c.getStockPrice());
+                sendsProcessedOrder(sellOrder);
+            }
+        }
     }
-
-    void notifyBrokerOfTransaction() {}
 
     /**
      * Gives a snapshot of the market state at a given moment.
      * @return A MarketState object which is an object that inherit from HashMap<String, Double>.
      *         It associates the name of a company with a stock price.
      */
-    MarketState getMarketState() {
+    private MarketState getMarketState() {
         MarketState marketState = new MarketState();
         for (Map.Entry<String, Company> entry : companies.entrySet()) {
             marketState.put(entry.getKey(), entry.getValue().getStockPrice());
         }
         return marketState;
+    }
+
+    /**
+     * Adds the broker to the closedBrokers list
+     * @param brokerName The name of the broker
+     */
+    void closeBroker(String brokerName) {
+        closedBrokers.add(brokerName);
+    }
+
+    /**
+     * Indicates whether all the brokers have closed the day
+     */
+    boolean isClosed() {
+        if (closedBrokers.size() == 0) { return false; }
+
+        return closedBrokers.size() == brokersAndNbOfClients.size();
     }
 }

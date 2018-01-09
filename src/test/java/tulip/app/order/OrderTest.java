@@ -16,7 +16,7 @@ public class OrderTest {
         Order orderReceived = Order.fromJSON(json);
         assertTrue(orderSent.equals(orderReceived));
 
-        orderSent.processOrder(new Date(10000000), 60, 968);
+        orderSent.processOrder(new Date(10000000), 60);
         json = orderSent.toJSON();
         System.out.println(json);
         orderReceived = Order.fromJSON(json);
