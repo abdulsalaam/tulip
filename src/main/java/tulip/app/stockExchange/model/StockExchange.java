@@ -1,4 +1,4 @@
-package tulip.app.stockExchange;
+package tulip.app.stockExchange.model;
 
 import tulip.app.MarketState;
 import tulip.app.appMessage.ActorType;
@@ -6,6 +6,7 @@ import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
 import tulip.app.order.Order;
 import tulip.app.order.OrderType;
+import tulip.app.stockExchange.model.Company;
 import tulip.service.producerConsumer.Consumer;
 
 import java.net.ServerSocket;

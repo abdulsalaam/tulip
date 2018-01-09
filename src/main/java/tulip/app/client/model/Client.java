@@ -251,4 +251,15 @@ public class Client implements ProducerMessenger {
         marketState.put("LVMH", 550.0);
         return marketState;
     }
+
+    public List<Order> getPendingPurchaseOrders() {
+        return pendingPurchaseOrders;
+    }
+    public List<Order> getPendingSellOrders() {
+        return pendingPurchaseOrders;
+    }
+    public List<Order> getArchivedOrders() {
+        return archivedOrders;
+    }
+
 }
