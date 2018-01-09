@@ -10,7 +10,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 /**
- * A client socket communicates with a MultiServerSocketThread and follows a communication protocol
+ * A client socket communicates with a MultiServerSocketThread and follows a communication protocol.
  */
 public class ClientSocket extends Thread {
 

@@ -77,7 +77,6 @@ public class Company {
         this.stockPrice = stockPrice;
     }
 
-
     /**
      * Decreases the number of floating stocks when floating stocks are sold
      * @param nbOfStocksToSell The number of floating stocks being sold
