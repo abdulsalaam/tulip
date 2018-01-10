@@ -49,7 +49,6 @@ public class StockExchange extends Thread {
     public void run() {
 
         while (true) {
-            if (consumer.canConsume()) {
                 AppMessage appMessage = consumer.consume();
 
                 switch (appMessage.getAppMessageContentType()) {
@@ -78,7 +77,7 @@ public class StockExchange extends Thread {
                         addClientToBroker(appMessage.getSender());
 
                 }
-            }
+
 
             if (isClosed()) {
                 updateStockPrices();

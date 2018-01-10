@@ -119,12 +119,11 @@ public class Client extends Thread implements ProducerMessenger {
             System.out.println("Client " + NAME + " is trying to register");
 
             // Sends registration message if possible
-            if (producer.canProduce()) {
                 producer.produce(
                         new AppMessage(NAME, ActorType.client, "", ActorType.broker,
                                 AppMessageContentType.registrationRequest, NAME)
                 );
-            }
+
 
             // Sleeps
             try {
@@ -143,12 +142,11 @@ public class Client extends Thread implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.marketStateRequest, "")
             );
-        }
+
     }
 
     /**
@@ -169,12 +167,11 @@ public class Client extends Thread implements ProducerMessenger {
         Order sellOrder =
                 new Order(++sellOrderCounter, OrderType.sell, company, NAME, broker, minSellingPrice, nbOfStocks);
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.order, sellOrder.toJSON())
             );
-        }
+
 
         pendingSellOrders.add(sellOrder);
     }
@@ -197,12 +194,11 @@ public class Client extends Thread implements ProducerMessenger {
         Order purchaseOrder =
                 new Order(++purchaseOrderCounter, OrderType.purchase, company, NAME, broker, maxPurchasingPrice, nbOfStocks);
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.order, purchaseOrder.toJSON())
             );
-        }
+
 
         pendingPurchaseOrders.add(purchaseOrder);
     }
@@ -311,22 +307,14 @@ public class Client extends Thread implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.endOfDayNotification, ""
                     ));
-        }
+
     }
 
     public MarketState getMarketState() {
-        marketState.put("Basecamp", 250.0);
-        marketState.put("Tesla", 596.70);
-        marketState.put("Facebook", 450.0);
-        marketState.put("Alphabet", 270.0);
-        marketState.put("Apple", 430.0);
-        marketState.put("Spotify", 220.0);
-        marketState.put("LVMH", 550.0);
         return marketState;
     }
 

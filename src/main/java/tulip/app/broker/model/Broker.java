@@ -76,7 +76,6 @@ public class Broker extends Thread implements ProducerMessenger {
         registerToStockExchange();
 
         while (true) {
-            if (consumer.canConsume()) {
                 AppMessage appMessage = consumer.consume();
                 switch (appMessage.getAppMessageContentType()) {
 
@@ -88,11 +87,10 @@ public class Broker extends Thread implements ProducerMessenger {
                         break;
 
                     case marketStateRequest:
-                        if (producer.canProduce()) {
                             producer.produce(new AppMessage(
                                     this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
                             ));
-                        }
+
                         break;
 
                     case registrationRequest:
@@ -104,7 +102,7 @@ public class Broker extends Thread implements ProducerMessenger {
                         break;
 
                 }
-            }
+
         }
     }
     /**
@@ -117,11 +115,10 @@ public class Broker extends Thread implements ProducerMessenger {
             System.out.println("Broker " + NAME + " is trying to register");
 
             // Sends registration request
-            if (producer.canProduce()) {
                 producer.produce(new AppMessage(
                         this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationRequest, this.NAME
                 ));
-            }
+
 
             // Sleeps
             try {
@@ -131,12 +128,11 @@ public class Broker extends Thread implements ProducerMessenger {
             }
 
             // Consumes message
-            if (consumer.canConsume()) {
                 AppMessage appMessage = consumer.consume();
                 if (appMessage.getAppMessageContentType().equals(AppMessageContentType.registrationAcknowledgment)) {
                     isRegistered = true;
                 }
-            }
+
         }
 
     }
@@ -148,17 +144,15 @@ public class Broker extends Thread implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
 
-        // todo: check if client is not already registered and registered client
         if(!(clients.contains(clientName))) {
             clients.add(clientName);
-            if (producer.canProduce()) {
                 producer.produce(new AppMessage(
                         this.NAME, ActorType.broker, clientName, ActorType.client, AppMessageContentType.registrationAcknowledgment, ""
                 ));
                 producer.produce(new AppMessage(
                         this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationNotification, clientName
                 ));
-            }
+
         }
     }
 
@@ -170,11 +164,10 @@ public class Broker extends Thread implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
 
-        if (producer.canProduce()) {
             producer.produce(new AppMessage(
                     this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.marketStateRequest, ""
             ));
-        }
+
     }
 
     /**
@@ -199,11 +192,10 @@ public class Broker extends Thread implements ProducerMessenger {
             if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
 
         String orderJson = pendingOrders.get(0).toJSON();
-        if(producer.canProduce()) {
             producer.produce(new AppMessage(
                     this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.order, orderJson
             ));
-        }
+
         pendingOrders.remove(0);
     }
 
@@ -213,12 +205,11 @@ public class Broker extends Thread implements ProducerMessenger {
      * has been proceeded.
      */
     private void notifyOfTransaction(String clientName) {
-        if (producer.canProduce()){
             producer.produce(new AppMessage(
                     this.NAME, ActorType.broker, clientName, ActorType.client, AppMessageContentType.order, ""
 
             ));
-        }
+
     }
 
     /**
@@ -236,11 +227,10 @@ public class Broker extends Thread implements ProducerMessenger {
      * and informs the stock exchange
      */
     private void closeTheDay(){
-        if (producer.canProduce()) {
             producer.produce(new AppMessage(
                     this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
             ));
-        }
+
     }
 
     /**

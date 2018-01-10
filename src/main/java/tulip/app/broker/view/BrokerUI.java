@@ -49,9 +49,7 @@ public class BrokerUI extends Application{
         }
 
         broker.start();
-        broker.registerToStockExchange();
         Application.launch();
-        broker.registerToStockExchange();
     }
 
     @Override
@@ -113,30 +111,6 @@ public class BrokerUI extends Application{
 
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();broker.registerToStockExchange();broker.registerToStockExchange();broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();broker.registerToStockExchange();broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();
-                broker.registerToStockExchange();broker.registerToStockExchange();
-                broker.registerToStockExchange();
-
-
-
-
-
-
-
                 broker.requestMarketState();
                 showMarketState(broker.getMarketState());
             }

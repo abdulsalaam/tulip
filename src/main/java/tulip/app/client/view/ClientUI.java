@@ -43,6 +43,7 @@ public class ClientUI extends Application{
             e.printStackTrace();
         }
 
+        client.start();
         Application.launch();
 
     }
@@ -109,7 +110,6 @@ public class ClientUI extends Application{
         // Actions
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.registerToBroker();
                 client.requestMarketState();
                 showMarketState(client.getMarketState());
             }
