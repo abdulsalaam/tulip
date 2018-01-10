@@ -39,7 +39,8 @@ public class stockExchangeUI extends Application {
     private static StockExchange stockExchange;
 
     public static void main(String [] args) throws IOException {
-        stockExchange = new StockExchange(new ServerSocket());
+        stockExchange = new StockExchange(new ServerSocket(4000));
+        stockExchange.start();
         Application.launch();
     }
 

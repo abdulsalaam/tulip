@@ -59,7 +59,7 @@ public class Consumer {
     public AppMessage consume() throws BufferUnderflowException {
         synchronized (monitor) {
             if (nbmess > 0) {
-                System.out.println("Consume");
+                //System.out.println("Consume");
                 Message message = buffer[out];
                 out = (out + 1) % BUFFER_SIZE;
                 nbmess--;
@@ -93,7 +93,7 @@ public class Consumer {
         Integer producerNumber = nameToProducerNumber.get(name);
         String rawAppMessage = appMessage.toJSON();
         Message message = new Message(NAME, Target.producer, ContentType.app, rawAppMessage);
-        System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
+       // System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
 
@@ -102,7 +102,7 @@ public class Consumer {
      * @param message The message being received
      */
     public void uponReceipt(Message message, int producerNumber) {
-        System.out.println("Consumer " + NAME + " receives: " + message.toJSON());
+      //  System.out.println("Consumer " + NAME + " receives: " + message.toJSON());
         if (nbOfProducers > 0) {
 
             // Checks if the producer is not registered
@@ -135,7 +135,7 @@ public class Consumer {
      * */
     private void uponReceiptOfAppMessage(Message message) {
         synchronized (monitor) {
-            System.out.println(message.toJSON());
+            //System.out.println(message.toJSON());
             buffer[in] = message;
             in = (in + 1) % BUFFER_SIZE;
             nbmess++;
@@ -165,16 +165,16 @@ public class Consumer {
      * @param tokenValue The value of the token being sent
      * */
     private void sendTokenTo(int producerNumber, int tokenValue) {
-        System.out.println("Producer number " + producerNumber);
+       // System.out.println("Producer number " + producerNumber);
         Message message = new Message(NAME, Target.producer, ContentType.token, Integer.toString(tokenValue));
-        System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
+       // System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
 
     /** Adds a producer and starts the token system if needed */
     public void addProducer() {
         synchronized (monitor) {
-            System.out.println("Add producer");
+           // System.out.println("Add producer");
             nbOfProducers++;
 
             if (!tokenStarted) {
@@ -200,7 +200,7 @@ public class Consumer {
                     nextProducer,
                     new Message(NAME, Target.producer, ContentType.token, message.getContent())
             );
-            System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
+           // System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
         }
     }
 

@@ -56,7 +56,7 @@ public class Producer extends Thread {
      */
     public void produce(AppMessage appMessage) throws BufferOverflowException {
         synchronized (monitor) {
-            System.out.println("Produire");
+           // System.out.println("Produire");
             if (canProduce()) {
                 String rawAppMessage = appMessage.toJSON();
                 Message message = new Message(NAME, Target.consumer, ContentType.app, rawAppMessage);
@@ -99,7 +99,7 @@ public class Producer extends Thread {
      */
     public void uponReceipt(Message message) {
         synchronized (monitor) {
-            System.out.println("Producer " + NAME + " receives: " + message.toJSON());
+           // System.out.println("Producer " + NAME + " receives: " + message.toJSON());
 
             // If the message corresponds to a token
             if (message.getContentType().equals(ContentType.token)) {
@@ -140,7 +140,7 @@ public class Producer extends Thread {
         synchronized (monitor) {
             Message message = new Message(NAME, Target.nextProducer, ContentType.token, Integer.toString(tokenValue));
             CLIENT_SOCKET.sendMessage(message);
-            System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+           // System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
         }
     }
 
@@ -152,7 +152,7 @@ public class Producer extends Thread {
         synchronized (monitor) {
             Message message = new Message(NAME, Target.consumer, ContentType.token, Integer.toString(tokenValue));
             CLIENT_SOCKET.sendMessage(message);
-            System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+           // System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
         }
     }
 
@@ -162,7 +162,7 @@ public class Producer extends Thread {
      */
     private void sendMessage(Message message) {
         synchronized (monitor) {
-            System.out.println("Producer " + NAME + " sends MESSAGE: " + message.toJSON());
+          //  System.out.println("Producer " + NAME + " sends MESSAGE: " + message.toJSON());
             CLIENT_SOCKET.sendMessage(message);
         }
     }

@@ -105,6 +105,7 @@ public class Broker extends Thread implements ProducerMessenger {
      */
     public void registerToStockExchange() {
         while (!isRegistered) {
+            System.out.println("nope");
             if (brokerProducer.canProduce()) {
                 brokerProducer.produce(new AppMessage(
                         this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationRequest, this.name

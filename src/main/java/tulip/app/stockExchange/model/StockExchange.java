@@ -55,7 +55,7 @@ public class StockExchange extends Thread {
                 switch (appMessage.getAppMessageContentType()) {
 
                     case registrationRequest:
-                        String brokerName = appMessage.getRecipient();
+                        String brokerName = appMessage.getSender();
                         registerBroker(brokerName);
                         sendRegistrationAcknowledgment(brokerName);
                         break;
