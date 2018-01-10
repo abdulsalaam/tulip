@@ -108,12 +108,13 @@ public class Client implements ProducerMessenger {
      * Sends a registration message to the broker
      */
     private void registerToBroker() {
-
-        if (producer.canProduce()) {
-            producer.produce(
-                    new AppMessage(NAME, ActorType.client, "", ActorType.broker,
-                            AppMessageContentType.registrationRequest, NAME)
-            );
+        while (!isRegistered) {
+            if (producer.canProduce()) {
+                producer.produce(
+                        new AppMessage(NAME, ActorType.client, "", ActorType.broker,
+                                AppMessageContentType.registrationRequest, NAME)
+                );
+            }
         }
     }
 
