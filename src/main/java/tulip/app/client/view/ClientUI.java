@@ -43,8 +43,9 @@ public class ClientUI extends Application{
             e.printStackTrace();
         }
 
-        Application.launch();
         client.registerToBroker();
+        Application.launch();
+
     }
 
     @Override

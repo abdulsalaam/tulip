@@ -49,6 +49,7 @@ public class BrokerUI extends Application{
         }
 
         broker.start();
+        broker.registerToStockExchange();
         Application.launch();
         broker.registerToStockExchange();
     }

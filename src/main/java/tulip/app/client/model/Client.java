@@ -173,9 +173,9 @@ public class Client implements ProducerMessenger {
     public void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice)
             throws RegistrationException, IllegalOrderException {
 
-       // if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
 
-        if (purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice)) { throw new IllegalOrderException("Illegal pruchase order"); }
+        if (!(purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice))) { throw new IllegalOrderException("Illegal pruchase order"); }
 
         Order purchaseOrder =
                 new Order(++purchaseOrderCounter, OrderType.purchase, company, NAME, broker, maxPurchasingPrice, nbOfStocks);
