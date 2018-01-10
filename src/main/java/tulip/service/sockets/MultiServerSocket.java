@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * A MultiServerSocket listens to a port and each time a ClientSocket wants to communicate on this port, it creates
@@ -19,38 +20,31 @@ public class MultiServerSocket extends Thread {
     private final ServerSocket SERVER_SOCKET;
 
     /** The list of the MultiServerSocketThread corresponding to the socket clients connected */
-    private List<MultiServerSocketThread> clients = new ArrayList<>();
+    private List<MultiServerSocketThread> clients;
 
-    private final Object monitor = new Object();
+    private final Object consumerMonitor = new Object();
+    private final Object clientsMonitor = new Object();
 
     public MultiServerSocket(Consumer consumer, ServerSocket serverSocket) {
         this.CONSUMER = consumer;
+        synchronized (consumerMonitor) { consumerMonitor.notifyAll(); }
         this.SERVER_SOCKET = serverSocket;
-        synchronized (monitor) {
-            monitor.notifyAll();
-        }
+        this.clients = new ArrayList<>();
+        synchronized (clientsMonitor) { clientsMonitor.notifyAll(); }
     }
 
     @Override
     public void run() {
-
         System.out.println("MultiServerSocket starting");
-
         try {
             while (true) {
-
-                // When a new client socket initiates a connection with the MultiServerSocket
-                // it creates a new multiServerSocketThread to handle the connection with the socket
-                MultiServerSocketThread multiServerSocketThread =
-                        new MultiServerSocketThread(this, SERVER_SOCKET.accept());
-
-                // Starts the thread
-                multiServerSocketThread.start();
+                // When a new client socket initiates a connection with the MultiServerSocket,
+                // it creates and starts a new multiServerSocketThread to handle the connection with the socket
+                new MultiServerSocketThread(this, SERVER_SOCKET.accept()).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         System.out.println("MultiServerSocket quitting");
     }
 
@@ -58,17 +52,22 @@ public class MultiServerSocket extends Thread {
      * Sends a message to a specific client
      * @param clientNumber The position of the client on the list of the connected client
      * @param message The message object to send to the client
+     * @throws NoSuchElementException If the clientNumber is not in the list
      */
-    public void sendMessageToClient(int clientNumber, Message message) {
-        synchronized (monitor) {
+    public void sendMessageToClient(int clientNumber, Message message) throws NoSuchElementException {
+        synchronized (clientsMonitor) {
             while (clients == null) {
                 try {
-                    monitor.wait();
+                    clientsMonitor.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+        }
+        try {
             clients.get(clientNumber).sendMessage(message);
+        } catch (IndexOutOfBoundsException e) {
+            throw new NoSuchElementException();
         }
     }
 
@@ -77,16 +76,16 @@ public class MultiServerSocket extends Thread {
      * @param message The message being received
      */
     void uponReceipt(Message message, int clientNumber) {
-        synchronized (monitor) {
+        synchronized (consumerMonitor) {
             while (CONSUMER == null) {
                 try {
-                    monitor.wait();
+                    consumerMonitor.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            CONSUMER.uponReceipt(message, clientNumber);
         }
+        CONSUMER.uponReceipt(message, clientNumber);
     }
 
     /**
@@ -95,18 +94,28 @@ public class MultiServerSocket extends Thread {
      * @param multiServerSocketThread The multiServerSocketThread corresponding to the client connecting
      */
     void addClient(MultiServerSocketThread multiServerSocketThread) {
-        synchronized (monitor) {
-            while (CONSUMER == null || clients == null) {
+
+        synchronized (clientsMonitor) {
+            while (clients == null) {
                 try {
-                    monitor.wait();
+                    clientsMonitor.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
             clients.add(multiServerSocketThread);
-            System.out.println(clients.toString());
             multiServerSocketThread.setClientNumber(clients.indexOf(multiServerSocketThread));
-            CONSUMER.addProducer();
         }
+
+        synchronized (consumerMonitor) {
+            while (CONSUMER == null) {
+                try {
+                    consumerMonitor.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        CONSUMER.addProducer();
     }
 }

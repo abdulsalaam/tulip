@@ -22,8 +22,6 @@ public class MultiServerSocketThread extends Thread {
     private PrintWriter out;
     private BufferedReader in;
 
-    private final Object monitor = new Object();
-
     MultiServerSocketThread(MultiServerSocket multiServerSocket, Socket socket) {
         this.MULTI_SERVER_SOCKET = multiServerSocket;
         this.socket = socket;
@@ -32,7 +30,7 @@ public class MultiServerSocketThread extends Thread {
     @Override
     public void run() {
 
-        System.out.println("MultiServerSocketThread starting");
+        System.out.println("MultiServerSocketThread " + this.getId() + " starting");
 
         try {
 
