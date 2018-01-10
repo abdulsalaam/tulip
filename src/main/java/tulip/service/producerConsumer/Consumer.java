@@ -88,13 +88,13 @@ public class Consumer {
 
     public void sendAppMessageTo(String name, AppMessage appMessage) throws IllegalStateException {
 
-        if (!producerIsRegistered(name)) { throw new IllegalStateException(); }
+//        if (!producerIsRegistered(name)) { throw new IllegalStateException(); }
 
         Integer producerNumber = nameToProducerNumber.get(name);
         String rawAppMessage = appMessage.toJSON();
         Message message = new Message(NAME, Target.producer, ContentType.app, rawAppMessage);
         System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
-        MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
+//        MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
     }
 
     /**

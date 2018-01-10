@@ -26,7 +26,7 @@ public class StockExchange extends Thread {
      * A map of all the companies listed on the stock exchange.
      * The name of the company is mapped with the corresponding Company object.
      * */
-    private Map<String, Company> companies = new HashMap<>();
+    public Map<String, Company> companies = new HashMap<>();
 
     /** A map which links a broker (identified by his name) to his number of client */
     private Map<String, Integer> brokersAndNbOfClients = new HashMap<>();
@@ -185,7 +185,7 @@ public class StockExchange extends Thread {
     /**
      * Processes all the pending orders for all the companies and sends the processed orders to the brokers
      */
-    private void processTransactions() {
+    public void processTransactions() {
 
         // Iterates over each company
         for (Company c : companies.values()) {

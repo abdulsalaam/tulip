@@ -20,10 +20,10 @@ public class Company {
     private double stockPrice ;
 
     /** Queue of pending purchase orders */
-    private Queue<Order> pendingPurchaseOrders = new LinkedList<>();
+    public Queue<Order> pendingPurchaseOrders = new LinkedList<>();
 
     /** Queue of pending sell orders */
-    private Queue<Order> pendingSellOrders = new LinkedList<>();
+    public Queue<Order> pendingSellOrders = new LinkedList<>();
 
     /**
      * Constructor
