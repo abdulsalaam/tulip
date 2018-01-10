@@ -75,8 +75,10 @@ public class Broker extends Thread implements ProducerMessenger {
 
         registerToStockExchange();
 
-        /*while (true) {
-                AppMessage appMessage = consumer.consume();
+        while (true) {
+            AppMessage appMessage = consumer.consume();
+            if (appMessage != null) {
+
                 switch (appMessage.getAppMessageContentType()) {
 
                     case order:
@@ -87,9 +89,9 @@ public class Broker extends Thread implements ProducerMessenger {
                         break;
 
                     case marketStateRequest:
-                            producer.produce(new AppMessage(
-                                    this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
-                            ));
+                        producer.produce(new AppMessage(
+                                this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
+                        ));
 
                         break;
 
@@ -102,7 +104,10 @@ public class Broker extends Thread implements ProducerMessenger {
                         break;
 
                 }
-        }*/
+
+            }
+
+        }
     }
 
     /**
@@ -162,16 +167,25 @@ public class Broker extends Thread implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
 
-        if(!(clients.contains(clientName))) {
+        if(!clients.contains(clientName)) {
             clients.add(clientName);
-                producer.produce(new AppMessage(
-                        this.NAME, ActorType.broker, clientName, ActorType.client, AppMessageContentType.registrationAcknowledgment, ""
-                ));
-                producer.produce(new AppMessage(
-                        this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationNotification, clientName
-                ));
-
         }
+
+        // Sends a registration acknowledgement to the client
+        consumer.sendAppMessageTo(
+                clientName,
+                new AppMessage(
+                        this.NAME, ActorType.broker, clientName, ActorType.client,
+                        AppMessageContentType.registrationAcknowledgment, ""
+                )
+        );
+
+        // Indicates to the stock exchange that the broker has a new client
+        producer.produce(
+                new AppMessage(
+                        this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange,
+                        AppMessageContentType.registrationNotification, clientName
+        ));
     }
 
     /**

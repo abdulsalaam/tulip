@@ -91,6 +91,7 @@ public class Client extends Thread implements ProducerMessenger {
             case registrationAcknowledgment:
                 this.isRegistered = true;
                 this.broker = appMessage.getSender();
+                System.out.println("Client " + NAME + " is now to registered");
                 break;
 
             case marketStateReply:
@@ -116,18 +117,16 @@ public class Client extends Thread implements ProducerMessenger {
         // Loop until the client is registered
         while (!isRegistered) {
 
-            System.out.println("Client " + NAME + " is trying to register");
-
             // Sends registration message if possible
-                producer.produce(
-                        new AppMessage(NAME, ActorType.client, "", ActorType.broker,
-                                AppMessageContentType.registrationRequest, NAME)
-                );
-
+            producer.produce(
+                    new AppMessage(NAME, ActorType.client, "", ActorType.broker,
+                            AppMessageContentType.registrationRequest, NAME)
+            );
+            System.out.println("Client " + NAME + " is trying to register");
 
             // Sleeps
             try {
-                sleep(500);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
