@@ -126,13 +126,18 @@ public class Broker extends Thread implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
 
-        if (brokerProducer.canProduce()) {
-            brokerProducer.produce(new AppMessage(
-                    this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.registrationAcknowledgment, ""
-            ));
-            brokerProducer.produce(new AppMessage(
-                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationNotification, clientName
-            ));
+        if(!(clients.contains(clientName))) {
+            clients.add(clientName);
+            if (brokerProducer.canProduce()) {
+                brokerProducer.produce(new AppMessage(
+                        this.name, ActorType.broker, clientName, ActorType.client, AppMessageContentType.registrationAcknowledgment, ""
+                ));
+                brokerProducer.produce(new AppMessage(
+                        this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationNotification, clientName
+                ));
+            }
+        } else {
+            throw new RegistrationException("The client is already registered to this broker");
         }
     }
 

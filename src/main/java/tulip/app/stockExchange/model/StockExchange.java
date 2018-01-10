@@ -71,6 +71,10 @@ public class StockExchange extends Thread {
 
                     case endOfDayNotification:
                         closeBroker(appMessage.getRecipient());
+                        break;
+
+                    case registrationNotification:
+                        addClientToBroker(appMessage.getSender());
 
                 }
             }
@@ -97,7 +101,9 @@ public class StockExchange extends Thread {
      * @param initialStockPrice The initial stock price
      */
     public void addCompany(String name, int nbEmittedStocks, double initialStockPrice) {
-        companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
+        if(! (companies.containsKey(name))) {
+            companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
+        }
     }
 
     /**
@@ -142,7 +148,9 @@ public class StockExchange extends Thread {
      * @param brokerName The name of the client for which you want to increase the client counter
      */
     void addClientToBroker(String brokerName) {
-        brokersAndNbOfClients.put(brokerName, brokersAndNbOfClients.get(brokerName) + 1);
+        if(brokerIsRegistered(brokerName)) {
+            brokersAndNbOfClients.put(brokerName, brokersAndNbOfClients.get(brokerName) + 1);
+        }
     }
 
     /**
