@@ -104,16 +104,11 @@ public class Broker extends Thread implements ProducerMessenger {
      * Sends registering request to stock exchange
      */
     public void registerToStockExchange() {
-        if (brokerProducer.canProduce()) {
-            brokerProducer.produce(new AppMessage(
-                    this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationRequest, this.name
-            ));
-            while(!isRegistered) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        while (!isRegistered) {
+            if (brokerProducer.canProduce()) {
+                brokerProducer.produce(new AppMessage(
+                        this.name, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationRequest, this.name
+                ));
             }
         }
     }
