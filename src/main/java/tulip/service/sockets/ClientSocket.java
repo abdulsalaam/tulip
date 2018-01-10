@@ -19,12 +19,12 @@ public class ClientSocket extends Thread {
     private PrintWriter out;
     private BufferedReader in;
 
-    private final Object monitor = new Object();
-
     public ClientSocket(Producer producer, Socket socket) {
         this.PRODUCER = producer;
         this.SOCKET = socket;
     }
+
+    private final Object outMonitor = new Object();
 
     @Override
     public void run() {
@@ -63,7 +63,9 @@ public class ClientSocket extends Thread {
      */
     public void sendMessage(Message message) {
         String rawMessage = message.toJSON();
-        out.println(rawMessage);
+        synchronized (outMonitor) {
+            out.println(rawMessage);
+        }
     }
 
     /**
