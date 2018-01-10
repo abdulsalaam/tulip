@@ -84,8 +84,6 @@ public class BrokerUI extends Application{
         GridPane.setHalignment(title, HPos.CENTER);
 
         // Buttons
-
-
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
         grid.add(requestMarketStateBtn, 1, 1);
@@ -104,11 +102,7 @@ public class BrokerUI extends Application{
             GridPane.setHalignment(button, HPos.CENTER);
         }
 
-        // Text fields
-
-
         // Actions
-
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 broker.requestMarketState();
