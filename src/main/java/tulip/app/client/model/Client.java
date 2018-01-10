@@ -85,7 +85,7 @@ public class Client implements ProducerMessenger {
 
             case registrationAcknowledgment:
                 this.isRegistered = true;
-                this.broker = appMessage.getContent();
+                this.broker = appMessage.getSender();
                 break;
 
             case marketStateReply:
