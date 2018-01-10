@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.BufferUnderflowException;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.*;
 
@@ -28,6 +29,8 @@ public class producerConsumerTest {
             Socket socket1 = new Socket(HOST, PORT);
             Socket socket2 = new Socket(HOST, PORT);
 
+            CountDownLatch latch = new CountDownLatch(1);
+
             AppMessage uponReceiptOfAppMessageTest =
                     new AppMessage("Quentin", ActorType.stockExchange, "Peter", ActorType.broker, AppMessageContentType.order, "Consumer message ");
 
@@ -37,6 +40,7 @@ public class producerConsumerTest {
                 public void uponReceiptOfAppMessage(AppMessage appMessage) {
                     assertTrue(appMessage.equals(uponReceiptOfAppMessageTest));
                     System.out.println("uponReceiptOfAppMessage succeeded");
+                    latch.countDown();
                 }
             };
 
