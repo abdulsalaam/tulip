@@ -117,14 +117,12 @@ public class ClientUI extends Application{
 
         pendingPurchaseOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.requestMarketState();
                 showOrders(client.getPendingPurchaseOrders());
             }
         });
 
         pendingSellOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.requestMarketState();
                 showOrders(client.getPendingSellOrders());
             }
         });

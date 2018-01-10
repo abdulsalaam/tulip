@@ -108,14 +108,14 @@ public class Client implements ProducerMessenger {
      * Sends a registration message to the broker
      */
     public void registerToBroker() {
-        while (!isRegistered) {
+       // while (!isRegistered) {
             if (producer.canProduce()) {
                 producer.produce(
                         new AppMessage(NAME, ActorType.client, "", ActorType.broker,
                                 AppMessageContentType.registrationRequest, NAME)
                 );
             }
-        }
+      //  }
     }
 
     /**
@@ -173,7 +173,7 @@ public class Client implements ProducerMessenger {
     public void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice)
             throws RegistrationException, IllegalOrderException {
 
-        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+        //if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
 
         if (!(purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice))) { throw new IllegalOrderException("Illegal pruchase order"); }
 
@@ -187,7 +187,7 @@ public class Client implements ProducerMessenger {
             );
         }
 
-        pendingSellOrders.add(purchaseOrder);
+        pendingPurchaseOrders.add(purchaseOrder);
     }
 
     /**
@@ -317,7 +317,7 @@ public class Client implements ProducerMessenger {
         return pendingPurchaseOrders;
     }
     public List<Order> getPendingSellOrders() {
-        return pendingPurchaseOrders;
+        return pendingSellOrders;
     }
     public List<Order> getArchivedOrders() {
         return archivedOrders;
