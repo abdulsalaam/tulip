@@ -32,6 +32,7 @@ public class ClientSocket extends Thread {
 
         try {
             out = new PrintWriter(SOCKET.getOutputStream(), true);
+            synchronized (outMonitor) { outMonitor.notifyAll(); }
             in = new BufferedReader(new InputStreamReader(SOCKET.getInputStream()));
 
             try {
@@ -64,6 +65,13 @@ public class ClientSocket extends Thread {
     public void sendMessage(Message message) {
         String rawMessage = message.toJSON();
         synchronized (outMonitor) {
+            while (out == null) {
+                try {
+                    outMonitor.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             out.println(rawMessage);
         }
     }
