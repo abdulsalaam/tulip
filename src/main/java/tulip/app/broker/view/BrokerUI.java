@@ -39,10 +39,16 @@ public class BrokerUI extends Application{
 
     public static void main(String [] args) {
         try {
-            broker = new Broker("Leonardo", new ServerSocket(), new Socket());
+            broker = new Broker(
+                    "Leonardo",
+                    new ServerSocket(5000),
+                    new Socket("127.0.0.1", 4000)
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        broker.start();
         Application.launch();
     }
 

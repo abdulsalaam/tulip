@@ -23,6 +23,7 @@ import tulip.app.MarketState;
 import tulip.app.client.model.Client;
 import tulip.app.order.Order;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,8 +37,15 @@ public class ClientUI extends Application{
     private static Client client;
 
     public static void main(String [] args) {
-        client = new Client("Emma", 3000, new Socket());
+        try {
+            client = new Client("Emma", 3000, new Socket("127.0.0.1", 5000));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        client.start();
         Application.launch();
+
     }
 
     @Override
@@ -109,14 +117,12 @@ public class ClientUI extends Application{
 
         pendingPurchaseOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.requestMarketState();
                 showOrders(client.getPendingPurchaseOrders());
             }
         });
 
         pendingSellOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.requestMarketState();
                 showOrders(client.getPendingSellOrders());
             }
         });

@@ -49,13 +49,13 @@ public class StockExchange extends Thread {
     public void run() {
 
         while (true) {
-            if (consumer.canConsume()) {
-                AppMessage appMessage = consumer.consume();
+            AppMessage appMessage = consumer.consume();
+            if (appMessage != null) {
 
                 switch (appMessage.getAppMessageContentType()) {
 
                     case registrationRequest:
-                        String brokerName = appMessage.getRecipient();
+                        String brokerName = appMessage.getSender();
                         registerBroker(brokerName);
                         sendRegistrationAcknowledgment(brokerName);
                         break;
@@ -77,6 +77,7 @@ public class StockExchange extends Thread {
                         addClientToBroker(appMessage.getSender());
 
                 }
+
             }
 
             if (isClosed()) {
@@ -116,6 +117,7 @@ public class StockExchange extends Thread {
                 new AppMessage(NAME, ActorType.stockExchange, brokerName, ActorType.broker,
                         AppMessageContentType.registrationAcknowledgment, "")
         );
+        System.out.println("Sends registration acknowledgment");
     }
 
     /**

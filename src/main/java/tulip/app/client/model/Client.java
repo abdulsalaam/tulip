@@ -18,14 +18,14 @@ import java.util.List;
 /**
  * This class represents a client
  */
-public class Client implements ProducerMessenger {
+public class Client extends Thread implements ProducerMessenger {
 
     /** The name of the client (unique identifier) */
     private final String NAME;
 
     /**
      * The portfolio of the client ie. a map that associates the name of a company with the number of stocks owned by the
-     * client
+     * client.
      * */
     private Portfolio portfolio = new Portfolio();
 
@@ -74,6 +74,11 @@ public class Client implements ProducerMessenger {
         this.producer = new Producer(name, socket, this);
     }
 
+    @Override
+    public void run() {
+        registerToBroker();
+    }
+
     /**
      * This method is called upon receipt of a message by the producer
      * @param appMessage The message being received
@@ -85,7 +90,8 @@ public class Client implements ProducerMessenger {
 
             case registrationAcknowledgment:
                 this.isRegistered = true;
-                this.broker = appMessage.getContent();
+                this.broker = appMessage.getSender();
+                System.out.println("Client " + NAME + " is now to registered");
                 break;
 
             case marketStateReply:
@@ -105,15 +111,24 @@ public class Client implements ProducerMessenger {
     }
 
     /**
-     * Sends a registration message to the broker
+     * Registers the client to the broker
      */
     private void registerToBroker() {
+        // Loop until the client is registered
         while (!isRegistered) {
-            if (producer.canProduce()) {
-                producer.produce(
-                        new AppMessage(NAME, ActorType.client, "", ActorType.broker,
-                                AppMessageContentType.registrationRequest, NAME)
-                );
+
+            // Sends registration message if possible
+            producer.produce(
+                    new AppMessage(NAME, ActorType.client, "", ActorType.broker,
+                            AppMessageContentType.registrationRequest, NAME)
+            );
+            System.out.println("Client " + NAME + " is trying to register");
+
+            // Sleeps
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -126,12 +141,11 @@ public class Client implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.marketStateRequest, "")
             );
-        }
+
     }
 
     /**
@@ -152,12 +166,11 @@ public class Client implements ProducerMessenger {
         Order sellOrder =
                 new Order(++sellOrderCounter, OrderType.sell, company, NAME, broker, minSellingPrice, nbOfStocks);
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.order, sellOrder.toJSON())
             );
-        }
+
 
         pendingSellOrders.add(sellOrder);
     }
@@ -175,19 +188,18 @@ public class Client implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
 
-        if (purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice)) { throw new IllegalOrderException("Illegal pruchase order"); }
+        if (!(purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice))) { throw new IllegalOrderException("Illegal pruchase order"); }
 
         Order purchaseOrder =
                 new Order(++purchaseOrderCounter, OrderType.purchase, company, NAME, broker, maxPurchasingPrice, nbOfStocks);
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.order, purchaseOrder.toJSON())
             );
-        }
 
-        pendingSellOrders.add(purchaseOrder);
+
+        pendingPurchaseOrders.add(purchaseOrder);
     }
 
     /**
@@ -294,22 +306,14 @@ public class Client implements ProducerMessenger {
 
         if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
 
-        if (producer.canProduce()) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.endOfDayNotification, ""
                     ));
-        }
+
     }
 
     public MarketState getMarketState() {
-        marketState.put("Basecamp", 250.0);
-        marketState.put("Tesla", 596.70);
-        marketState.put("Facebook", 450.0);
-        marketState.put("Alphabet", 270.0);
-        marketState.put("Apple", 430.0);
-        marketState.put("Spotify", 220.0);
-        marketState.put("LVMH", 550.0);
         return marketState;
     }
 
@@ -317,7 +321,7 @@ public class Client implements ProducerMessenger {
         return pendingPurchaseOrders;
     }
     public List<Order> getPendingSellOrders() {
-        return pendingPurchaseOrders;
+        return pendingSellOrders;
     }
     public List<Order> getArchivedOrders() {
         return archivedOrders;

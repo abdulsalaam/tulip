@@ -32,14 +32,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class stockExchangeUI extends Application {
+public class StockExchangeUI extends Application {
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
     private static StockExchange stockExchange;
 
     public static void main(String [] args) throws IOException {
-        stockExchange = new StockExchange(new ServerSocket());
+        stockExchange = new StockExchange(new ServerSocket(4000));
+        stockExchange.start();
         Application.launch();
     }
 
