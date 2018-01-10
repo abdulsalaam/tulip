@@ -18,14 +18,14 @@ import java.util.List;
 /**
  * This class represents a client
  */
-public class Client implements ProducerMessenger {
+public class Client extends Thread implements ProducerMessenger {
 
     /** The name of the client (unique identifier) */
     private final String NAME;
 
     /**
      * The portfolio of the client ie. a map that associates the name of a company with the number of stocks owned by the
-     * client
+     * client.
      * */
     private Portfolio portfolio = new Portfolio();
 
@@ -74,6 +74,11 @@ public class Client implements ProducerMessenger {
         this.producer = new Producer(name, socket, this);
     }
 
+    @Override
+    public void run() {
+        registerToBroker();
+    }
+
     /**
      * This method is called upon receipt of a message by the producer
      * @param appMessage The message being received
@@ -105,15 +110,28 @@ public class Client implements ProducerMessenger {
     }
 
     /**
-     * Sends a registration message to the broker
+     * Registers the client to the broker
      */
     private void registerToBroker() {
+        // Loop until the client is registered
+        while (!isRegistered) {
 
-        if (producer.canProduce()) {
-            producer.produce(
-                    new AppMessage(NAME, ActorType.client, "", ActorType.broker,
-                            AppMessageContentType.registrationRequest, NAME)
-            );
+            System.out.println("Client " + NAME + " is trying to register");
+
+            // Sends registration message if possible
+            if (producer.canProduce()) {
+                producer.produce(
+                        new AppMessage(NAME, ActorType.client, "", ActorType.broker,
+                                AppMessageContentType.registrationRequest, NAME)
+                );
+            }
+
+            // Sleeps
+            try {
+                sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
