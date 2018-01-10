@@ -24,7 +24,7 @@ public class ClientSocket extends Thread {
         this.SOCKET = socket;
     }
 
-    private final Object outMonitor = new Object();
+    private final Object outLock = new Object();
 
     @Override
     public void run() {
@@ -32,7 +32,7 @@ public class ClientSocket extends Thread {
 
         try {
             out = new PrintWriter(SOCKET.getOutputStream(), true);
-            synchronized (outMonitor) { outMonitor.notifyAll(); }
+            synchronized (outLock) { outLock.notifyAll(); }
             in = new BufferedReader(new InputStreamReader(SOCKET.getInputStream()));
 
             try {
@@ -64,10 +64,10 @@ public class ClientSocket extends Thread {
      */
     public void sendMessage(Message message) {
         String rawMessage = message.toJSON();
-        synchronized (outMonitor) {
+        synchronized (outLock) {
             while (out == null) {
                 try {
-                    outMonitor.wait();
+                    outLock.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

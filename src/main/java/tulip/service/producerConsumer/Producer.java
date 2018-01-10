@@ -7,16 +7,15 @@ import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 
 import java.net.Socket;
-import java.nio.BufferOverflowException;
 
-public class Producer extends Thread {
+public class Producer {
 
     private final String NAME;
     private final ClientSocket CLIENT_SOCKET;
     private final ProducerMessenger PRODUCER_MESSENGER;
 
     private final int BUFFER_SIZE = 10;
-    private Message[] buffer = new Message[BUFFER_SIZE];
+    private AppMessage[] buffer = new AppMessage[BUFFER_SIZE];
     private int in = 0;
     private int out = 0;
     private int nbmess = 0;
@@ -24,7 +23,9 @@ public class Producer extends Thread {
     private int temp = 0;
     private final int THRESHOLD = 4;
 
-    private final Object monitor = new Object();
+    private final Object lock = new Object();
+    private final Object clientSocketLock = new Object();
+    private final Object producerMessengerLock = new Object();
 
     /**
      * Constructor
@@ -35,37 +36,29 @@ public class Producer extends Thread {
     public Producer(String name, Socket socket, ProducerMessenger producerMessenger) {
         this.NAME = name;
         this.CLIENT_SOCKET = new ClientSocket(this,socket);
-        this.PRODUCER_MESSENGER = producerMessenger;
         this.CLIENT_SOCKET.start();
+        synchronized (clientSocketLock) { clientSocketLock.notifyAll(); }
+        this.PRODUCER_MESSENGER = producerMessenger;
+        synchronized (producerMessengerLock) { producerMessengerLock.notifyAll(); }
         new Postman().start();
     }
 
     /**
-     * Indicates whether there is room in the buffer
-     * @return a boolean indicating whether it is currently possible to produce a message
-     * */
-    public boolean canProduce() {
-        synchronized (monitor) {
-            return nbmess < BUFFER_SIZE;
-        }
-    }
-
-    /**
-     * Produces a message by adding it tho the buffer array. Must be used in conjunction with boolean canProduce()
-     * @param appMessage The app message to be sent in the form of a json String
+     * Produces a message by adding it to the buffer array.
+     * @param appMessage The app message to be sent
+     * @return true if the message has been produced, false otherwise
      */
-    public void produce(AppMessage appMessage) throws BufferOverflowException {
-        synchronized (monitor) {
-            System.out.println("Produire");
-            if (canProduce()) {
-                String rawAppMessage = appMessage.toJSON();
-                Message message = new Message(NAME, Target.consumer, ContentType.app, rawAppMessage);
-                buffer[in] = message;
+    public boolean produce(AppMessage appMessage) {
+        synchronized (lock) {
+            if (nbmess < BUFFER_SIZE) {
+                buffer[in] = appMessage;
                 in = (in + 1) % BUFFER_SIZE;
                 nbmess++;
-            } else {
-                throw new BufferOverflowException();
+                System.out.println("Producer " + NAME + " produces: " + appMessage.toJSON());
+                return true;
             }
+
+            return false;
         }
     }
 
@@ -76,14 +69,14 @@ public class Producer extends Thread {
         @Override
         public void run() {
             while (true) {
-                synchronized (monitor) {
-                    try {
-                        monitor.wait(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                /*try {
+                    // Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+                synchronized (lock) {
                     if (nbaut > 0) {
-                        sendMessage(buffer[out]);
+                        sendAppMessage(buffer[out]);
                         out = (out + 1) % BUFFER_SIZE;
                         nbaut--;
                         nbmess--;
@@ -98,19 +91,31 @@ public class Producer extends Thread {
      * @param message The message being received
      */
     public void uponReceipt(Message message) {
-        synchronized (monitor) {
-            System.out.println("Producer " + NAME + " receives: " + message.toJSON());
+        // System.out.println("Producer " + NAME + " receives: " + message.toJSON());
 
+        switch (message.getContentType()) {
             // If the message corresponds to a token
-            if (message.getContentType().equals(ContentType.token)) {
+            case token:
                 int tokenValue = Integer.parseInt(message.getContent());
                 uponReceiptOfToken(tokenValue);
+                break;
 
             // If the message corresponds to an app message
-            } else if (message.getContentType().equals(ContentType.app)) {
+            case app:
                 AppMessage appMessage = AppMessage.fromJSON(message.getContent());
+
+                synchronized (producerMessengerLock) {
+                    while (PRODUCER_MESSENGER == null) {
+                        try {
+                            clientSocketLock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
                 PRODUCER_MESSENGER.uponReceiptOfAppMessage(appMessage);
-            }
+                break;
         }
     }
 
@@ -119,7 +124,7 @@ public class Producer extends Thread {
      * @param tokenValue The value of the token when received
      * */
     private void uponReceiptOfToken(int tokenValue) {
-        synchronized (monitor) {
+        synchronized (lock) {
             temp = Math.min(nbmess - nbaut, tokenValue);
             int value = tokenValue;
             value -= temp;
@@ -137,11 +142,20 @@ public class Producer extends Thread {
      * @param tokenValue The value of the token being sent
      */
     private void sendTokenToProducer(int tokenValue) {
-        synchronized (monitor) {
-            Message message = new Message(NAME, Target.nextProducer, ContentType.token, Integer.toString(tokenValue));
-            CLIENT_SOCKET.sendMessage(message);
-            System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+        Message message = new Message(NAME, Target.nextProducer, ContentType.token, Integer.toString(tokenValue));
+
+        synchronized (clientSocketLock) {
+            while (CLIENT_SOCKET == null) {
+                try {
+                    clientSocketLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+
+        CLIENT_SOCKET.sendMessage(message);
+        // System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
     }
 
     /**
@@ -149,21 +163,40 @@ public class Producer extends Thread {
      * @param tokenValue The value of the token being sent
      */
     private void sendTokenToConsumer(int tokenValue) {
-        synchronized (monitor) {
-            Message message = new Message(NAME, Target.consumer, ContentType.token, Integer.toString(tokenValue));
-            CLIENT_SOCKET.sendMessage(message);
-            System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
+        Message message = new Message(NAME, Target.consumer, ContentType.token, Integer.toString(tokenValue));
+
+        synchronized (clientSocketLock) {
+            while (CLIENT_SOCKET == null) {
+                try {
+                    clientSocketLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+
+        CLIENT_SOCKET.sendMessage(message);
+        // System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
     }
 
     /**
-     * Sends a message
-     * @param message The message being sent
+     * Sends an AppMessage over socket by putting it into a message before sending it
+     * @param appMessage The message being sent
      */
-    private void sendMessage(Message message) {
-        synchronized (monitor) {
-            System.out.println("Producer " + NAME + " sends MESSAGE: " + message.toJSON());
-            CLIENT_SOCKET.sendMessage(message);
+    private void sendAppMessage(AppMessage appMessage) {
+        Message message = new Message(NAME, Target.consumer, ContentType.app, appMessage.toJSON());
+
+        synchronized (clientSocketLock) {
+            while (CLIENT_SOCKET == null) {
+                try {
+                    clientSocketLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+
+        CLIENT_SOCKET.sendMessage(message);
+        System.out.println("Producer " + NAME + " sends APP MESSAGE: " + message.toJSON());
     }
 }

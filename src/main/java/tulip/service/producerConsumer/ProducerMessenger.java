@@ -4,7 +4,7 @@ import tulip.app.appMessage.AppMessage;
 
 /**
  * This method must be implemented by the objects using the class Producer, in order for the producer to be able
- * to perform task on message receipt.
+ * to perform tasks on message receipt.
  */
 public interface ProducerMessenger {
 

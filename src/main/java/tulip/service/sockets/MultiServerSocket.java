@@ -22,15 +22,15 @@ public class MultiServerSocket extends Thread {
     /** The list of the MultiServerSocketThread corresponding to the socket clients connected */
     private List<MultiServerSocketThread> clients;
 
-    private final Object consumerMonitor = new Object();
-    private final Object clientsMonitor = new Object();
+    private final Object consumerLock = new Object();
+    private final Object clientsLock = new Object();
 
     public MultiServerSocket(Consumer consumer, ServerSocket serverSocket) {
         this.CONSUMER = consumer;
-        synchronized (consumerMonitor) { consumerMonitor.notifyAll(); }
+        synchronized (consumerLock) { consumerLock.notifyAll(); }
         this.SERVER_SOCKET = serverSocket;
         this.clients = new ArrayList<>();
-        synchronized (clientsMonitor) { clientsMonitor.notifyAll(); }
+        synchronized (clientsLock) { clientsLock.notifyAll(); }
     }
 
     @Override
@@ -55,10 +55,10 @@ public class MultiServerSocket extends Thread {
      * @throws NoSuchElementException If the clientNumber is not in the list
      */
     public void sendMessageToClient(int clientNumber, Message message) throws NoSuchElementException {
-        synchronized (clientsMonitor) {
+        synchronized (clientsLock) {
             while (clients == null) {
                 try {
-                    clientsMonitor.wait();
+                    clientsLock.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -76,10 +76,10 @@ public class MultiServerSocket extends Thread {
      * @param message The message being received
      */
     void uponReceipt(Message message, int clientNumber) {
-        synchronized (consumerMonitor) {
+        synchronized (consumerLock) {
             while (CONSUMER == null) {
                 try {
-                    consumerMonitor.wait();
+                    consumerLock.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -95,10 +95,10 @@ public class MultiServerSocket extends Thread {
      */
     void addClient(MultiServerSocketThread multiServerSocketThread) {
 
-        synchronized (clientsMonitor) {
+        synchronized (clientsLock) {
             while (clients == null) {
                 try {
-                    clientsMonitor.wait();
+                    clientsLock.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -107,10 +107,10 @@ public class MultiServerSocket extends Thread {
             multiServerSocketThread.setClientNumber(clients.indexOf(multiServerSocketThread));
         }
 
-        synchronized (consumerMonitor) {
+        synchronized (consumerLock) {
             while (CONSUMER == null) {
                 try {
-                    consumerMonitor.wait();
+                    consumerLock.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

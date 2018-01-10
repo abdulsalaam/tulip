@@ -11,6 +11,7 @@ import tulip.service.producerConsumer.messages.Target;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.*;
 
@@ -43,8 +44,8 @@ public class producerConsumerTest {
             producer1.produce(appMessageSent);
 
             while (true) {
-                if (consumer.canConsume()) {
-                    AppMessage appMessageReceived = consumer.consume();
+                AppMessage appMessageReceived = consumer.consume();
+                if (appMessageReceived != null) {
                     assertTrue(appMessageReceived.equals(appMessageSent));
                     break;
                 }
@@ -66,8 +67,9 @@ public class producerConsumerTest {
             int index = 0;
 
             while (true) {
-                if (consumer.canConsume()) {
-                    appMessagesReceived[index++] = consumer.consume();
+                AppMessage appMessage = consumer.consume();
+                if (appMessage != null) {
+                    appMessagesReceived[index++] = appMessage;
                 }
 
                 if (index == 4) {

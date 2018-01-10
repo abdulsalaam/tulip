@@ -6,13 +6,11 @@ import tulip.app.appMessage.AppMessageContentType;
 import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
 import tulip.service.producerConsumer.ProducerMessenger;
-import tulip.service.producerConsumer.messages.ContentType;
-import tulip.service.producerConsumer.messages.Message;
-import tulip.service.producerConsumer.messages.Target;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
 
@@ -46,28 +44,22 @@ public class Main {
             int counter2 = 0;
             while (true) {
 
-                if (producer1.canProduce()) {
-                    producer1.produce(
-                            new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Echo " + counter1)
-                    );
-                    counter1++;
-                }
+                producer1.produce(
+                        new AppMessage("Peter", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Echo " + counter1)
+                );
+                counter1++;
 
-                if (producer2.canProduce()) {
-                    producer2.produce(
-                            new AppMessage("Harrisson", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
-                    );
-                    counter2++;
-                }
+                producer2.produce(
+                        new AppMessage("Harrisson", ActorType.client, "", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
+                );
+                counter2++;
 
-                if (consumer.canConsume()) {
-                    consumer.consume();
-                    if (consumer.producerIsRegistered("Harrisson")) {
-                        consumer.sendAppMessageTo(
-                                "Harrisson",
-                                new AppMessage("Christopher", ActorType.stockExchange, "Harrisson", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
-                        );
-                    }
+                consumer.consume();
+                if ( ThreadLocalRandom.current().nextInt(0, 2) == 0) {
+                    consumer.sendAppMessageTo(
+                            "Harrisson",
+                            new AppMessage("Christopher", ActorType.stockExchange, "Harrisson", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
+                    );
                 }
 
             }
