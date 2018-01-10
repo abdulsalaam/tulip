@@ -56,10 +56,14 @@ public class Main {
 
                 consumer.consume();
                 if ( ThreadLocalRandom.current().nextInt(0, 2) == 0) {
-                    consumer.sendAppMessageTo(
-                            "Harrisson",
-                            new AppMessage("Christopher", ActorType.stockExchange, "Harrisson", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
-                    );
+                    try {
+                        consumer.sendAppMessageTo(
+                                "Harrisson",
+                                new AppMessage("Christopher", ActorType.stockExchange, "Harrisson", ActorType.broker, AppMessageContentType.order, "Echo " + counter2)
+                        );
+                    } catch (IllegalStateException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }

@@ -76,12 +76,12 @@ public class Consumer {
      * regardless of the flow control.
      * @param name The name of the producer the app message is being sent to
      * @param appMessage The appMessage being sent
-     * @return true if the message has been sent, false otherwise
+     * @throws IllegalStateException thrown if the producer to which the message is sent is not registered
      * */
 
-    public boolean sendAppMessageTo(String name, AppMessage appMessage) {
+    public void sendAppMessageTo(String name, AppMessage appMessage) throws IllegalStateException {
 
-        if (!producerIsRegistered(name)) { return false; }
+        if (!producerIsRegistered(name)) { throw new IllegalStateException(); }
 
         Integer producerNumber = nameToProducerNumber.get(name);
         Message message = new Message(NAME, Target.producer, ContentType.app, appMessage.toJSON());
@@ -99,7 +99,6 @@ public class Consumer {
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
         // System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
 
-        return true;
     }
 
     /**
