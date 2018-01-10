@@ -69,11 +69,11 @@ public class Producer {
         @Override
         public void run() {
             while (true) {
-                /*try {
-                    // Thread.sleep(500);
+                try {
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }*/
+                }
                 synchronized (lock) {
                     if (nbaut > 0) {
                         sendAppMessage(buffer[out]);
@@ -154,6 +154,12 @@ public class Producer {
             }
         }
 
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         CLIENT_SOCKET.sendMessage(message);
         // System.out.println("Producer " + NAME + " sends TOKEN: " + message.toJSON());
     }
@@ -173,6 +179,12 @@ public class Producer {
                     e.printStackTrace();
                 }
             }
+        }
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         CLIENT_SOCKET.sendMessage(message);

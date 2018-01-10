@@ -96,6 +96,12 @@ public class Consumer {
             }
         }
 
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
         // System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
 
@@ -210,6 +216,12 @@ public class Consumer {
             }
         }
 
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
         // System.out.println("Consumer " + NAME + " sends TOKEN: " + message.toJSON());
     }
@@ -229,6 +241,12 @@ public class Consumer {
                     e.printStackTrace();
                 }
             }
+        }
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         MULTI_SERVER_SOCKET.sendMessageToClient(
