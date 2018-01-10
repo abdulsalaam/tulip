@@ -265,13 +265,9 @@ public class Broker extends Thread implements ProducerMessenger {
             producer.produce(new AppMessage(
                     this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
             ));
-
     }
 
     public List<Order> getPendingOrders() {
-        pendingOrders.add(new Order(23, OrderType.purchase, "Basecamp", "Titus", this.NAME, 120, 350));
-        pendingOrders.add(new Order(23, OrderType.purchase, "Alphabet", "Bobo", this.NAME, 180, 950));
-        pendingOrders.add(new Order(23, OrderType.purchase, "Sony", "Leonardo", this.NAME, 100, 390));
         return pendingOrders;
     }
 
