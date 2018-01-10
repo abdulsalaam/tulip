@@ -49,7 +49,8 @@ public class StockExchange extends Thread {
     public void run() {
 
         while (true) {
-                AppMessage appMessage = consumer.consume();
+            AppMessage appMessage = consumer.consume();
+            if (appMessage != null) {
 
                 switch (appMessage.getAppMessageContentType()) {
 
@@ -57,7 +58,6 @@ public class StockExchange extends Thread {
                         String brokerName = appMessage.getSender();
                         registerBroker(brokerName);
                         sendRegistrationAcknowledgment(brokerName);
-                        System.out.println("SENDS REGISTRATION");
                         break;
 
                     case marketStateRequest:
@@ -78,6 +78,7 @@ public class StockExchange extends Thread {
 
                 }
 
+            }
 
             if (isClosed()) {
                 updateStockPrices();
@@ -111,12 +112,12 @@ public class StockExchange extends Thread {
      * @param brokerName The broker to whom the registration acknowledgement is sent
      */
     private void sendRegistrationAcknowledgment(String brokerName) {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         consumer.sendAppMessageTo(
                 brokerName,
                 new AppMessage(NAME, ActorType.stockExchange, brokerName, ActorType.broker,
                         AppMessageContentType.registrationAcknowledgment, "")
         );
+        System.out.println("Sends registration acknowledgment");
     }
 
     /**

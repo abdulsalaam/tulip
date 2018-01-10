@@ -75,7 +75,7 @@ public class Broker extends Thread implements ProducerMessenger {
 
         registerToStockExchange();
 
-        while (true) {
+        /*while (true) {
                 AppMessage appMessage = consumer.consume();
                 switch (appMessage.getAppMessageContentType()) {
 
@@ -102,9 +102,35 @@ public class Broker extends Thread implements ProducerMessenger {
                         break;
 
                 }
+        }*/
+    }
+
+    /**
+     * Treats app messages received from stock exchange
+     */
+    @Override
+    public void uponReceiptOfAppMessage(AppMessage appMessage) {
+
+        switch (appMessage.getAppMessageContentType()) {
+
+            case registrationAcknowledgment:
+                this.isRegistered = true;
+                System.out.println("Broker " + NAME + " is now registered");
+                break;
+
+            case marketStateReply:
+                marketState = MarketState.fromJSON(appMessage.getContent());
+                break;
+
+            case orderProcessed:
+                Order processedOrder = Order.fromJSON(appMessage.getContent());
+                notifyOfTransaction(processedOrder.getClient());
+                calculateCommission(processedOrder);
+                break;
 
         }
     }
+
     /**
      * Registers the broker to the stock exchange
      */
@@ -112,29 +138,21 @@ public class Broker extends Thread implements ProducerMessenger {
 
         // Loop until the broker is registered
         while (!isRegistered) {
-            System.out.println("Broker " + NAME + " is trying to register");
 
             // Sends registration request
-                producer.produce(new AppMessage(
-                        this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationRequest, this.NAME
-                ));
+            producer.produce(new AppMessage(
+                    this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.registrationRequest, this.NAME
+            ));
 
+            System.out.println("Broker " + NAME + " is trying to register");
 
             // Sleeps
             try {
-                sleep(500);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            // Consumes message
-                AppMessage appMessage = consumer.consume();
-                if (appMessage.getAppMessageContentType().equals(AppMessageContentType.registrationAcknowledgment)) {
-                    isRegistered = true;
-                }
-
         }
-
     }
 
     /**
@@ -231,31 +249,6 @@ public class Broker extends Thread implements ProducerMessenger {
                     this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
             ));
 
-    }
-
-    /**
-     * Treats acquaintances received from stock exchange
-     */
-    @Override
-    public void uponReceiptOfAppMessage(AppMessage appMessage) {
-
-        switch (appMessage.getAppMessageContentType()) {
-
-            case marketStateReply:
-                marketState = MarketState.fromJSON(appMessage.getContent());
-                break;
-
-            case registrationAcknowledgment:
-                this.isRegistered = true;
-                break;
-
-            case orderProcessed:
-                Order processedOrder = Order.fromJSON(appMessage.getContent());
-                notifyOfTransaction(processedOrder.getClient());
-                calculateCommission(processedOrder);
-                break;
-
-        }
     }
 
     public List<Order> getPendingOrders() {

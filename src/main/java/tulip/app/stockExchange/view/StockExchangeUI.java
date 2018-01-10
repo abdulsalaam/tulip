@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class stockExchangeUI extends Application {
+public class StockExchangeUI extends Application {
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
