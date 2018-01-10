@@ -101,6 +101,9 @@ public class Broker extends Thread implements ProducerMessenger {
 
                     case endOfDayNotification:
                         closedClients.add(appMessage.getContent());
+                        if (closedClients.size() == clients.size() && closedClients.size() != 0) {
+                            closeTheDay();
+                        }
                         break;
 
                 }
@@ -273,17 +276,6 @@ public class Broker extends Thread implements ProducerMessenger {
     }
 
     public MarketState getMarketState() {
-        marketState.put("Basecamp", 250.0);
-        marketState.put("Tesla", 596.70);
-        marketState.put("Facebook", 450.0);
-        marketState.put("Alphabet", 270.0);
-        marketState.put("Apple", 430.0);
-        marketState.put("Spotify", 220.0);
-        marketState.put("LVMH", 550.0);
-        marketState.put("Ecosia", 120.0);
-        marketState.put("Biocop", 140.0);
-        marketState.put("Veolia", 245.8);
-        marketState.put("Samsung", 240.0);
         return marketState;
     }
 }
