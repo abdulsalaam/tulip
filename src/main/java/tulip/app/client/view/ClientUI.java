@@ -288,6 +288,4 @@ public class ClientUI extends Application{
         MarketPopUp.show();
     }
 
-
-
 }

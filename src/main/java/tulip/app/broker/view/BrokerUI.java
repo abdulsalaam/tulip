@@ -100,6 +100,10 @@ public class BrokerUI extends Application{
         buttons.add(requestMarketStateBtn);
         grid.add(showPendingOrdersBtn, 5, 1);
 
+        Button showClientsBtn = new Button("My registered clients");
+        buttons.add(showClientsBtn);
+        grid.add(showClientsBtn, 3, 3);
+
         int index = 0;
         for(Button button : buttons) {
             button.setStyle("-fx-pref-width: 500px;");
@@ -129,6 +133,15 @@ public class BrokerUI extends Application{
             }
 
         });
+
+        showClientsBtn.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                showClients(broker.getClients());
+            }
+
+        });
+
+
 
 
 
@@ -202,5 +215,36 @@ public class BrokerUI extends Application{
         MarketPopUp.show();
     }
 
+    public static void showClients(List<String> clients){
 
+        Stage showClients = new Stage();
+        showClients.setTitle("Registered clients");
+        Group root = new Group();
+        Scene scene = new Scene(root, 500, 200);
+
+
+
+
+        //GridPane
+        GridPane gridpane = new GridPane();
+        for (int i = 0; i < 5; i++)
+        {
+            ColumnConstraints column = new ColumnConstraints(150);
+            grid.getColumnConstraints().add(column);
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            RowConstraints row = new RowConstraints(70);
+            grid.getRowConstraints().add(row);
+        }
+        int index = 0;
+        for(String client : clients) {
+            gridpane.add(new Label(client), 0, index++);
+        }
+
+        root.getChildren().add(gridpane);
+        showClients.setScene(scene);
+        showClients.show();
+
+    }
 }
