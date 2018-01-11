@@ -15,7 +15,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
-public class Broker extends Thread implements ProducerMessenger {
+public class Broker extends Observable implements Runnable, ProducerMessenger {
 
     /** Name of the broker */
     private final String NAME;

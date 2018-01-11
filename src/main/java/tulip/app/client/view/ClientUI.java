@@ -22,17 +22,12 @@ import javafx.stage.Stage;
 import tulip.app.MarketState;
 import tulip.app.client.model.Client;
 import tulip.app.order.Order;
-
+import static javafx.scene.paint.Color.ALICEBLUE;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static javafx.scene.paint.Color.ALICEBLUE;
-
-public class ClientUI extends Application{
+public class ClientUI extends Application implements Observer {
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
@@ -41,12 +36,15 @@ public class ClientUI extends Application{
     public static void main(String [] args) {
         try {
             client = new Client("Emma", 3000, new Socket("127.0.0.1", 5000));
+            new Thread(client).start();
+            Application.launch();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        client.start();
-        Application.launch();
+    @Override
+    public void update(Observable o, Object arg) {
 
     }
 
