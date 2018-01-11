@@ -29,23 +29,14 @@ public class Broker extends Thread implements ProducerMessenger {
     /** Commission rate applied by the broker on each transaction */
     private final double COMMISSION_RATE = 0.1;
 
-    /** (Registered) clients list of the broker */
+    /** Registered clients of the broker */
     private List<String> clients = new ArrayList<>();
-
-    /** (Not yet registered) prospects of the broker requesting registration */
-    private List<String> clientsRequestingRegistration = new ArrayList<>();
 
     /** Clients of the broker who closed the day */
     private List<String> closedClients = new ArrayList<>();
 
     /** Orders (which can be both purchases and sellings) not yet proceeded */
     private List<Order> pendingOrders = new ArrayList<>();
-
-    /** Counts the selling orders proceeded by the broker */
-    private int sellOrderCounter = 0;
-
-    /** Counts the purchase orders proceeded by the broker */
-    private int purchaseOrderCounter = 0;
 
     /** Current market state (list of companies and associated prices */
     private MarketState marketState = new MarketState();
@@ -107,9 +98,7 @@ public class Broker extends Thread implements ProducerMessenger {
                         break;
 
                 }
-
             }
-
         }
     }
 
@@ -164,31 +153,35 @@ public class Broker extends Thread implements ProducerMessenger {
     }
 
     /**
-     * Registers a client
+     * Registers a client. If the broker is not yet registered, this method does nothing
+     * @param clientName The name of the client to register
      */
-    private void registerClient(String clientName) throws RegistrationException {
+    private void registerClient(String clientName) {
 
-        if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
+        if (isRegistered) {
 
-        if(!clients.contains(clientName)) {
-            clients.add(clientName);
+            // If needed adds the client to the client list
+            if (!clients.contains(clientName)) { clients.add(clientName); }
+
+            // Sends a registration acknowledgement to the client
+            consumer.sendAppMessageTo(
+                    clientName,
+                    new AppMessage(
+                            this.NAME, ActorType.broker, clientName, ActorType.client,
+                            AppMessageContentType.registrationAcknowledgment, ""
+                    )
+            );
+
+            // Indicates to the stock exchange that the broker has a new client
+            producer.produce(
+                    new AppMessage(
+                            this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange,
+                            AppMessageContentType.registrationNotification, clientName
+                    ));
+
+        } else {
+            System.out.println("Impossible to register the client, the broker is not yet registered");
         }
-
-        // Sends a registration acknowledgement to the client
-        consumer.sendAppMessageTo(
-                clientName,
-                new AppMessage(
-                        this.NAME, ActorType.broker, clientName, ActorType.client,
-                        AppMessageContentType.registrationAcknowledgment, ""
-                )
-        );
-
-        // Indicates to the stock exchange that the broker has a new client
-        producer.produce(
-                new AppMessage(
-                        this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange,
-                        AppMessageContentType.registrationNotification, clientName
-        ));
     }
 
     /**

@@ -148,7 +148,7 @@ public class StockExchange extends Thread {
      * @param brokerName The name of the client for which you want to increase the client counter
      */
     private void addClientToBroker(String brokerName) {
-        if(brokerIsRegistered(brokerName)) {
+        if (brokerIsRegistered(brokerName)) {
             brokersAndNbOfClients.put(brokerName, brokersAndNbOfClients.get(brokerName) + 1);
         }
     }
