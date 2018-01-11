@@ -41,6 +41,12 @@ public class StockExchange extends Thread {
      */
     public StockExchange(ServerSocket serverSocket) {
         this.consumer = new Consumer(NAME, serverSocket);
+
+        // Adds companies
+        addCompany("Apple", 500, 70);
+        addCompany("Google", 1000, 40);
+        addCompany("Tesla", 800, 48);
+        addCompany("Amazon", 900, 50);
     }
 
     @Override
@@ -292,6 +298,8 @@ public class StockExchange extends Thread {
     public MarketState getMarketState() {
         MarketState marketState = new MarketState();
         for (Map.Entry<String, Company> entry : companies.entrySet()) {
+            System.out.println(entry.getKey());
+            System.out.println(entry.getValue().getStockPrice());
             marketState.put(entry.getKey(), entry.getValue().getStockPrice());
         }
         return marketState;

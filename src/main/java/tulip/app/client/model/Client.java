@@ -57,10 +57,12 @@ public class Client extends Thread implements ProducerMessenger {
     private int purchaseOrderCounter = 0;
 
     /** The current market state (list of companies and associated prices) */
-    private MarketState marketState = new MarketState();
+    private MarketState marketState = null;
 
     /** The producer corresponding to the client */
     private Producer producer;
+
+    private final Object marketStateLock = new Object();
 
     /**
      * The constructor of the client
@@ -98,6 +100,9 @@ public class Client extends Thread implements ProducerMessenger {
 
             case marketStateReply:
                 this.marketState = MarketState.fromJSON(appMessage.getContent());
+                synchronized (marketStateLock) {
+                    marketStateLock.notifyAll();
+                }
                 break;
 
             case orderProcessed:
@@ -137,16 +142,17 @@ public class Client extends Thread implements ProducerMessenger {
 
     /**
      * Sends a request of the market state to the broker
-     * @throws RegistrationException
      */
-    public void requestMarketState() throws RegistrationException {
+    public void requestMarketState() {
 
-        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
-
+        if (isRegistered) {
             producer.produce(
                     new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
                             AppMessageContentType.marketStateRequest, "")
             );
+        } else {
+            System.out.println("The client is not registered");
+        }
 
     }
 
@@ -316,6 +322,18 @@ public class Client extends Thread implements ProducerMessenger {
     }
 
     public MarketState getMarketState() {
+        marketState = null;
+        synchronized (marketStateLock) {
+            while (marketState == null) {
+                requestMarketState();
+                try {
+                    marketStateLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         return marketState;
     }
 

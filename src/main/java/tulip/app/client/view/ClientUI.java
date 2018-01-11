@@ -110,7 +110,6 @@ public class ClientUI extends Application{
         // Actions
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.requestMarketState();
                 showMarketState(client.getMarketState());
             }
         });
