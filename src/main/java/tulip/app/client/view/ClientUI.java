@@ -89,10 +89,6 @@ public class ClientUI extends Application {
         buttons.add(pendingSellOrdersBtn);
         grid.add(pendingSellOrdersBtn, 3, 3);
 
-        Button archivedOrdersBtn = new Button("My archived orders");
-        buttons.add(archivedOrdersBtn);
-        grid.add(archivedOrdersBtn, 5, 3);
-
         Button placeOrderBtn = new Button("Place an order");
         buttons.add(placeOrderBtn);
         grid.add(placeOrderBtn, 3, 1);
@@ -127,11 +123,6 @@ public class ClientUI extends Application {
             }
         });
 
-        archivedOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                showOrders(client.getArchivedOrders());
-            }
-        });
         placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 showOrderPlacement();

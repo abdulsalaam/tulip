@@ -46,9 +46,6 @@ public class Client implements Runnable, ProducerMessenger {
     /** The list of the sell purchased placed by the client and not treated yet */
     private List<Order> pendingPurchaseOrders = new ArrayList<>();
 
-    /** The list of the orders which have been treated */
-    private List<Order> archivedOrders = new ArrayList<>();
-
     /** The commission rate of the broker */
     private final double COMMISSION_RATE = 0.1;
 
@@ -286,8 +283,6 @@ public class Client implements Runnable, ProducerMessenger {
 
         // Remove the order from the list of the pending sell orders
         pendingSellOrders.removeIf(o -> o.getId() == order.getId());
-
-        archivedOrders.add(order);
     }
 
     /**
@@ -304,8 +299,6 @@ public class Client implements Runnable, ProducerMessenger {
 
         // Remove the order from the list of the pending purchase orders
         pendingPurchaseOrders.removeIf(o -> o.getId() == order.getId());
-
-        archivedOrders.add(order);
     }
 
     /**
@@ -344,9 +337,6 @@ public class Client implements Runnable, ProducerMessenger {
     }
     public List<Order> getPendingSellOrders() {
         return pendingSellOrders;
-    }
-    public List<Order> getArchivedOrders() {
-        return archivedOrders;
     }
     public double getCash() {
         return cash;
