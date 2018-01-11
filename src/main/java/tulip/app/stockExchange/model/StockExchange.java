@@ -26,8 +26,8 @@ public class StockExchange extends Thread {
      * */
     private Map<String, Company> companies = new HashMap<>();
 
-    /** A map which links a broker (identified by his name) to his number of client */
-    private Map<String, Integer> brokersAndNbOfClients = new HashMap<>();
+    /** A map which links a broker (identified by his name) to the name of his clients */
+    private Map<String, List<String>> brokersClients = new HashMap<>();
 
     /** A list which indicate wich broker have closed the day */
     private List<String> closedBrokers = new ArrayList<>();
@@ -72,7 +72,7 @@ public class StockExchange extends Thread {
                         break;
 
                     case registrationNotification:
-                        addClientToBroker(appMessage.getSender());
+                        addClientToBroker(appMessage.getSender(), appMessage.getContent());
 
                 }
 
@@ -90,18 +90,10 @@ public class StockExchange extends Thread {
      * @param brokerName The name of the broker being registered
      */
     private void registerBroker(String brokerName) {
-        brokersAndNbOfClients.put(brokerName, 0);
-    }
-
-    /**
-     * Adds a company to companies
-     * @param name The name of the company
-     * @param nbEmittedStocks The number of emitted stocks for this company
-     * @param initialStockPrice The initial stock price
-     */
-    public void addCompany(String name, int nbEmittedStocks, double initialStockPrice) {
-        if(! (companies.containsKey(name))) {
-            companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
+        // If the client is not already registered
+        if (!brokersClients.containsKey(brokerName)) {
+            brokersClients.put(brokerName, new ArrayList<>());
+            System.out.println(brokerName + " is now registered");
         }
     }
 
@@ -115,7 +107,43 @@ public class StockExchange extends Thread {
                 new AppMessage(NAME, ActorType.stockExchange, brokerName, ActorType.broker,
                         AppMessageContentType.registrationAcknowledgment, "")
         );
-        System.out.println("Sends registration acknowledgment");
+        System.out.println("Sends registration acknowledgment to " + brokerName);
+    }
+
+    /**
+     * Indicates whether a broker is registered to the stock exchange
+     * @param brokerName The name of the broker you want to check
+     * */
+    private boolean brokerIsRegistered(String brokerName) {
+        return brokersClients.containsKey(brokerName);
+    }
+
+    /**
+     * For a given client, adds a client to the client list
+     * @param brokerName The name of the client for which you want to increase the client counter
+     */
+    private void addClientToBroker(String brokerName, String clientName) {
+        if (brokerIsRegistered(brokerName)) {
+
+            // Adds the client to the list if the client is not already in the list
+            List<String> clientList = brokersClients.get(brokerName);
+            if (!clientList.contains(clientName)) {
+                clientList.add(clientName);
+                System.out.println( "The client " + clientName + " has been added to the client list of " + brokerName);
+            }
+        }
+    }
+
+    /**
+     * Adds a company to companies
+     * @param name The name of the company
+     * @param nbEmittedStocks The number of emitted stocks for this company
+     * @param initialStockPrice The initial stock price
+     */
+    public void addCompany(String name, int nbEmittedStocks, double initialStockPrice) {
+        if (!companies.containsKey(name)) {
+            companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
+        }
     }
 
     /**
@@ -141,24 +169,6 @@ public class StockExchange extends Thread {
                 new AppMessage(NAME, ActorType.stockExchange, order.getBroker(), ActorType.broker,
                         AppMessageContentType.orderProcessed, order.toJSON())
         );
-    }
-
-    /**
-     * Increases the counter of clients by one on the brokersAndNbOfClients map, for a given client
-     * @param brokerName The name of the client for which you want to increase the client counter
-     */
-    private void addClientToBroker(String brokerName) {
-        if(brokerIsRegistered(brokerName)) {
-            brokersAndNbOfClients.put(brokerName, brokersAndNbOfClients.get(brokerName) + 1);
-        }
-    }
-
-    /**
-     * Indicates whether a broker is registered to the stock exchange
-     * @param brokerName The name of the broker you want to check
-     * */
-    private boolean brokerIsRegistered(String brokerName) {
-        return brokersAndNbOfClients.containsKey(brokerName);
     }
 
     /**
@@ -301,7 +311,7 @@ public class StockExchange extends Thread {
     private boolean isClosed() {
         if (closedBrokers.size() == 0) { return false; }
 
-        return closedBrokers.size() == brokersAndNbOfClients.size();
+        return closedBrokers.size() == brokersClients.size();
     }
 
     public List<Order> getCurrentDemand() {

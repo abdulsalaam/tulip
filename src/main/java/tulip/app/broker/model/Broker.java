@@ -29,7 +29,7 @@ public class Broker extends Thread implements ProducerMessenger {
     /** Commission rate applied by the broker on each transaction */
     private final double COMMISSION_RATE = 0.1;
 
-    /** (Registered) clients list of the broker */
+    /** Registered clients of the broker */
     private List<String> clients = new ArrayList<>();
 
     /** Clients of the broker who closed the day */
@@ -81,7 +81,7 @@ public class Broker extends Thread implements ProducerMessenger {
 
                     case marketStateRequest:
                         producer.produce(new AppMessage(
-                                this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
+                                this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateRequest, marketState.toJSON()
                         ));
 
                         break;
@@ -98,9 +98,7 @@ public class Broker extends Thread implements ProducerMessenger {
                         break;
 
                 }
-
             }
-
         }
     }
 
@@ -113,8 +111,10 @@ public class Broker extends Thread implements ProducerMessenger {
         switch (appMessage.getAppMessageContentType()) {
 
             case registrationAcknowledgment:
-                this.isRegistered = true;
-                System.out.println("Broker " + NAME + " is now registered");
+                if (!isRegistered) {
+                    this.isRegistered = true;
+                    System.out.println("Broker " + NAME + " is now registered");
+                }
                 break;
 
             case marketStateReply:
@@ -155,31 +155,35 @@ public class Broker extends Thread implements ProducerMessenger {
     }
 
     /**
-     * Registers a client
+     * Registers a client. If the broker is not yet registered, this method does nothing
+     * @param clientName The name of the client to register
      */
-    private void registerClient(String clientName) throws RegistrationException {
+    private void registerClient(String clientName) {
 
-        if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
+        if (isRegistered) {
 
-        if(!clients.contains(clientName)) {
-            clients.add(clientName);
+            // If needed adds the client to the client list
+            if (!clients.contains(clientName)) { clients.add(clientName); }
+
+            // Sends a registration acknowledgement to the client
+            consumer.sendAppMessageTo(
+                    clientName,
+                    new AppMessage(
+                            this.NAME, ActorType.broker, clientName, ActorType.client,
+                            AppMessageContentType.registrationAcknowledgment, ""
+                    )
+            );
+
+            // Indicates to the stock exchange that the broker has a new client
+            producer.produce(
+                    new AppMessage(
+                            this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange,
+                            AppMessageContentType.registrationNotification, clientName
+                    ));
+
+        } else {
+            System.out.println("Impossible to register the client, the broker is not yet registered");
         }
-
-        // Sends a registration acknowledgement to the client
-        consumer.sendAppMessageTo(
-                clientName,
-                new AppMessage(
-                        this.NAME, ActorType.broker, clientName, ActorType.client,
-                        AppMessageContentType.registrationAcknowledgment, ""
-                )
-        );
-
-        // Indicates to the stock exchange that the broker has a new client
-        producer.produce(
-                new AppMessage(
-                        this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange,
-                        AppMessageContentType.registrationNotification, clientName
-        ));
     }
 
     /**

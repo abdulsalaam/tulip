@@ -89,9 +89,11 @@ public class Client extends Thread implements ProducerMessenger {
         switch (appMessage.getAppMessageContentType()) {
 
             case registrationAcknowledgment:
-                this.isRegistered = true;
-                this.broker = appMessage.getSender();
-                System.out.println("Client " + NAME + " is now to registered");
+                if (!isRegistered) {
+                    this.isRegistered = true;
+                    this.broker = appMessage.getSender();
+                    System.out.println("Client " + NAME + " is now to registered");
+                }
                 break;
 
             case marketStateReply:
