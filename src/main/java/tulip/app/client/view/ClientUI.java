@@ -27,11 +27,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 
-public class ClientUI extends Application implements Observer {
+public class ClientUI extends Application {
 
     private static GridPane grid;
-    private List<Button> buttons = new ArrayList<>();
+    private static List<Button> buttons = new ArrayList<>();
     private static Client client;
+
+    private static Label cash;
+    private static Label connected;
 
     public static void main(String [] args) {
         try {
@@ -41,11 +44,6 @@ public class ClientUI extends Application implements Observer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-
     }
 
     @Override
@@ -76,8 +74,11 @@ public class ClientUI extends Application implements Observer {
         GridPane.setHalignment(title, HPos.CENTER);
 
         // Label
-        Label cash = new Label("Cash: "+ String.valueOf(client.getCash()));
-        grid.add(cash, 0, 0);
+        connected = new Label("Not connected");
+        grid.add(connected, 0, 0);
+
+        cash = new Label("Cash: "+ String.valueOf(client.getCash()));
+        grid.add(cash, 0, 1);
 
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
@@ -288,4 +289,11 @@ public class ClientUI extends Application implements Observer {
         MarketPopUp.show();
     }
 
+    public static void setCashAmount(double amount) {
+        cash.setText(Double.toString(amount));
+    }
+
+    public static void setConnectedText(String text) {
+        connected.setText(text);
+    }
 }

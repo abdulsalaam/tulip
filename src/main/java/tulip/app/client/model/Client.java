@@ -4,6 +4,7 @@ import tulip.app.MarketState;
 import tulip.app.appMessage.ActorType;
 import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
+import tulip.app.client.view.ClientUI;
 import tulip.app.exceptions.IllegalOrderException;
 import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
@@ -19,7 +20,7 @@ import java.util.Observable;
 /**
  * This class represents a client
  */
-public class Client extends Observable implements Runnable, ProducerMessenger {
+public class Client implements Runnable, ProducerMessenger {
 
     /** The name of the client (unique identifier) */
     private final String NAME;
@@ -95,6 +96,7 @@ public class Client extends Observable implements Runnable, ProducerMessenger {
                 if (!isRegistered) {
                     this.isRegistered = true;
                     this.broker = appMessage.getSender();
+                    ClientUI.setConnectedText("Connected");
                     System.out.println("Client " + NAME + " is now to registered");
                 }
                 break;
@@ -279,6 +281,7 @@ public class Client extends Observable implements Runnable, ProducerMessenger {
 
         // Update cash
         cash += order.getActualAmount() * (1 - COMMISSION_RATE);
+        ClientUI.setCashAmount(cash);
 
         // Update portfolio
         portfolio.removeStocks(order.getCompany(), order.getActualNbOfStocks());
@@ -297,6 +300,7 @@ public class Client extends Observable implements Runnable, ProducerMessenger {
 
         // Update cash
         cash -= order.getActualAmount() * (1 + COMMISSION_RATE);
+        ClientUI.setCashAmount(cash);
 
         // Update portfolio
         portfolio.addStocks(order.getCompany(), order.getActualNbOfStocks());

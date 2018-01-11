@@ -4,6 +4,7 @@ import tulip.app.MarketState;
 import tulip.app.appMessage.ActorType;
 import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
+import tulip.app.broker.view.BrokerUI;
 import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
 import tulip.app.order.OrderType;
@@ -15,7 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
-public class Broker extends Observable implements Runnable, ProducerMessenger {
+public class Broker implements Runnable, ProducerMessenger {
 
     /** Name of the broker */
     private final String NAME;
@@ -114,6 +115,7 @@ public class Broker extends Observable implements Runnable, ProducerMessenger {
             case registrationAcknowledgment:
                 if (!isRegistered) {
                     this.isRegistered = true;
+                    BrokerUI.setConnectedText("Connected");
                     System.out.println("Broker " + NAME + " is now registered");
                 }
                 break;
@@ -254,6 +256,7 @@ public class Broker extends Observable implements Runnable, ProducerMessenger {
     private void calculateCommission(Order order) {
         double commission = order.getActualAmount() * COMMISSION_RATE;
         this.cash += commission;
+        BrokerUI.setCashAmount(cash);
     }
 
     /**

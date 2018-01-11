@@ -11,7 +11,7 @@ import tulip.service.producerConsumer.Consumer;
 import java.net.ServerSocket;
 import java.util.*;
 
-public class StockExchange extends Observable implements Runnable {
+public class StockExchange implements Runnable {
 
     /** The name of the stock exchange */
     private final String NAME = "Stock Exchange";

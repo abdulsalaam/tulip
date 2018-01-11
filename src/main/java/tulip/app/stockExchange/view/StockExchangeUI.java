@@ -31,7 +31,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
-public class StockExchangeUI extends Application implements Observer {
+public class StockExchangeUI extends Application {
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
@@ -41,11 +41,6 @@ public class StockExchangeUI extends Application implements Observer {
         stockExchange = new StockExchange(new ServerSocket(4000));
         new Thread(stockExchange).start();
         Application.launch();
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-
     }
 
     @Override
