@@ -37,7 +37,7 @@ public class ClientUI extends Application {
 
     public static void main(String [] args) {
         try {
-            client = new Client("Emma", 3000, new Socket("127.0.0.1", 5000));
+            client = new Client("Emma Watson", 3000, new Socket("127.0.0.1", 5000));
             new Thread(client).start();
             Application.launch();
         } catch (IOException e) {

@@ -40,7 +40,7 @@ public class BrokerUI extends Application {
     public static void main(String [] args) {
         try {
             broker = new Broker(
-                    "Leonardo",
+                    "Leonardo di Caprio",
                     new ServerSocket(5000),
                     new Socket("127.0.0.1", 4000)
             );
