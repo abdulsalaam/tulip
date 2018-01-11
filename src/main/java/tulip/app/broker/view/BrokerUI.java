@@ -100,7 +100,7 @@ public class BrokerUI extends Application{
         buttons.add(requestMarketStateBtn);
         grid.add(showPendingOrdersBtn, 5, 1);
 
-        Button showClientsBtn = new Button("My registered clients");
+        Button showClientsBtn = new Button("My registered brokers");
         buttons.add(showClientsBtn);
         grid.add(showClientsBtn, 3, 3);
 
@@ -221,9 +221,6 @@ public class BrokerUI extends Application{
         showClients.setTitle("Registered clients");
         Group root = new Group();
         Scene scene = new Scene(root, 500, 200);
-
-
-
 
         //GridPane
         GridPane gridpane = new GridPane();
