@@ -41,7 +41,7 @@ public class StockExchange implements Runnable {
         try {
             // Adds companies
             addCompany("Apple", 500, 70);
-            addCompany("Google", 1000, 40);
+            addCompany("Alphabet", 1000, 40);
             addCompany("Tesla", 800, 48);
             addCompany("Amazon", 900, 50);
         } catch (IllegalArgumentException e) {
