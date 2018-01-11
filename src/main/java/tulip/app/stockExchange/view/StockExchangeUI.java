@@ -213,8 +213,12 @@ public class StockExchangeUI extends Application {
                 if (companyName.getText().equals("") || nbEmittedStocks.getText().equals("") || initialStockPrice.getText().equals("")) {
                     Util.warningWindow("Error", "Please fill all the fields", "");
                 } else {
-                    stockExchange.addCompany(companyName.getText(), Integer.parseInt(nbEmittedStocks.getText()), Integer.parseInt(initialStockPrice.getText()));
-                    showCompanyPlacement.close();
+                    try {
+                        stockExchange.addCompany(companyName.getText(), Integer.parseInt(nbEmittedStocks.getText()), Integer.parseInt(initialStockPrice.getText()));
+                        showCompanyPlacement.close();
+                    } catch (IllegalArgumentException e) {
+                        Util.warningWindow("Company name invalid", "The company you tried to add already exists", "");
+                    }
                 }
             }
         });
