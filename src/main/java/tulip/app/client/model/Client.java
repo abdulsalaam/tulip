@@ -346,5 +346,8 @@ public class Client extends Thread implements ProducerMessenger {
     public List<Order> getArchivedOrders() {
         return archivedOrders;
     }
+    public double getCash() {
+        return cash;
+    }
 
 }

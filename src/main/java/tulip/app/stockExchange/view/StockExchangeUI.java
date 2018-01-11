@@ -11,6 +11,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -88,6 +89,10 @@ public class StockExchangeUI extends Application {
         buttons.add(supplyBtn);
         grid.add(supplyBtn, 3, 1);
 
+        Button showBrokersBtn = new Button("My registered clients");
+        buttons.add(showBrokersBtn);
+        grid.add(showBrokersBtn, 1, 3);
+
 
         int index = 0;
         for(Button button : buttons) {
@@ -117,6 +122,13 @@ public class StockExchangeUI extends Application {
             public void handle(ActionEvent event) {
                 showPendingOrders(stockExchange.getCurrentSupply());
             }
+        });
+
+        showBrokersBtn.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                showBrokers(stockExchange.getBrokers());
+            }
+
         });
 
         // Style and final set up
@@ -243,6 +255,36 @@ public class StockExchangeUI extends Application {
         bc.getData().addAll(serie);
         MarketPopUp.setScene(scene);
         MarketPopUp.show();
+    }
+
+    public static void showBrokers(List<String> brokers){
+
+        Stage showClients = new Stage();
+        showClients.setTitle("Registered brokers");
+        Group root = new Group();
+        Scene scene = new Scene(root, 500, 200);
+
+        //GridPane
+        GridPane gridpane = new GridPane();
+        for (int i = 0; i < 5; i++)
+        {
+            ColumnConstraints column = new ColumnConstraints(150);
+            grid.getColumnConstraints().add(column);
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            RowConstraints row = new RowConstraints(70);
+            grid.getRowConstraints().add(row);
+        }
+        int index = 0;
+        for(String broker : brokers) {
+            gridpane.add(new Label(broker), 0, index++);
+        }
+
+        root.getChildren().add(gridpane);
+        showClients.setScene(scene);
+        showClients.show();
+
     }
 }
 

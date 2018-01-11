@@ -285,4 +285,12 @@ public class Broker extends Thread implements ProducerMessenger {
 
         return marketState;
     }
+
+    public double getCash() {
+        return cash;
+    }
+
+    public List<String> getClients() {
+        return clients;
+    }
 }

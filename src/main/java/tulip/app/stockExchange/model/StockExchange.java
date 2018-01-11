@@ -338,4 +338,12 @@ public class StockExchange extends Thread {
         return sellOrders;
     }
 
+    public List<String> getBrokers() {
+        List<String> brokers = new ArrayList<>();
+        for (Map.Entry<String, List<String> > broker : brokersClients.entrySet()) {
+            brokers.add(broker.getKey());
+        }
+        return brokers;
+    }
+
 }

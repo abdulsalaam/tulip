@@ -83,6 +83,10 @@ public class BrokerUI extends Application{
         grid.add(title, 3, 0);
         GridPane.setHalignment(title, HPos.CENTER);
 
+        // Label
+        Label cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
+        grid.add(cash, 0, 0);
+
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
@@ -95,6 +99,10 @@ public class BrokerUI extends Application{
         Button showPendingOrdersBtn = new Button("Show pending orders");
         buttons.add(requestMarketStateBtn);
         grid.add(showPendingOrdersBtn, 5, 1);
+
+        Button showClientsBtn = new Button("My registered brokers");
+        buttons.add(showClientsBtn);
+        grid.add(showClientsBtn, 3, 3);
 
         int index = 0;
         for(Button button : buttons) {
@@ -114,6 +122,8 @@ public class BrokerUI extends Application{
         placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 broker.placeOrder();
+                cash.setText("Cash: "+String.valueOf(broker.getCash()));
+
             }
         });
 
@@ -123,6 +133,17 @@ public class BrokerUI extends Application{
             }
 
         });
+
+        showClientsBtn.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                showClients(broker.getClients());
+            }
+
+        });
+
+
+
+
 
         // Style and final set up
         root.setStyle(
@@ -194,5 +215,33 @@ public class BrokerUI extends Application{
         MarketPopUp.show();
     }
 
+    public static void showClients(List<String> clients){
 
+        Stage showClients = new Stage();
+        showClients.setTitle("Registered clients");
+        Group root = new Group();
+        Scene scene = new Scene(root, 500, 200);
+
+        //GridPane
+        GridPane gridpane = new GridPane();
+        for (int i = 0; i < 5; i++)
+        {
+            ColumnConstraints column = new ColumnConstraints(150);
+            grid.getColumnConstraints().add(column);
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            RowConstraints row = new RowConstraints(70);
+            grid.getRowConstraints().add(row);
+        }
+        int index = 0;
+        for(String client : clients) {
+            gridpane.add(new Label(client), 0, index++);
+        }
+
+        root.getChildren().add(gridpane);
+        showClients.setScene(scene);
+        showClients.show();
+
+    }
 }
