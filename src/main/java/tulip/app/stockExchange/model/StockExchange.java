@@ -6,7 +6,6 @@ import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
 import tulip.app.order.Order;
 import tulip.app.order.OrderType;
-import tulip.app.stockExchange.model.Company;
 import tulip.service.producerConsumer.Consumer;
 
 import java.net.ServerSocket;
@@ -15,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
-
 
 public class StockExchange extends Thread {
 
@@ -39,7 +37,7 @@ public class StockExchange extends Thread {
 
     /**
      * Constructor of the StockExchange
-     * @param serverSocket
+     * @param serverSocket The server socket use to communicate with the brokers
      */
     public StockExchange(ServerSocket serverSocket) {
         this.consumer = new Consumer(NAME, serverSocket);
@@ -149,7 +147,7 @@ public class StockExchange extends Thread {
      * Increases the counter of clients by one on the brokersAndNbOfClients map, for a given client
      * @param brokerName The name of the client for which you want to increase the client counter
      */
-    void addClientToBroker(String brokerName) {
+    private void addClientToBroker(String brokerName) {
         if(brokerIsRegistered(brokerName)) {
             brokersAndNbOfClients.put(brokerName, brokersAndNbOfClients.get(brokerName) + 1);
         }
@@ -183,7 +181,7 @@ public class StockExchange extends Thread {
     /**
      * Updates the stock prices of all the companies
      */
-    void updateStockPrices() {
+    private void updateStockPrices() {
         for (Company company : companies.values()) {
             double deltaPrice =
                     (company.nbOfStocksForPurchase() - company.nbOfStocksForSale()) / company.getNB_EMITTED_STOCKS();
@@ -216,8 +214,8 @@ public class StockExchange extends Thread {
                         purchaseOrder.setActualNbOfStocks(floatingStocksSold);
                     }
 
-                    // While there are still stock to be purchased, iterates over sell orders
-                    while (purchaseOrder.getDesiredNbOfStocks() > purchaseOrder.getActualNbOfStocks() &&
+                    // While there are still stocks to be purchased, iterates over sell orders
+                    while (purchaseOrder.getActualNbOfStocks() < purchaseOrder.getDesiredNbOfStocks() &&
                             !c.getPendingSellOrders().isEmpty()) {
 
                         // Retrieves, but does not remove, the head of the queue
@@ -242,12 +240,19 @@ public class StockExchange extends Thread {
                                     sellOrder.getDesiredNbOfStocks() - sellOrder.getActualNbOfStocks()
                             );
 
+                            // Updates the actual number of stocks
+                            purchaseOrder.setActualNbOfStocks(
+                                purchaseOrder.getActualNbOfStocks() + stocksSold
+                            );
+                            sellOrder.setActualNbOfStocks(
+                                    sellOrder.getActualNbOfStocks() + stocksSold
+                            );
+
                             // For this sell order, if all the stocks for sale have been sold
                             if (sellOrder.getDesiredNbOfStocks() == sellOrder.getActualNbOfStocks()) {
                                 c.getPendingSellOrders().remove();
                                 sellOrder.processOrder(new Date(), c.getStockPrice());
                                 sendsProcessedOrder(sellOrder);
-
                             }
                         }
                     }
@@ -286,14 +291,14 @@ public class StockExchange extends Thread {
      * Adds the broker to the closedBrokers list
      * @param brokerName The name of the broker
      */
-    void closeBroker(String brokerName) {
+    private void closeBroker(String brokerName) {
         closedBrokers.add(brokerName);
     }
 
     /**
      * Indicates whether all the brokers have closed the day
      */
-    boolean isClosed() {
+    private boolean isClosed() {
         if (closedBrokers.size() == 0) { return false; }
 
         return closedBrokers.size() == brokersAndNbOfClients.size();
@@ -302,9 +307,7 @@ public class StockExchange extends Thread {
     public List<Order> getCurrentDemand() {
         List<Order> purchaseOrders = new ArrayList<>();
         for (Company company : companies.values()) {
-            for(Order purchaseOrder : company.getPendingPurchaseOrders()) {
-                purchaseOrders.add(purchaseOrder);
-            }
+            purchaseOrders.addAll(company.getPendingPurchaseOrders());
         }
         return purchaseOrders;
     }
@@ -312,9 +315,7 @@ public class StockExchange extends Thread {
     public List<Order> getCurrentSupply() {
         List<Order> sellOrders = new ArrayList<>();
         for (Company company : companies.values()) {
-            for(Order purchaseOrder : company.getPendingSellOrders()) {
-                sellOrders.add(purchaseOrder);
-            }
+            sellOrders.addAll(company.getPendingSellOrders());
         }
         return sellOrders;
     }
