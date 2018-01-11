@@ -83,6 +83,7 @@ public class Broker implements Runnable, ProducerMessenger {
                         break;
 
                     case marketStateRequest:
+                        getMarketState();
                         consumer.sendAppMessageTo(appMessage.getSender(),
                                 new AppMessage(this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
                                 ));
