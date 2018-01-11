@@ -47,6 +47,8 @@ public class Broker extends Thread implements ProducerMessenger {
     /** Producer role of the broker */
     private Producer producer;
 
+    private final Object marketStateLock = new Object();
+
     /**
      * Constructor
      * @param name is the name of the broker
@@ -83,7 +85,6 @@ public class Broker extends Thread implements ProducerMessenger {
                         consumer.sendAppMessageTo(appMessage.getSender(),
                                 new AppMessage(this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
                                 ));
-
                         break;
 
                     case registrationRequest:
@@ -119,6 +120,9 @@ public class Broker extends Thread implements ProducerMessenger {
 
             case marketStateReply:
                 marketState = MarketState.fromJSON(appMessage.getContent());
+                synchronized (marketStateLock) {
+                    marketStateLock.notifyAll();
+                }
                 break;
 
             case orderProcessed:
@@ -190,14 +194,14 @@ public class Broker extends Thread implements ProducerMessenger {
      * Sends request to stock exchange in order to retrieve
      * market state information
      */
-    public void requestMarketState() throws RegistrationException {
-
-        if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
-
+    public void requestMarketState() {
+        if (isRegistered) {
             producer.produce(new AppMessage(
                     this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.marketStateRequest, ""
             ));
-
+        } else {
+            System.err.println("The broker is not registered");
+        }
     }
 
     /**
@@ -267,6 +271,18 @@ public class Broker extends Thread implements ProducerMessenger {
     }
 
     public MarketState getMarketState() {
+        marketState = null;
+        synchronized (marketStateLock) {
+            while (marketState == null) {
+                requestMarketState();
+                try {
+                    marketStateLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         return marketState;
     }
 }
