@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static javafx.scene.paint.Color.ALICEBLUE;
+
 public class ClientUI extends Application{
 
     private static GridPane grid;
@@ -77,6 +79,8 @@ public class ClientUI extends Application{
 
         // Label
         Label cash = new Label("Cash: "+ String.valueOf(client.getCash()));
+        cash.setTextFill(ALICEBLUE);
+        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(cash, 0, 0);
 
         // Buttons

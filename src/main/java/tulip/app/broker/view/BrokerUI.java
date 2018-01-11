@@ -85,6 +85,7 @@ public class BrokerUI extends Application{
 
         // Label
         Label cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
+        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(cash, 0, 0);
 
         // Buttons
@@ -100,7 +101,7 @@ public class BrokerUI extends Application{
         buttons.add(requestMarketStateBtn);
         grid.add(showPendingOrdersBtn, 5, 1);
 
-        Button showClientsBtn = new Button("My registered brokers");
+        Button showClientsBtn = new Button("My registered clients");
         buttons.add(showClientsBtn);
         grid.add(showClientsBtn, 3, 3);
 

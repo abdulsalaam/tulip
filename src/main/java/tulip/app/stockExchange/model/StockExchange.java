@@ -211,6 +211,8 @@ public class StockExchange extends Thread {
      */
     private void processTransactions() {
 
+        System.out.println("PROCESSING TRANSACTIONS");
+
         // Iterates over each company
         for (Company c : companies.values()) {
 
