@@ -21,7 +21,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.MarketState;
+import tulip.app.Util;
 import tulip.app.broker.model.Broker;
+import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
 
 import java.io.IOException;
@@ -126,8 +128,14 @@ public class BrokerUI extends Application {
 
         placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                broker.placeOrder();
-                cash.setText("Cash: "+String.valueOf(broker.getCash()));
+                try {
+                    broker.placeOrder();
+                    cash.setText("Cash: " + String.valueOf(broker.getCash()));
+                } catch (IndexOutOfBoundsException e) {
+                    Util.warningWindow("Index out of bounds", "No more order to process", "");
+                } catch (RegistrationException e) {
+                    Util.warningWindow("Registration error", "The broker is not registered", "");
+                }
 
             }
         });

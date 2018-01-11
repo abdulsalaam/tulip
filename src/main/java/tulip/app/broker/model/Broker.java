@@ -37,7 +37,7 @@ public class Broker implements Runnable, ProducerMessenger {
     private List<String> closedClients = new ArrayList<>();
 
     /** Orders (which can be both purchases and sellings) not yet proceeded */
-    private List<Order> pendingOrders = new ArrayList<>();
+    private Queue<Order> pendingOrders = new LinkedList<>();
 
     /** Current market state (list of companies and associated prices */
     private MarketState marketState = new MarketState();
@@ -223,17 +223,16 @@ public class Broker implements Runnable, ProducerMessenger {
     /**
      * Proceeds an order
      */
-    public void placeOrder()
-        throws RegistrationException {
+    public void placeOrder() throws RegistrationException, IndexOutOfBoundsException {
 
-            if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
+        if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
 
-        String orderJson = pendingOrders.get(0).toJSON();
-            producer.produce(new AppMessage(
-                    this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.order, orderJson
-            ));
+        Order order = pendingOrders.poll();
+        if (order == null) { throw new IndexOutOfBoundsException(); }
 
-        pendingOrders.remove(0);
+        producer.produce(new AppMessage(
+                this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.order, order.toJSON()
+        ));
     }
 
 
@@ -271,7 +270,9 @@ public class Broker implements Runnable, ProducerMessenger {
     }
 
     public List<Order> getPendingOrders() {
-        return pendingOrders;
+        @SuppressWarnings("unchecked")
+        List<Order> list = (List<Order>) pendingOrders;
+        return list.subList(0, list.size());
     }
 
     public MarketState getMarketState() {
