@@ -146,8 +146,8 @@ public class BrokerUI extends Application {
 
         // Style and final set up
         root.setStyle(
-                "-fx-background-image: url('tulipFlower.jpg');-fx-background-size: cover");
-
+                "-fx-background-color: #CFCFCF; -fx-background-image: url('tulipFlower.jpg');" +
+                "-fx-background-size: cover;");
         root.getChildren().add(grid);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -162,9 +162,7 @@ public class BrokerUI extends Application {
         final NumberAxis yAxis = new NumberAxis();
         final BarChart<String,Number> bc =
                 new BarChart<String,Number>(xAxis,yAxis);
-        bc.setStyle(
-                "-fx-background-color: white;"
-        );
+        bc.setStyle("-fx-background-color: #CFCFCF;");
 
         xAxis.setTickLabelFill(Color.WHITE);
         yAxis.setTickLabelFill(Color.WHITE);
@@ -176,8 +174,10 @@ public class BrokerUI extends Application {
         }
 
 
-        bc.setStyle(
-                "-fx-background-image: url('background.png');-fx-background-size: cover");
+        bc.setStyle("" +
+                "-fx-background-color: #CFCFCF;" +
+                "-fx-background-image: url('background.png');" +
+                "-fx-background-size: cover;");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);
         MarketPopUp.setScene(scene);
@@ -192,9 +192,7 @@ public class BrokerUI extends Application {
         final NumberAxis yAxis = new NumberAxis();
         final BarChart<String,Number> bc =
                 new BarChart<String,Number>(xAxis,yAxis);
-        bc.setStyle(
-                "-fx-background-color: white;"
-        );
+        bc.setStyle("-fx-background-color: #CFCFCF");
 
         xAxis.setTickLabelFill(Color.WHITE);
         yAxis.setTickLabelFill(Color.WHITE);
@@ -207,7 +205,8 @@ public class BrokerUI extends Application {
 
 
         bc.setStyle(
-                "-fx-background-image: url('background.png');-fx-background-size: cover");
+                "-fx-background-color: #CFCFCF; -fx-background-image: url('background.png');" +
+                "-fx-background-size: cover;");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);
         MarketPopUp.setScene(scene);
