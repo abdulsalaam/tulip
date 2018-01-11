@@ -88,6 +88,7 @@ public class StockExchange implements Runnable {
             if (isClosed()) {
                 updateStockPrices();
                 processTransactions();
+                break;
             }
         }
     }
@@ -212,7 +213,7 @@ public class StockExchange implements Runnable {
      */
     private void processTransactions() {
 
-        System.out.println("PROCESSING TRANSACTIONS");
+        System.out.println("Processing transactions");
 
         // Iterates over each company
         for (Company c : companies.values()) {

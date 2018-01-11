@@ -36,10 +36,18 @@ public class StockExchangeUI extends Application {
     private List<Button> buttons = new ArrayList<>();
     private static StockExchange stockExchange;
 
-    public static void main(String [] args) throws IOException {
-        stockExchange = new StockExchange(new ServerSocket(4000));
-        new Thread(stockExchange).start();
-        Application.launch();
+    public static void main(String [] args) {
+        startup(4000);
+    }
+
+    public static void startup(int serverSocketPort) {
+        try {
+            stockExchange = new StockExchange(new ServerSocket(serverSocketPort));
+            new Thread(stockExchange).start();
+            Application.launch();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

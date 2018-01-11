@@ -36,8 +36,12 @@ public class ClientUI extends Application {
     private static Client client;
 
     public static void main(String [] args) {
+        startup("Emma", "127.0.0.1", 5000);
+    }
+
+    public static void startup(String name, String socketHost, int socketPort) {
         try {
-            client = new Client("Emma Watson", 3000, new Socket("127.0.0.1", 5000));
+            client = new Client(name, 100000, new Socket(socketHost, socketPort));
             new Thread(client).start();
             Application.launch();
         } catch (IOException e) {

@@ -38,12 +38,12 @@ public class BrokerUI extends Application {
     private static Broker broker;
 
     public static void main(String [] args) {
+        startup("Leonardo", 5000, "127.0.0.1", 4000);
+    }
+
+    public static void startup(String name, int serverSocketPort, String socketHost, int socketPort) {
         try {
-            broker = new Broker(
-                    "Leonardo di Caprio",
-                    new ServerSocket(5000),
-                    new Socket("127.0.0.1", 4000)
-            );
+            broker = new Broker(name, new ServerSocket(serverSocketPort), new Socket(socketHost, socketPort));
             new Thread(broker).start();
             Application.launch();
         } catch (IOException e) {
