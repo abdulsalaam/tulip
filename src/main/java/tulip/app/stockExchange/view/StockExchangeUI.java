@@ -29,11 +29,9 @@ import tulip.app.stockExchange.model.StockExchange;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class StockExchangeUI extends Application {
+public class StockExchangeUI extends Application implements Observer {
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
@@ -41,8 +39,13 @@ public class StockExchangeUI extends Application {
 
     public static void main(String [] args) throws IOException {
         stockExchange = new StockExchange(new ServerSocket(4000));
-        stockExchange.start();
+        new Thread(stockExchange).start();
         Application.launch();
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+
     }
 
     @Override

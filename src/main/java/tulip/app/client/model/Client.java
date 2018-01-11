@@ -14,11 +14,12 @@ import tulip.service.producerConsumer.ProducerMessenger;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
 /**
  * This class represents a client
  */
-public class Client extends Thread implements ProducerMessenger {
+public class Client extends Observable implements Runnable, ProducerMessenger {
 
     /** The name of the client (unique identifier) */
     private final String NAME;

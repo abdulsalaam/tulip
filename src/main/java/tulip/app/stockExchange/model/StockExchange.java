@@ -9,13 +9,9 @@ import tulip.app.order.OrderType;
 import tulip.service.producerConsumer.Consumer;
 
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Date;
+import java.util.*;
 
-public class StockExchange extends Thread {
+public class StockExchange extends Observable implements Runnable {
 
     /** The name of the stock exchange */
     private final String NAME = "Stock Exchange";

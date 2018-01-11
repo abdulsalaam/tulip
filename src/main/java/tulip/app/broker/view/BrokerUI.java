@@ -27,11 +27,9 @@ import tulip.app.order.Order;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class BrokerUI extends Application{
+public class BrokerUI extends Application implements Observer {
 
     private static GridPane grid;
     private List<Button> buttons = new ArrayList<>();
@@ -44,16 +42,19 @@ public class BrokerUI extends Application{
                     new ServerSocket(5000),
                     new Socket("127.0.0.1", 4000)
             );
+            new Thread(broker).start();
+            Application.launch();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        broker.start();
-        Application.launch();
     }
 
     @Override
+    public void update(Observable o, Object arg) {
 
+    }
+
+    @Override
     public void start(Stage primaryStage) {
 
         primaryStage.setTitle("Tulip");
