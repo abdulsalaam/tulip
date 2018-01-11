@@ -69,7 +69,7 @@ public class ClientUI extends Application{
         }
 
         // Title
-        Text title = new Text("TULIP FOR CLIENTS");
+        Text title = new Text("Tulip for Clients");
         title.setFill(Color.WHITE);
         title.setFont(Font.font(STYLESHEET_CASPIAN, 50));
         grid.add(title, 3, 0);

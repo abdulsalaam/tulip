@@ -65,7 +65,7 @@ public class StockExchangeUI extends Application {
         }
 
         // Title
-        Text title = new Text("TULIP FOR THE STOCK EXCHANGE");
+        Text title = new Text("Tulip for the Stock Exchange");
         title.setFill(Color.WHITE);
         title.setFont(Font.font(STYLESHEET_CASPIAN, 50));
         grid.add(title, 3, 0);
