@@ -92,7 +92,7 @@ public class StockExchangeUI extends Application implements Observer {
         buttons.add(supplyBtn);
         grid.add(supplyBtn, 3, 1);
 
-        Button showBrokersBtn = new Button("My registered clients");
+        Button showBrokersBtn = new Button("Registered brokers");
         buttons.add(showBrokersBtn);
         grid.add(showBrokersBtn, 1, 3);
 

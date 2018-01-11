@@ -207,6 +207,8 @@ public class StockExchange extends Observable implements Runnable {
      */
     private void processTransactions() {
 
+        System.out.println("PROCESSING TRANSACTIONS");
+
         // Iterates over each company
         for (Company c : companies.values()) {
 
