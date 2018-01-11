@@ -81,7 +81,7 @@ public class Broker extends Thread implements ProducerMessenger {
 
                     case marketStateRequest:
                         producer.produce(new AppMessage(
-                                this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
+                                this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateRequest, marketState.toJSON()
                         ));
 
                         break;
