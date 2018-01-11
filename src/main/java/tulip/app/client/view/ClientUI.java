@@ -181,7 +181,7 @@ public class ClientUI extends Application{
 
 
         bc.setStyle(
-                "-fx-background-image: url('leo.png');-fx-background-size: cover");
+                "-fx-background-image: url('background.png');-fx-background-size: cover");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);
         MarketPopUp.setScene(scene);

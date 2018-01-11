@@ -83,6 +83,10 @@ public class BrokerUI extends Application{
         grid.add(title, 3, 0);
         GridPane.setHalignment(title, HPos.CENTER);
 
+        // Label
+        Label cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
+        grid.add(cash, 0, 0);
+
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
@@ -114,6 +118,8 @@ public class BrokerUI extends Application{
         placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 broker.placeOrder();
+                cash.setText("Cash: "+String.valueOf(broker.getCash()));
+
             }
         });
 
@@ -123,6 +129,8 @@ public class BrokerUI extends Application{
             }
 
         });
+
+
 
         // Style and final set up
         root.setStyle(
