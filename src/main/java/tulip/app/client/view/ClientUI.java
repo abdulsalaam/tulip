@@ -1,6 +1,8 @@
 package tulip.app.client.view;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -10,10 +12,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -22,6 +21,8 @@ import javafx.stage.Stage;
 import tulip.app.MarketState;
 import tulip.app.Util;
 import tulip.app.client.model.Client;
+import tulip.app.exceptions.IllegalOrderException;
+import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
 import static javafx.scene.paint.Color.ALICEBLUE;
 import java.io.IOException;
@@ -220,9 +221,8 @@ public class ClientUI extends Application {
             grid.getRowConstraints().add(row);
         }
 
-        // Text fields
-        final TextField company = new TextField();
-        company.setPromptText("Company");
+        @SuppressWarnings("unchecked")
+        ComboBox company = new ComboBox(FXCollections.observableArrayList(client.getMarketState().keySet()));
 
         final TextField nbStock = new TextField();
         nbStock.setPromptText("Number of stocks");
@@ -238,22 +238,34 @@ public class ClientUI extends Application {
         // Actions
         purchase.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                if (company.getText().equals("") || nbStock.getText().equals("") || price.getText().equals("")) {
+                if ( company.getValue() == null || nbStock.getText().equals("") || price.getText().equals("")) {
                     Util.warningWindow("Error", "Please fill all the fields", "");
                 } else {
-                    client.placePurchaseOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
-                    showOrderPlacement.close();
+                    try {
+                        client.placePurchaseOrder((String) company.getValue(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                        showOrderPlacement.close();
+                    } catch (RegistrationException e) {
+                        Util.warningWindow("Registration error", "The client is not registered", "");
+                    } catch (IllegalOrderException e) {
+                        Util.warningWindow("Illegal order", "You do not have enough money available for this operation", "");
+                    }
                 }
             }
         });
 
         sell.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                if (company.getText().equals("") || nbStock.getText().equals("") || price.getText().equals("")) {
+                if ( company.getValue() == null || nbStock.getText().equals("") || price.getText().equals("")) {
                     Util.warningWindow("Error", "Please fill all the fields", "");
                 } else {
-                    client.placeSellOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
-                    showOrderPlacement.close();
+                    try {
+                        client.placeSellOrder((String) company.getValue(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                        showOrderPlacement.close();
+                    } catch (RegistrationException e) {
+                        Util.warningWindow("Registration error", "The client is not registered", "");
+                    } catch (IllegalOrderException e) {
+                        Util.warningWindow("Illegal order", "You do not have enough stocks available for this operation", "");
+                    }
                 }
             }
         });
