@@ -84,9 +84,12 @@ public class BrokerUI extends Application {
 
         // Label
         connected = new Label("Not connected");
+        connected.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(connected, 0, 0);
 
+
         cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
+        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(cash, 0, 1);
 
         // Buttons
@@ -102,7 +105,7 @@ public class BrokerUI extends Application {
         buttons.add(requestMarketStateBtn);
         grid.add(showPendingOrdersBtn, 5, 1);
 
-        Button showClientsBtn = new Button("My registered brokers");
+        Button showClientsBtn = new Button("My registered clients");
         buttons.add(showClientsBtn);
         grid.add(showClientsBtn, 3, 3);
 

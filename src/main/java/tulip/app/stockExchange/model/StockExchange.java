@@ -207,6 +207,8 @@ public class StockExchange implements Runnable {
      */
     private void processTransactions() {
 
+        System.out.println("PROCESSING TRANSACTIONS");
+
         // Iterates over each company
         for (Company c : companies.values()) {
 

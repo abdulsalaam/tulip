@@ -22,10 +22,12 @@ import javafx.stage.Stage;
 import tulip.app.MarketState;
 import tulip.app.client.model.Client;
 import tulip.app.order.Order;
-
+import static javafx.scene.paint.Color.ALICEBLUE;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
+
+import static javafx.scene.paint.Color.ALICEBLUE;
 
 public class ClientUI extends Application {
 
@@ -75,9 +77,13 @@ public class ClientUI extends Application {
 
         // Label
         connected = new Label("Not connected");
+        connected.setTextFill(ALICEBLUE);
+        connected.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(connected, 0, 0);
 
         cash = new Label("Cash: "+ String.valueOf(client.getCash()));
+        cash.setTextFill(ALICEBLUE);
+        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(cash, 0, 1);
 
         // Buttons
