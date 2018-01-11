@@ -204,7 +204,8 @@ public class StockExchange implements Runnable {
         for (Map.Entry<String, Company> entry : companies.entrySet()) {
             Company company = entry.getValue();
             double deltaPrice =
-                    (company.nbOfStocksForPurchase() - company.nbOfStocksForSale()) / company.getNB_EMITTED_STOCKS();
+                    (company.nbOfStocksForPurchase() - (company.nbOfStocksForSale() + company.getNbFloatingStocks()) )
+                            / company.getNB_EMITTED_STOCKS();
             double newStockPrice = company.getStockPrice() * (1 + deltaPrice);
             company.updateStockPrice(newStockPrice);
             System.out.println(entry.getKey() + " price is now: " + newStockPrice);
@@ -227,8 +228,8 @@ public class StockExchange implements Runnable {
                 // Retrieves and removes the head of the pendingPurchaseOrder queue
                 Order purchaseOrder = c.getPendingPurchaseOrders().poll();
 
-                // If the desired price is inferior or equal to the market price
-                if (purchaseOrder.getDesiredPrice() <= c.getStockPrice()) {
+                // If the desired price is superior or equal to the market price
+                if (purchaseOrder.getDesiredPrice() >= c.getStockPrice()) {
 
                     // Sells the floating stocks
                     if (c.getNbFloatingStocks() > 0) {
