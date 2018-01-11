@@ -6,12 +6,6 @@ import tulip.app.stockExchange.view.StockExchangeUI;
 
 public class Launcher {
 
-    /*
-    stock-exchange server-socket
-    broker name server-socket-port socket-host socket-port
-    client name socket-host socket-port
-     */
-
     public static void main(String[] args) {
         switch (args[0]) {
 
@@ -24,12 +18,18 @@ public class Launcher {
                 break;
 
             case "client":
-                ClientUI.startup(args[1], args[3], Integer.parseInt(args[4]));
+                ClientUI.startup(args[1], args[2], Integer.parseInt(args[3]));
                 break;
 
             default:
                 System.out.println("Please enter valid arguments");
-
+                System.out.println("To launch the stock exchange:");
+                System.out.println("    stock-exchange [server-socket-port]");
+                System.out.println("To launch the broker:");
+                System.out.println("    broker [name] [server-socket-port] [socket-host] [socket-port]");
+                System.out.println("To launch the client");
+                System.out.println("    client [name] [socket-host] [socket-port]");
+                break;
         }
     }
 }

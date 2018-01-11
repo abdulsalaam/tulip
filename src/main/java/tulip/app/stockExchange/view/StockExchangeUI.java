@@ -137,8 +137,7 @@ public class StockExchangeUI extends Application {
         });
 
         // Style and final set up
-        root.setStyle(
-                "-fx-background-image: url('city.jpg');-fx-background-size: cover");
+        root.setStyle("-fx-background-image: url('./city.jpg');-fx-background-size: cover");
 
         root.getChildren().add(grid);
 
