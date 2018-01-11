@@ -37,9 +37,6 @@ public class BrokerUI extends Application {
     private List<Button> buttons = new ArrayList<>();
     private static Broker broker;
 
-    private static Label cash;
-    private static Label connected;
-
     public static void main(String [] args) {
         try {
             broker = new Broker(
@@ -85,12 +82,12 @@ public class BrokerUI extends Application {
         GridPane.setHalignment(title, HPos.CENTER);
 
         // Label
-        connected = new Label("Not connected");
+        Label connected = new Label("Not connected");
         connected.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(connected, 0, 0);
 
 
-        cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
+        Label cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
         cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(cash, 0, 1);
 
@@ -256,13 +253,5 @@ public class BrokerUI extends Application {
         showClients.setScene(scene);
         showClients.show();
 
-    }
-
-    public static void setCashAmount(double amount) {
-        cash.setText(Double.toString(amount));
-    }
-
-    public static void setConnectedText(String text) {
-        connected.setText(text);
     }
 }

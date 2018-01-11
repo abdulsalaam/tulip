@@ -99,7 +99,6 @@ public class Broker implements Runnable, ProducerMessenger {
                             closeTheDay();
                         }
                         break;
-
                 }
             }
         }
@@ -116,7 +115,6 @@ public class Broker implements Runnable, ProducerMessenger {
             case registrationAcknowledgment:
                 if (!isRegistered) {
                     this.isRegistered = true;
-                    BrokerUI.setConnectedText("Connected");
                     System.out.println("Broker " + NAME + " is now registered");
                 }
                 break;
@@ -212,7 +210,7 @@ public class Broker implements Runnable, ProducerMessenger {
      * @return true if the client is registered, false otherwise
      */
     private boolean checkClientRegistered(String clientName) {
-        for(String s : clients) {
+        for (String s : clients) {
             if (s.equals(clientName)) {
                 return true;
             }
@@ -241,11 +239,10 @@ public class Broker implements Runnable, ProducerMessenger {
      * has been proceeded.
      */
     private void notifyOfTransaction(String clientName) {
-            producer.produce(new AppMessage(
-                    this.NAME, ActorType.broker, clientName, ActorType.client, AppMessageContentType.order, ""
+        producer.produce(new AppMessage(
+                this.NAME, ActorType.broker, clientName, ActorType.client, AppMessageContentType.order, ""
 
-            ));
-
+        ));
     }
 
     /**
@@ -256,7 +253,6 @@ public class Broker implements Runnable, ProducerMessenger {
     private void calculateCommission(Order order) {
         double commission = order.getActualAmount() * COMMISSION_RATE;
         this.cash += commission;
-        BrokerUI.setCashAmount(cash);
     }
 
     /**
@@ -264,9 +260,9 @@ public class Broker implements Runnable, ProducerMessenger {
      * and informs the stock exchange
      */
     private void closeTheDay(){
-            producer.produce(new AppMessage(
-                    this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
-            ));
+        producer.produce(new AppMessage(
+                this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
+        ));
     }
 
     public List<Order> getPendingOrders() {

@@ -34,9 +34,6 @@ public class ClientUI extends Application {
     private static List<Button> buttons = new ArrayList<>();
     private static Client client;
 
-    private static Label cash;
-    private static Label connected;
-
     public static void main(String [] args) {
         try {
             client = new Client("Emma", 3000, new Socket("127.0.0.1", 5000));
@@ -75,12 +72,12 @@ public class ClientUI extends Application {
         GridPane.setHalignment(title, HPos.CENTER);
 
         // Label
-        connected = new Label("Not connected");
+        Label connected = new Label("Not connected");
         connected.setTextFill(ALICEBLUE);
         connected.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(connected, 0, 0);
 
-        cash = new Label("Cash: "+ String.valueOf(client.getCash()));
+        Label cash = new Label("Cash: "+ String.valueOf(client.getCash()));
         cash.setTextFill(ALICEBLUE);
         cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
         grid.add(cash, 0, 1);
@@ -304,13 +301,5 @@ public class ClientUI extends Application {
         bc.getData().addAll(serie);
         MarketPopUp.setScene(scene);
         MarketPopUp.show();
-    }
-
-    public static void setCashAmount(double amount) {
-        cash.setText(Double.toString(amount));
-    }
-
-    public static void setConnectedText(String text) {
-        connected.setText(text);
     }
 }
