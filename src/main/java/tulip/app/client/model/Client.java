@@ -342,4 +342,7 @@ public class Client implements Runnable, ProducerMessenger {
         return cash;
     }
 
+    public String getNAME() {
+        return NAME;
+    }
 }

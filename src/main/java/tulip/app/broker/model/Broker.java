@@ -294,4 +294,8 @@ public class Broker implements Runnable, ProducerMessenger {
     public List<String> getClients() {
         return clients;
     }
+
+    public String getNAME() {
+        return NAME;
+    }
 }

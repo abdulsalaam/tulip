@@ -81,6 +81,10 @@ public class BrokerUI extends Application {
         grid.add(title, 3, 0);
         GridPane.setHalignment(title, HPos.CENTER);
 
+        Label name = new Label("    " + broker.getNAME());
+        name.setFont(Font.font(STYLESHEET_CASPIAN, 20));
+        grid.add(name, 0, 0);
+
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
