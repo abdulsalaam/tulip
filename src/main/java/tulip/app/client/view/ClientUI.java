@@ -75,6 +75,10 @@ public class ClientUI extends Application{
         grid.add(title, 3, 0);
         GridPane.setHalignment(title, HPos.CENTER);
 
+        // Label
+        Label cash = new Label("Cash: "+ String.valueOf(client.getCash()));
+        grid.add(cash, 0, 0);
+
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
@@ -117,12 +121,14 @@ public class ClientUI extends Application{
         pendingPurchaseOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 showOrders(client.getPendingPurchaseOrders());
+                cash.setText("Cash: "+String.valueOf(client.getCash()));
             }
         });
 
         pendingSellOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 showOrders(client.getPendingSellOrders());
+                cash.setText("Cash: "+String.valueOf(client.getCash()));
             }
         });
 
