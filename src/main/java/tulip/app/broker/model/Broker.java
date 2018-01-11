@@ -111,8 +111,10 @@ public class Broker extends Thread implements ProducerMessenger {
         switch (appMessage.getAppMessageContentType()) {
 
             case registrationAcknowledgment:
-                this.isRegistered = true;
-                System.out.println("Broker " + NAME + " is now registered");
+                if (!isRegistered) {
+                    this.isRegistered = true;
+                    System.out.println("Broker " + NAME + " is now registered");
+                }
                 break;
 
             case marketStateReply:
