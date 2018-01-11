@@ -81,16 +81,6 @@ public class BrokerUI extends Application {
         grid.add(title, 3, 0);
         GridPane.setHalignment(title, HPos.CENTER);
 
-        // Label
-        Label connected = new Label("Not connected");
-        connected.setFont(Font.font(STYLESHEET_CASPIAN, 15));
-        grid.add(connected, 0, 0);
-
-
-        Label cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
-        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
-        grid.add(cash, 0, 1);
-
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
@@ -127,7 +117,6 @@ public class BrokerUI extends Application {
             public void handle(ActionEvent event) {
                 try {
                     broker.placeOrder();
-                    cash.setText("Cash: " + String.valueOf(broker.getCash()));
                 } catch (IndexOutOfBoundsException e) {
                     Util.warningWindow("Index out of bounds", "No more order to process", "");
                 } catch (RegistrationException e) {
