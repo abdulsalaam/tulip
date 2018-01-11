@@ -298,7 +298,6 @@ public class Client implements Runnable, ProducerMessenger {
 
         // Update cash
         cash -= order.getActualAmount() * (1 + COMMISSION_RATE);
-        ClientUI.setCashAmount(cash);
 
         // Update portfolio
         portfolio.addStocks(order.getCompany(), order.getActualNbOfStocks());
