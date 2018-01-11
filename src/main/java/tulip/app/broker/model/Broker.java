@@ -32,20 +32,11 @@ public class Broker extends Thread implements ProducerMessenger {
     /** (Registered) clients list of the broker */
     private List<String> clients = new ArrayList<>();
 
-    /** (Not yet registered) prospects of the broker requesting registration */
-    private List<String> clientsRequestingRegistration = new ArrayList<>();
-
     /** Clients of the broker who closed the day */
     private List<String> closedClients = new ArrayList<>();
 
     /** Orders (which can be both purchases and sellings) not yet proceeded */
     private List<Order> pendingOrders = new ArrayList<>();
-
-    /** Counts the selling orders proceeded by the broker */
-    private int sellOrderCounter = 0;
-
-    /** Counts the purchase orders proceeded by the broker */
-    private int purchaseOrderCounter = 0;
 
     /** Current market state (list of companies and associated prices */
     private MarketState marketState = new MarketState();

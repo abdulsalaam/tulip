@@ -263,7 +263,7 @@ public class Client extends Thread implements ProducerMessenger {
     }
 
     /**
-     * Called upon receipt of a processed sell order to takes into account the processed sell order.
+     * Called upon receipt of a processed sell order to take into account the processed sell order.
      * @param order The sell order received
      */
     private void processSellOrder(Order order) {
@@ -281,7 +281,7 @@ public class Client extends Thread implements ProducerMessenger {
     }
 
     /**
-     * Called upon receipt of a processed purchase order to takes into account the processed purchase order.
+     * Called upon receipt of a processed purchase order to take into account the processed purchase order.
      * @param order
      */
     private void processPurchaseOrder(Order order) {
