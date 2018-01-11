@@ -1,6 +1,7 @@
 package tulip.service.producerConsumer;
 
 import tulip.app.appMessage.AppMessage;
+import tulip.service.Config;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Target;
 import tulip.service.sockets.MultiServerSocket;
@@ -97,7 +98,7 @@ public class Consumer {
         }
 
         try {
-            Thread.sleep(500);
+            Thread.sleep(Config.TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -217,7 +218,7 @@ public class Consumer {
         }
 
         try {
-            Thread.sleep(500);
+            Thread.sleep(Config.TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -244,7 +245,7 @@ public class Consumer {
         }
 
         try {
-            Thread.sleep(500);
+            Thread.sleep(Config.TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
