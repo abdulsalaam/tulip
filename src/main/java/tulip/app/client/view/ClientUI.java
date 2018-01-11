@@ -1,33 +1,33 @@
 package tulip.app.client.view;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.MarketState;
+import tulip.app.Util;
 import tulip.app.client.model.Client;
+import tulip.app.exceptions.IllegalOrderException;
+import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
 import static javafx.scene.paint.Color.ALICEBLUE;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
-
-import static javafx.scene.paint.Color.ALICEBLUE;
 
 public class ClientUI extends Application {
 
@@ -35,12 +35,13 @@ public class ClientUI extends Application {
     private static List<Button> buttons = new ArrayList<>();
     private static Client client;
 
-    private static Label cash;
-    private static Label connected;
-
     public static void main(String [] args) {
+        startup("Emma", "127.0.0.1", 5000);
+    }
+
+    public static void startup(String name, String socketHost, int socketPort) {
         try {
-            client = new Client("Emma", 3000, new Socket("127.0.0.1", 5000));
+            client = new Client(name, 100000, new Socket(socketHost, socketPort));
             new Thread(client).start();
             Application.launch();
         } catch (IOException e) {
@@ -74,17 +75,6 @@ public class ClientUI extends Application {
         title.setFont(Font.font(STYLESHEET_CASPIAN, 50));
         grid.add(title, 3, 0);
         GridPane.setHalignment(title, HPos.CENTER);
-
-        // Label
-        connected = new Label("Not connected");
-        connected.setTextFill(ALICEBLUE);
-        connected.setFont(Font.font(STYLESHEET_CASPIAN, 15));
-        grid.add(connected, 0, 0);
-
-        cash = new Label("Cash: "+ String.valueOf(client.getCash()));
-        cash.setTextFill(ALICEBLUE);
-        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
-        grid.add(cash, 0, 1);
 
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
@@ -128,14 +118,12 @@ public class ClientUI extends Application {
         pendingPurchaseOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 showOrders(client.getPendingPurchaseOrders());
-                cash.setText("Cash: "+String.valueOf(client.getCash()));
             }
         });
 
         pendingSellOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 showOrders(client.getPendingSellOrders());
-                cash.setText("Cash: "+String.valueOf(client.getCash()));
             }
         });
 
@@ -218,15 +206,14 @@ public class ClientUI extends Application {
             ColumnConstraints column = new ColumnConstraints(150);
             grid.getColumnConstraints().add(column);
         }
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
         {
             RowConstraints row = new RowConstraints(70);
             grid.getRowConstraints().add(row);
         }
 
-        // Text fields
-        final TextField company = new TextField();
-        company.setPromptText("Company");
+        @SuppressWarnings("unchecked")
+        ComboBox company = new ComboBox(FXCollections.observableArrayList(client.getMarketState().keySet()));
 
         final TextField nbStock = new TextField();
         nbStock.setPromptText("Number of stocks");
@@ -242,23 +229,47 @@ public class ClientUI extends Application {
         // Actions
         purchase.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.placePurchaseOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                if ( company.getValue() == null || nbStock.getText().equals("") || price.getText().equals("")) {
+                    Util.warningWindow("Error", "Please fill all the fields", "");
+                } else {
+                    try {
+                        client.placePurchaseOrder((String) company.getValue(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                        showOrderPlacement.close();
+                    } catch (RegistrationException e) {
+                        Util.warningWindow("Registration error", "The client is not registered", "");
+                    } catch (IllegalOrderException e) {
+                        Util.warningWindow("Illegal order", "You do not have enough money available for this operation", "");
+                    }
+                }
             }
         });
 
         sell.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.placeSellOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                if ( company.getValue() == null || nbStock.getText().equals("") || price.getText().equals("")) {
+                    Util.warningWindow("Error", "Please fill all the fields", "");
+                } else {
+                    try {
+                        client.placeSellOrder((String) company.getValue(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                        showOrderPlacement.close();
+                    } catch (RegistrationException e) {
+                        Util.warningWindow("Registration error", "The client is not registered", "");
+                    } catch (IllegalOrderException e) {
+                        Util.warningWindow("Illegal order", "You do not have enough stocks available for this operation", "");
+                    }
+                }
             }
         });
 
-
-        gridpane.add(company, 0, 1);
-        gridpane.add(nbStock, 0, 2);
-        gridpane.add(price, 0, 3);
+        gridpane.add(new Label("Company:"), 0, 1);
+        gridpane.add(company, 0, 2);
+        gridpane.add(new Label("Number of stocks: "),0, 3 );
+        gridpane.add(nbStock, 0, 4);
+        gridpane.add(new Label("Price: "), 0, 5);
+        gridpane.add(price, 0, 6);
 
         gridpane.add(purchase, 3, 3);
-        gridpane.add(sell, 3, 1);
+        gridpane.add(sell, 3, 5);
 
         root.getChildren().add(gridpane);
         showOrderPlacement.setScene(scene);
@@ -293,13 +304,5 @@ public class ClientUI extends Application {
         bc.getData().addAll(serie);
         MarketPopUp.setScene(scene);
         MarketPopUp.show();
-    }
-
-    public static void setCashAmount(double amount) {
-        cash.setText(Double.toString(amount));
-    }
-
-    public static void setConnectedText(String text) {
-        connected.setText(text);
     }
 }

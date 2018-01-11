@@ -38,11 +38,16 @@ public class StockExchange implements Runnable {
     public StockExchange(ServerSocket serverSocket) {
         this.consumer = new Consumer(NAME, serverSocket);
 
-        // Adds companies
-        addCompany("Apple", 500, 70);
-        addCompany("Google", 1000, 40);
-        addCompany("Tesla", 800, 48);
-        addCompany("Amazon", 900, 50);
+        try {
+            // Adds companies
+            addCompany("Apple", 500, 70);
+            addCompany("Alphabet", 1000, 40);
+            addCompany("Tesla", 800, 48);
+            addCompany("Amazon", 900, 50);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -83,6 +88,7 @@ public class StockExchange implements Runnable {
             if (isClosed()) {
                 updateStockPrices();
                 processTransactions();
+                break;
             }
         }
     }
@@ -141,11 +147,11 @@ public class StockExchange implements Runnable {
      * @param name The name of the company
      * @param nbEmittedStocks The number of emitted stocks for this company
      * @param initialStockPrice The initial stock price
+     * @throws IllegalArgumentException If the company is already in the list
      */
-    public void addCompany(String name, int nbEmittedStocks, double initialStockPrice) {
-        if (!companies.containsKey(name)) {
-            companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
-        }
+    public void addCompany(String name, int nbEmittedStocks, double initialStockPrice) throws IllegalArgumentException {
+        if (companies.containsKey(name)) { throw new IllegalArgumentException(); }
+        companies.put(name, new Company(name, nbEmittedStocks, initialStockPrice));
     }
 
     /**
@@ -207,7 +213,7 @@ public class StockExchange implements Runnable {
      */
     private void processTransactions() {
 
-        System.out.println("PROCESSING TRANSACTIONS");
+        System.out.println("Processing transactions");
 
         // Iterates over each company
         for (Company c : companies.values()) {
@@ -296,8 +302,6 @@ public class StockExchange implements Runnable {
     public MarketState getMarketState() {
         MarketState marketState = new MarketState();
         for (Map.Entry<String, Company> entry : companies.entrySet()) {
-            System.out.println(entry.getKey());
-            System.out.println(entry.getValue().getStockPrice());
             marketState.put(entry.getKey(), entry.getValue().getStockPrice());
         }
         return marketState;

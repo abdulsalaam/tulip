@@ -96,7 +96,6 @@ public class Client implements Runnable, ProducerMessenger {
                 if (!isRegistered) {
                     this.isRegistered = true;
                     this.broker = appMessage.getSender();
-                    ClientUI.setConnectedText("Connected");
                     System.out.println("Client " + NAME + " is now to registered");
                 }
                 break;
@@ -281,7 +280,6 @@ public class Client implements Runnable, ProducerMessenger {
 
         // Update cash
         cash += order.getActualAmount() * (1 - COMMISSION_RATE);
-        ClientUI.setCashAmount(cash);
 
         // Update portfolio
         portfolio.removeStocks(order.getCompany(), order.getActualNbOfStocks());
@@ -300,7 +298,6 @@ public class Client implements Runnable, ProducerMessenger {
 
         // Update cash
         cash -= order.getActualAmount() * (1 + COMMISSION_RATE);
-        ClientUI.setCashAmount(cash);
 
         // Update portfolio
         portfolio.addStocks(order.getCompany(), order.getActualNbOfStocks());

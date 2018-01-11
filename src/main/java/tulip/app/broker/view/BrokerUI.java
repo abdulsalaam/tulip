@@ -21,7 +21,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.MarketState;
+import tulip.app.Util;
 import tulip.app.broker.model.Broker;
+import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
 
 import java.io.IOException;
@@ -35,16 +37,13 @@ public class BrokerUI extends Application {
     private List<Button> buttons = new ArrayList<>();
     private static Broker broker;
 
-    private static Label cash;
-    private static Label connected;
-
     public static void main(String [] args) {
+        startup("Leonardo", 5000, "127.0.0.1", 4000);
+    }
+
+    public static void startup(String name, int serverSocketPort, String socketHost, int socketPort) {
         try {
-            broker = new Broker(
-                    "Leonardo",
-                    new ServerSocket(5000),
-                    new Socket("127.0.0.1", 4000)
-            );
+            broker = new Broker(name, new ServerSocket(serverSocketPort), new Socket(socketHost, socketPort));
             new Thread(broker).start();
             Application.launch();
         } catch (IOException e) {
@@ -82,16 +81,6 @@ public class BrokerUI extends Application {
         grid.add(title, 3, 0);
         GridPane.setHalignment(title, HPos.CENTER);
 
-        // Label
-        connected = new Label("Not connected");
-        connected.setFont(Font.font(STYLESHEET_CASPIAN, 15));
-        grid.add(connected, 0, 0);
-
-
-        cash = new Label("Cash: "+ String.valueOf(broker.getCash()));
-        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
-        grid.add(cash, 0, 1);
-
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
@@ -126,8 +115,13 @@ public class BrokerUI extends Application {
 
         placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                broker.placeOrder();
-                cash.setText("Cash: "+String.valueOf(broker.getCash()));
+                try {
+                    broker.placeOrder();
+                } catch (IndexOutOfBoundsException e) {
+                    Util.warningWindow("Index out of bounds", "No more order to process", "");
+                } catch (RegistrationException e) {
+                    Util.warningWindow("Registration error", "The broker is not registered", "");
+                }
 
             }
         });
@@ -240,7 +234,7 @@ public class BrokerUI extends Application {
             grid.getRowConstraints().add(row);
         }
         int index = 0;
-        for(String client : clients) {
+        for (String client : clients) {
             gridpane.add(new Label(client), 0, index++);
         }
 
@@ -248,13 +242,5 @@ public class BrokerUI extends Application {
         showClients.setScene(scene);
         showClients.show();
 
-    }
-
-    public static void setCashAmount(double amount) {
-        cash.setText(Double.toString(amount));
-    }
-
-    public static void setConnectedText(String text) {
-        connected.setText(text);
     }
 }
