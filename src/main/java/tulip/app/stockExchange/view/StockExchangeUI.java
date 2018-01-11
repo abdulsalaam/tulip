@@ -22,13 +22,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.MarketState;
-import tulip.app.client.model.Client;
+import tulip.app.Util;
 import tulip.app.order.Order;
 import tulip.app.stockExchange.model.StockExchange;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.*;
 
 public class StockExchangeUI extends Application {
@@ -177,7 +176,7 @@ public class StockExchangeUI extends Application {
 
     public static void showCompanyPlacement() {
 
-        Stage showOrderPlacement = new Stage();
+        Stage showCompanyPlacement = new Stage();
         Group root = new Group();
         Scene scene = new Scene(root, 500, 200);
 
@@ -188,7 +187,7 @@ public class StockExchangeUI extends Application {
             ColumnConstraints column = new ColumnConstraints(150);
             grid.getColumnConstraints().add(column);
         }
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
         {
             RowConstraints row = new RowConstraints(70);
             grid.getRowConstraints().add(row);
@@ -211,18 +210,26 @@ public class StockExchangeUI extends Application {
         // Actions
         addBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                stockExchange.addCompany(companyName.getText(), Integer.parseInt(nbEmittedStocks.getText()), Integer.parseInt(initialStockPrice.getText()));
+                if (companyName.getText().equals("") || nbEmittedStocks.getText().equals("") || initialStockPrice.getText().equals("")) {
+                    Util.warningWindow("Error", "Please fill all the fields", "");
+                } else {
+                    stockExchange.addCompany(companyName.getText(), Integer.parseInt(nbEmittedStocks.getText()), Integer.parseInt(initialStockPrice.getText()));
+                    showCompanyPlacement.close();
+                }
             }
         });
 
-        gridpane.add(companyName, 0, 1);
-        gridpane.add(nbEmittedStocks, 0, 2);
-        gridpane.add(initialStockPrice, 0, 3);
-        gridpane.add(addBtn, 3, 1);
+        gridpane.add(new Label("Company name: "), 0, 1);
+        gridpane.add(companyName, 0, 2);
+        gridpane.add(new Label("Number of emitted stocks: "), 0, 3);
+        gridpane.add(nbEmittedStocks, 0, 4);
+        gridpane.add(new Label("Initial stock price: "), 0, 5);
+        gridpane.add(initialStockPrice, 0, 6);
+        gridpane.add(addBtn, 3, 2);
 
         root.getChildren().add(gridpane);
-        showOrderPlacement.setScene(scene);
-        showOrderPlacement.show();
+        showCompanyPlacement.setScene(scene);
+        showCompanyPlacement.show();
     }
 
     public static void showPendingOrders(List<Order> pendingOrders){

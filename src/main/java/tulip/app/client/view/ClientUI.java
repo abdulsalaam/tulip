@@ -4,13 +4,13 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -20,14 +20,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.MarketState;
+import tulip.app.Util;
 import tulip.app.client.model.Client;
 import tulip.app.order.Order;
 import static javafx.scene.paint.Color.ALICEBLUE;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
-
-import static javafx.scene.paint.Color.ALICEBLUE;
 
 public class ClientUI extends Application {
 
@@ -218,7 +217,7 @@ public class ClientUI extends Application {
             ColumnConstraints column = new ColumnConstraints(150);
             grid.getColumnConstraints().add(column);
         }
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
         {
             RowConstraints row = new RowConstraints(70);
             grid.getRowConstraints().add(row);
@@ -242,23 +241,35 @@ public class ClientUI extends Application {
         // Actions
         purchase.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.placePurchaseOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                if (company.getText().equals("") || nbStock.getText().equals("") || price.getText().equals("")) {
+                    Util.warningWindow("Error", "Please fill all the fields", "");
+                } else {
+                    client.placePurchaseOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                    showOrderPlacement.close();
+                }
             }
         });
 
         sell.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                client.placeSellOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                if (company.getText().equals("") || nbStock.getText().equals("") || price.getText().equals("")) {
+                    Util.warningWindow("Error", "Please fill all the fields", "");
+                } else {
+                    client.placeSellOrder(company.getText(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                    showOrderPlacement.close();
+                }
             }
         });
 
-
-        gridpane.add(company, 0, 1);
-        gridpane.add(nbStock, 0, 2);
-        gridpane.add(price, 0, 3);
+        gridpane.add(new Label("Company:"), 0, 1);
+        gridpane.add(company, 0, 2);
+        gridpane.add(new Label("Number of stocks: "),0, 3 );
+        gridpane.add(nbStock, 0, 4);
+        gridpane.add(new Label("Price: "), 0, 5);
+        gridpane.add(price, 0, 6);
 
         gridpane.add(purchase, 3, 3);
-        gridpane.add(sell, 3, 1);
+        gridpane.add(sell, 3, 5);
 
         root.getChildren().add(gridpane);
         showOrderPlacement.setScene(scene);

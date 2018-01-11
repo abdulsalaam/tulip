@@ -240,7 +240,7 @@ public class BrokerUI extends Application {
             grid.getRowConstraints().add(row);
         }
         int index = 0;
-        for(String client : clients) {
+        for (String client : clients) {
             gridpane.add(new Label(client), 0, index++);
         }
 
