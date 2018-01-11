@@ -7,23 +7,24 @@ import tulip.app.stockExchange.view.StockExchangeUI;
 public class Launcher {
 
     /*
-    stock-exchange
+    stock-exchange server-socket
     broker name server-socket-port socket-host socket-port
     client name socket-host socket-port
      */
 
     public static void main(String[] args) {
         switch (args[0]) {
-            case "client":
-                ClientUI.startup(args[1], args[3], Integer.parseInt(args[4]));
+
+            case "stock-exchange":
+                StockExchangeUI.startup(Integer.parseInt(args[1]));
                 break;
 
             case "broker":
                 BrokerUI.startup(args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]));
                 break;
 
-            case "stock-exchange":
-                StockExchangeUI.startup(Integer.parseInt(args[1]));
+            case "client":
+                ClientUI.startup(args[1], args[3], Integer.parseInt(args[4]));
                 break;
 
             default:
