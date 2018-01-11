@@ -200,11 +200,14 @@ public class StockExchange implements Runnable {
      * Updates the stock prices of all the companies
      */
     private void updateStockPrices() {
-        for (Company company : companies.values()) {
+        System.out.println("Update stock prices");
+        for (Map.Entry<String, Company> entry : companies.entrySet()) {
+            Company company = entry.getValue();
             double deltaPrice =
                     (company.nbOfStocksForPurchase() - company.nbOfStocksForSale()) / company.getNB_EMITTED_STOCKS();
             double newStockPrice = company.getStockPrice() * (1 + deltaPrice);
             company.updateStockPrice(newStockPrice);
+            System.out.println(entry.getKey() + " price is now: " + newStockPrice);
         }
     }
 
