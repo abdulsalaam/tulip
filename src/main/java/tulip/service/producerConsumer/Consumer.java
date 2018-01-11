@@ -63,7 +63,7 @@ public class Consumer {
                     nbcell = 0;
                 }
 
-                System.out.println("Consumer " + NAME + " consumes: " + appMessage.toJSON());
+                // System.out.println("Consumer " + NAME + " consumes: " + appMessage.toJSON());
                 return appMessage;
             }
 
@@ -104,7 +104,7 @@ public class Consumer {
         }
 
         MULTI_SERVER_SOCKET.sendMessageToClient(producerNumber, message);
-        // System.out.println("Consumer " + NAME + " sends MESSAGE: " + message.toJSON());
+        System.out.println("Consumer " + NAME + " sends: " + appMessage.toJSON());
 
     }
 
@@ -166,6 +166,7 @@ public class Consumer {
      * @param appMessage The app message received
      * */
     private void uponReceiptOfAppMessage(AppMessage appMessage) {
+        System.out.println("Consumer " + NAME + " receives: " + appMessage.toJSON());
         synchronized (lock) {
             buffer[in] = appMessage;
             in = (in + 1) % BUFFER_SIZE;
@@ -184,7 +185,7 @@ public class Consumer {
 
     /** Adds a producer and starts the token system if needed */
     public void addProducer() {
-        System.out.println("Adds producer");
+        // System.out.println("Adds producer");
         synchronized (lock) {
             nbOfProducers++;
         }

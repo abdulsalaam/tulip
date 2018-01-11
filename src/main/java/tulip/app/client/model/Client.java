@@ -338,9 +338,6 @@ public class Client implements Runnable, ProducerMessenger {
     public List<Order> getPendingSellOrders() {
         return pendingSellOrders;
     }
-    public double getCash() {
-        return cash;
-    }
 
     public String getNAME() {
         return NAME;

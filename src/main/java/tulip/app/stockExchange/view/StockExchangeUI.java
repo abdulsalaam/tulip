@@ -98,8 +98,6 @@ public class StockExchangeUI extends Application {
         buttons.add(showBrokersBtn);
         grid.add(showBrokersBtn, 1, 3);
 
-
-        int index = 0;
         for(Button button : buttons) {
             button.setStyle("-fx-pref-width: 500px;");
             GridPane.setHalignment(button, HPos.CENTER);

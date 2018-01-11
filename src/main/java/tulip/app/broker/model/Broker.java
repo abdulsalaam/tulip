@@ -4,10 +4,8 @@ import tulip.app.MarketState;
 import tulip.app.appMessage.ActorType;
 import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
-import tulip.app.broker.view.BrokerUI;
 import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
-import tulip.app.order.OrderType;
 import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
 import tulip.service.producerConsumer.ProducerMessenger;
@@ -128,7 +126,7 @@ public class Broker implements Runnable, ProducerMessenger {
 
             case orderProcessed:
                 Order processedOrder = Order.fromJSON(appMessage.getContent());
-                notifyOfTransaction(processedOrder.getClient());
+                notifyOfClientTransaction(processedOrder.getClient(), processedOrder);
                 calculateCommission(processedOrder);
                 break;
 
@@ -238,11 +236,14 @@ public class Broker implements Runnable, ProducerMessenger {
      * After an agreement has been made, notifies the client that the order
      * has been proceeded.
      */
-    private void notifyOfTransaction(String clientName) {
-        producer.produce(new AppMessage(
-                this.NAME, ActorType.broker, clientName, ActorType.client, AppMessageContentType.order, ""
+    private void notifyOfClientTransaction(String clientName, Order order) {
+        consumer.sendAppMessageTo(
+                clientName,
+                new AppMessage(
+                        this.NAME, ActorType.broker, clientName, ActorType.client, AppMessageContentType.order, order.toJSON()
 
-        ));
+                )
+        );
     }
 
     /**
@@ -285,10 +286,6 @@ public class Broker implements Runnable, ProducerMessenger {
         }
 
         return marketState;
-    }
-
-    public double getCash() {
-        return cash;
     }
 
     public List<String> getClients() {

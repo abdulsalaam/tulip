@@ -55,7 +55,7 @@ public class Producer {
                 buffer[in] = appMessage;
                 in = (in + 1) % BUFFER_SIZE;
                 nbmess++;
-                System.out.println("Producer " + NAME + " produces: " + appMessage.toJSON());
+                // System.out.println("Producer " + NAME + " produces: " + appMessage.toJSON());
                 return true;
             }
 
@@ -115,6 +115,7 @@ public class Producer {
                     }
                 }
 
+                System.out.println("Producer " + NAME + " receives: " + appMessage.toJSON());
                 PRODUCER_MESSENGER.uponReceiptOfAppMessage(appMessage);
                 break;
         }
@@ -210,6 +211,6 @@ public class Producer {
         }
 
         CLIENT_SOCKET.sendMessage(message);
-        System.out.println("Producer " + NAME + " sends APP MESSAGE: " + message.toJSON());
+        System.out.println("Producer " + NAME + " sends: " + appMessage.toJSON());
     }
 }
