@@ -69,7 +69,7 @@ public class ClientUI extends Application{
         }
 
         // Title
-        Text title = new Text("Tulip for Clients");
+        Text title = new Text("TULIP FOR CLIENTS");
         title.setFill(Color.WHITE);
         title.setFont(Font.font(STYLESHEET_CASPIAN, 50));
         grid.add(title, 3, 0);
@@ -149,7 +149,7 @@ public class ClientUI extends Application{
 
         // Style and final set up
         root.setStyle(
-                "-fx-background-image: url('pineappleSoft.png');-fx-background-size: cover");
+                "-fx-background-image: url('leo.png');-fx-background-size: cover");
 
         root.getChildren().add(grid);
 
@@ -181,7 +181,7 @@ public class ClientUI extends Application{
 
 
         bc.setStyle(
-                "-fx-background-image: url('background.png');-fx-background-size: cover");
+                "-fx-background-image: url('leo.png');-fx-background-size: cover");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);
         MarketPopUp.setScene(scene);

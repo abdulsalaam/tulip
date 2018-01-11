@@ -77,7 +77,7 @@ public class BrokerUI extends Application{
         }
 
         // Title
-        Text title = new Text("Tulip for Brokers");
+        Text title = new Text("TULIP FOR BROKERS");
         title.setFill(Color.BLACK);
         title.setFont(Font.font(STYLESHEET_CASPIAN, 50));
         grid.add(title, 3, 0);
