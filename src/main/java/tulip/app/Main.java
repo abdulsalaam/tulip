@@ -34,7 +34,7 @@ public class Main {
 
                 if (!cmd.hasOption("sp")) { throw new ParseException("Missing mandatory --server-port argument."); }
 
-                int serverSocketPort = Integer.parseInt(cmd.getOptionValue("se"));
+                int serverSocketPort = Integer.parseInt(cmd.getOptionValue("sp"));
                 StockExchangeUI.startup(serverSocketPort);
 
             } else if (cmd.hasOption("b")) {
@@ -45,7 +45,7 @@ public class Main {
                 if (!cmd.hasOption("p")) { throw new ParseException("Missing mandatory --port argument."); }
 
                 String name = cmd.getOptionValue("n");
-                int serverSocketPort = Integer.parseInt(cmd.getOptionValue("se"));
+                int serverSocketPort = Integer.parseInt(cmd.getOptionValue("sp"));
                 String host = cmd.getOptionValue("h");
                 int port = Integer.parseInt(cmd.getOptionValue("p"));
                 BrokerUI.startup(name, serverSocketPort, host, port);
@@ -65,7 +65,7 @@ public class Main {
                 throw new ParseException("You must specify at least one of the following options: --stock-exchange --broker --client ");
             }
         } catch (ParseException e) {
-            System.err.println("Error parsing command line : " + e.getMessage());
+            System.err.println("Error parsing command line: " + e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("tulip", options);
             System.exit(1);
