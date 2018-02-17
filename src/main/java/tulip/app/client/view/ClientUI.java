@@ -13,6 +13,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -143,10 +144,12 @@ public class ClientUI extends Application {
             }
         });
 
-        // Style and final set up
-        root.setStyle("-fx-background-color: #CFCFCF;" +
-                "-fx-background-image: url('leo.png');" +
-                "-fx-background-size: cover;");
+        Image img = new Image(ClientUI.class.getResourceAsStream("/img/leo.png"));
+        BackgroundImage backgroundImage = new BackgroundImage(img,
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
+        root.setBackground(new Background(backgroundImage));
 
         root.getChildren().add(grid);
 
@@ -177,7 +180,6 @@ public class ClientUI extends Application {
 
         bc.setStyle(
                 "-fx-background-color: #CFCFCF;" +
-                "-fx-background-image: url('background.png');" +
                 "-fx-background-size: cover;");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);
@@ -294,7 +296,6 @@ public class ClientUI extends Application {
 
         bc.setStyle(
                 "-fx-background-color: #CFCFCF;" +
-                "-fx-background-image: url('background.png');" +
                 "-fx-background-size: cover;");
 
         Scene scene  = new Scene(bc,800,600);

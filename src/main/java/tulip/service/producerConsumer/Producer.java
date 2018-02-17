@@ -3,7 +3,7 @@ package tulip.service.producerConsumer;
 import tulip.app.appMessage.AppMessage;
 import tulip.service.Config;
 import tulip.service.producerConsumer.messages.Target;
-import tulip.service.sockets.ClientSocket;
+import tulip.sockets.ClientSocket;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Message;
 

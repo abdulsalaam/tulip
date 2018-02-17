@@ -39,13 +39,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <build>
+        <resources>
+            <resource>
+                <directory>resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <configuration>
-                    <mainClass>tulip.app.Main</mainClass>
+                    <mainClass>tulip.Main</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -53,7 +58,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>tulip.app.Main</mainClass>
+                            <mainClass>tulip.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

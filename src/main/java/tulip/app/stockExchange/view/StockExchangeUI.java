@@ -13,10 +13,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -134,11 +132,12 @@ public class StockExchangeUI extends Application {
 
         });
 
-        // Style and final set up
-        root.setStyle("-fx-background-color: #DBDBDB;" +
-                "-fx-background-image: url('./city.jpg');" +
-                "-fx-background-size: cover");
-
+        Image img = new Image(StockExchangeUI.class.getResourceAsStream("/img/city.jpg"));
+        BackgroundImage backgroundImage = new BackgroundImage(img,
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
+        root.setBackground(new Background(backgroundImage));
         root.getChildren().add(grid);
 
         primaryStage.setScene(scene);
@@ -168,7 +167,6 @@ public class StockExchangeUI extends Application {
 
         bc.setStyle(
                 "-fx-background-color: #CFCFCF;" +
-                "-fx-background-image: url('background.png');" +
                 "-fx-background-size: cover;");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);
@@ -267,7 +265,6 @@ public class StockExchangeUI extends Application {
 
         bc.setStyle("" +
                 "-fx-background-color: #CFCFCF;" +
-                "-fx-background-image: url('background.png');" +
                 "-fx-background-size: cover;");
 
         Scene scene  = new Scene(bc,800,600);

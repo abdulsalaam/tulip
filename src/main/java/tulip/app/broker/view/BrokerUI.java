@@ -145,13 +145,12 @@ public class BrokerUI extends Application {
         });
 
 
-
-
-
-        // Style and final set up
-        root.setStyle(
-                "-fx-background-color: #CFCFCF; -fx-background-image: url('tulipFlower.jpg');" +
-                "-fx-background-size: cover;");
+        Image img = new Image(BrokerUI.class.getResourceAsStream("/img/tulipFlower.jpg"));
+        BackgroundImage backgroundImage = new BackgroundImage(img,
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
+        root.setBackground(new Background(backgroundImage));
         root.getChildren().add(grid);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -180,7 +179,6 @@ public class BrokerUI extends Application {
 
         bc.setStyle("" +
                 "-fx-background-color: #CFCFCF;" +
-                "-fx-background-image: url('background.png');" +
                 "-fx-background-size: cover;");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);
@@ -209,7 +207,7 @@ public class BrokerUI extends Application {
 
 
         bc.setStyle(
-                "-fx-background-color: #CFCFCF; -fx-background-image: url('background.png');" +
+                "-fx-background-color: #CFCFCF;" +
                 "-fx-background-size: cover;");
         Scene scene  = new Scene(bc,800,600);
         bc.getData().addAll(serie);

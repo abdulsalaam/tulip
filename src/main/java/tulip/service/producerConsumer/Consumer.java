@@ -4,7 +4,7 @@ import tulip.app.appMessage.AppMessage;
 import tulip.service.Config;
 import tulip.service.producerConsumer.messages.ContentType;
 import tulip.service.producerConsumer.messages.Target;
-import tulip.service.sockets.MultiServerSocket;
+import tulip.sockets.MultiServerSocket;
 import tulip.service.producerConsumer.messages.Message;
 
 import java.net.ServerSocket;
