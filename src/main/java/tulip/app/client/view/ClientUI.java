@@ -56,8 +56,8 @@ public class ClientUI extends Application {
     public void start(Stage primaryStage) {
 
         primaryStage.setTitle("Tulip");
-        BorderPane root = new BorderPane();
-        Scene scene = new Scene(root, 1000, 500);
+        BorderPane borderPane = new BorderPane();
+        Scene scene = new Scene(borderPane, 1000, 500);
         grid = new GridPane();
 
         // Gridpane
@@ -191,12 +191,11 @@ public class ClientUI extends Application {
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
-        root.setBackground(new Background(backgroundImage));
+        borderPane.setBackground(new Background(backgroundImage));
 
-        root.getChildren().add(grid);
 
+        borderPane.setCenter(grid);
         primaryStage.setScene(scene);
-
         primaryStage.show();
 
     }
