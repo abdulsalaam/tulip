@@ -1,6 +1,8 @@
 package tulip.app.client.view;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -81,6 +83,46 @@ public class ClientUI extends Application {
         name.setStyle("-fx-text-fill: white;");
         name.setFont(Font.font(STYLESHEET_CASPIAN, 20));
         grid.add(name, 0, 0);
+
+        Label registration = new Label("Not registered");
+        registration.setStyle("-fx-text-fill: white;");
+        registration.setFont(Font.font(STYLESHEET_CASPIAN, 20));
+        grid.add(registration, 0, 1);
+
+        client.isRegisteredProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue o, Object oldVal, Object newVal) {
+                if (client.getIsRegistered()) {
+                    registration.setText("Registered");
+                } else {
+                    registration.setText("Not registered");
+                }
+            }
+        });
+
+        Label cash = new Label("Cash: " + client.getCash());
+        cash.setStyle("-fx-text-fill: white;");
+        cash.setFont(Font.font(STYLESHEET_CASPIAN, 20));
+        grid.add(cash, 0, 2);
+
+        client.cashProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue o, Object oldVal, Object newVal) {
+                cash.setText("Cash: " + client.getCash());
+            }
+        });
+
+        Label broker = new Label("Broker: " + client.getBroker());
+        broker.setStyle("-fx-text-fill: white;");
+        broker.setFont(Font.font(STYLESHEET_CASPIAN, 20));
+        grid.add(broker, 0, 3);
+
+        client.brokerProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue o, Object oldVal, Object newVal) {
+                broker.setText("Cash: " + client.getBroker());
+            }
+        });
 
         // Buttons
         Button requestMarketStateBtn = new Button("Request market state");

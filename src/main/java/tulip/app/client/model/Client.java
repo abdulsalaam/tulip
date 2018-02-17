@@ -1,10 +1,10 @@
 package tulip.app.client.model;
 
+import javafx.beans.property.*;
 import tulip.app.MarketState;
 import tulip.app.appMessage.ActorType;
 import tulip.app.appMessage.AppMessage;
 import tulip.app.appMessage.AppMessageContentType;
-import tulip.app.client.view.ClientUI;
 import tulip.app.exceptions.IllegalOrderException;
 import tulip.app.exceptions.RegistrationException;
 import tulip.app.order.Order;
@@ -14,8 +14,8 @@ import tulip.service.producerConsumer.ProducerMessenger;
 
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Observable;
 
 /**
  * This class represents a client
@@ -32,13 +32,13 @@ public class Client implements Runnable, ProducerMessenger {
     private Portfolio portfolio = new Portfolio();
 
     /** The name of the broker of this client (unique identifier) */
-    private String broker;
+    private StringProperty broker = new SimpleStringProperty("");
 
     /** Indicates whether the client is registered to a broker */
-    private boolean isRegistered = false;
+    private BooleanProperty isRegistered = new SimpleBooleanProperty(false);
 
     /** The amount of cash of the client */
-    private double cash;
+    private DoubleProperty cash = new SimpleDoubleProperty(0);
 
     /** The list of the sell orders placed by the client and not treated yet */
     private List<Order> pendingSellOrders = new ArrayList<>();
@@ -70,7 +70,7 @@ public class Client implements Runnable, ProducerMessenger {
      * @param socket A socket used to communicate with a broker
      */
     public Client(String name, double cash, Socket socket) {
-        this.cash = cash;
+        setCash(cash);
         this.NAME = name;
         this.producer = new Producer(name, socket, this);
     }
@@ -90,9 +90,9 @@ public class Client implements Runnable, ProducerMessenger {
         switch (appMessage.getAppMessageContentType()) {
 
             case registrationAcknowledgment:
-                if (!isRegistered) {
-                    this.isRegistered = true;
-                    this.broker = appMessage.getSender();
+                if (!getIsRegistered()) {
+                    setIsRegistered(true);
+                    setBroker(appMessage.getSender());
                     System.out.println("Client " + NAME + " is now to registered");
                 }
                 break;
@@ -121,7 +121,7 @@ public class Client implements Runnable, ProducerMessenger {
      */
     private void registerToBroker() {
         // Loop until the client is registered
-        while (!isRegistered) {
+        while (!getIsRegistered()) {
 
             // Sends registration message if possible
             producer.produce(
@@ -144,9 +144,9 @@ public class Client implements Runnable, ProducerMessenger {
      */
     public void requestMarketState() {
 
-        if (isRegistered) {
+        if (getIsRegistered()) {
             producer.produce(
-                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                    new AppMessage(NAME, ActorType.client, getBroker(), ActorType.broker,
                             AppMessageContentType.marketStateRequest, "")
             );
         } else {
@@ -166,15 +166,15 @@ public class Client implements Runnable, ProducerMessenger {
     public void placeSellOrder(String company, int nbOfStocks, double minSellingPrice)
             throws RegistrationException, IllegalOrderException {
 
-        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+        if (!getIsRegistered()) { throw new RegistrationException("The client is not registered"); }
 
         if (!sellOrderIsLegal(company, nbOfStocks)) { throw new IllegalOrderException("Illegal sell order"); }
 
         Order sellOrder =
-                new Order(++sellOrderCounter, OrderType.sell, company, NAME, broker, minSellingPrice, nbOfStocks);
+                new Order(++sellOrderCounter, OrderType.sell, company, NAME, getBroker(), minSellingPrice, nbOfStocks);
 
             producer.produce(
-                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                    new AppMessage(NAME, ActorType.client, getBroker(), ActorType.broker,
                             AppMessageContentType.order, sellOrder.toJSON())
             );
 
@@ -193,15 +193,15 @@ public class Client implements Runnable, ProducerMessenger {
     public void placePurchaseOrder(String company, int nbOfStocks, double maxPurchasingPrice)
             throws RegistrationException, IllegalOrderException {
 
-        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+        if (!getIsRegistered()) { throw new RegistrationException("The client is not registered"); }
 
         if (!(purchaseOrderIsLegal(nbOfStocks, maxPurchasingPrice))) { throw new IllegalOrderException("Illegal pruchase order"); }
 
         Order purchaseOrder =
-                new Order(++purchaseOrderCounter, OrderType.purchase, company, NAME, broker, maxPurchasingPrice, nbOfStocks);
+                new Order(++purchaseOrderCounter, OrderType.purchase, company, NAME, getBroker(), maxPurchasingPrice, nbOfStocks);
 
             producer.produce(
-                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                    new AppMessage(NAME, ActorType.client, getBroker(), ActorType.broker,
                             AppMessageContentType.order, purchaseOrder.toJSON())
             );
 
@@ -231,7 +231,7 @@ public class Client implements Runnable, ProducerMessenger {
 
         // Is the amount of the order (broker's commission included) inferior or equal to the amount of money
         // available ?
-        return  maxPurchasingPrice * nbOfStocks * (1 + COMMISSION_RATE) <= cash - amountOfPurchaseOrders() ;
+        return  maxPurchasingPrice * nbOfStocks * (1 + COMMISSION_RATE) <= getCash() - amountOfPurchaseOrders() ;
     }
 
     /**
@@ -276,7 +276,7 @@ public class Client implements Runnable, ProducerMessenger {
     private void processSellOrder(Order order) {
 
         // Update cash
-        cash += order.getActualAmount() * (1 - COMMISSION_RATE);
+        setCash(getCash() + order.getActualAmount() * (1 - COMMISSION_RATE));
 
         // Update portfolio
         portfolio.removeStocks(order.getCompany(), order.getActualNbOfStocks());
@@ -292,7 +292,7 @@ public class Client implements Runnable, ProducerMessenger {
     private void processPurchaseOrder(Order order) {
 
         // Update cash
-        cash -= order.getActualAmount() * (1 + COMMISSION_RATE);
+        setCash(getCash() - order.getActualAmount() * (1 + COMMISSION_RATE));
 
         // Update portfolio
         portfolio.addStocks(order.getCompany(), order.getActualNbOfStocks());
@@ -307,10 +307,10 @@ public class Client implements Runnable, ProducerMessenger {
      */
     public void closeTheDay() throws RegistrationException {
 
-        if (!isRegistered) { throw new RegistrationException("The client is not registered"); }
+        if (!getIsRegistered()) { throw new RegistrationException("The client is not registered"); }
 
             producer.produce(
-                    new AppMessage(NAME, ActorType.client, broker, ActorType.broker,
+                    new AppMessage(NAME, ActorType.client, getBroker(), ActorType.broker,
                             AppMessageContentType.endOfDayNotification, ""
                     ));
 
@@ -333,13 +333,50 @@ public class Client implements Runnable, ProducerMessenger {
     }
 
     public List<Order> getPendingPurchaseOrders() {
-        return pendingPurchaseOrders;
+        return Collections.unmodifiableList(pendingPurchaseOrders);
     }
+
     public List<Order> getPendingSellOrders() {
-        return pendingSellOrders;
+        return Collections.unmodifiableList(pendingSellOrders);
     }
 
     public String getNAME() {
         return NAME;
+    }
+
+    public final boolean getIsRegistered() {
+        return isRegistered.get();
+    }
+
+    public final void setIsRegistered(boolean value) {
+        isRegistered.set(value);
+    }
+
+    public final BooleanProperty isRegisteredProperty() {
+        return isRegistered;
+    }
+
+    public final double getCash() {
+        return cash.get();
+    }
+
+    public final void setCash(double value) {
+        cash.set(value);
+    }
+
+    public final DoubleProperty cashProperty() {
+        return cash;
+    }
+
+    public final String getBroker() {
+        return broker.get();
+    }
+
+    public final void setBroker(String value) {
+        broker.set(value);
+    }
+
+    public final StringProperty brokerProperty() {
+        return broker;
     }
 }
