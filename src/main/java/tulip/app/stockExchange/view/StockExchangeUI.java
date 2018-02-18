@@ -22,12 +22,7 @@ import java.util.List;
 
 public class StockExchangeUI extends Application {
 
-    private static Stage stage;
     private static StockExchange stockExchange;
-
-    public static void main(String[] args) {
-        StockExchangeUI.launch("4000");
-    }
 
     @Override
     public void init() throws Exception {
@@ -45,10 +40,9 @@ public class StockExchangeUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        stage = primaryStage;
-        stage.setTitle("Tulip - Stock Exchange");
-        stage.setScene(getScene());
-        stage.show();
+        primaryStage.setTitle("Tulip - Stock exchange");
+        primaryStage.setScene(getScene());
+        primaryStage.show();
     }
 
     private Scene getScene() {
@@ -56,14 +50,7 @@ public class StockExchangeUI extends Application {
         BorderPane borderPane = new BorderPane();
 
         /* Header */
-        TilePane tilePaneHeader = new TilePane();
-        tilePaneHeader.setPrefRows(1);
-        tilePaneHeader.setPrefColumns(2);
-        tilePaneHeader.setPrefTileWidth(450);
-        tilePaneHeader.setPrefTileHeight(100);
-        tilePaneHeader.setMaxWidth(900);
-        tilePaneHeader.getChildren().addAll(getHeaderLabels());
-        borderPane.setTop(tilePaneHeader);
+        borderPane.setTop(Util.getHeading("Stock exchange"));
 
         /* Body */
         TilePane tilePaneBody = new TilePane();
@@ -81,7 +68,7 @@ public class StockExchangeUI extends Application {
     }
 
     private List<Label> getHeaderLabels() {
-        Label name = new Label("Stock exchange");
+        Label name = new Label("");
         return Arrays.asList(name);
     }
 
@@ -105,17 +92,17 @@ public class StockExchangeUI extends Application {
             }
         });
 
-        Button demandBtn = new Button("Current demand");
-        buttons.add(demandBtn);
-        demandBtn.setOnAction(new EventHandler<ActionEvent>() {
+        Button purchaseOrders = new Button("Pending purchase orders");
+        buttons.add(purchaseOrders);
+        purchaseOrders.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 Util.showOrders(stockExchange.getCurrentDemand());
             }
         });
 
-        Button supplyBtn = new Button("Current supply");
-        buttons.add(supplyBtn);
-        supplyBtn.setOnAction(new EventHandler<ActionEvent>() {
+        Button sellOrders = new Button("Pending sell orders");
+        buttons.add(sellOrders);
+        sellOrders.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 Util.showOrders(stockExchange.getCurrentSupply());
             }
@@ -132,7 +119,7 @@ public class StockExchangeUI extends Application {
 
         ArrayList<StackPane> stackPanes = new ArrayList<>();
         for (Button button : buttons) {
-            button.setPrefWidth(250);
+            button.setPrefWidth(200);
             StackPane sp = new StackPane(button);
             StackPane.setAlignment(sp, Pos.CENTER);
             stackPanes.add(sp);
@@ -189,5 +176,4 @@ public class StockExchangeUI extends Application {
         showCompanyPlacement.setScene(scene);
         showCompanyPlacement.show();
     }
-
 }

@@ -5,10 +5,13 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import tulip.app.common.view.Util;
 import tulip.app.broker.model.Broker;
@@ -18,16 +21,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BrokerUI extends Application {
 
     private static Broker broker;
-
-    public static void main(String[] args) {
-        BrokerUI.launch("Leonardo", "5000", "127.0.0.1", "4000");
-    }
 
     @Override
     public void init() throws Exception {
@@ -59,14 +57,7 @@ public class BrokerUI extends Application {
         BorderPane borderPane = new BorderPane();
 
         /* Header */
-        TilePane tilePaneHeader = new TilePane();
-        tilePaneHeader.setPrefRows(1);
-        tilePaneHeader.setPrefColumns(2);
-        tilePaneHeader.setPrefTileWidth(450);
-        tilePaneHeader.setPrefTileHeight(100);
-        tilePaneHeader.setMaxWidth(900);
-        tilePaneHeader.getChildren().addAll(getHeaderLabels());
-        borderPane.setTop(tilePaneHeader);
+        borderPane.setTop(Util.getHeading("Broker - " + broker.getName()));
 
         /* Body */
         TilePane tilePaneBody = new TilePane();
@@ -79,23 +70,11 @@ public class BrokerUI extends Application {
         borderPane.setCenter(tilePaneBody);
 
         /* Footer */
-        TilePane tilePaneFooter = new TilePane();
-        tilePaneFooter.setPrefRows(1);
-        tilePaneFooter.setPrefColumns(2);
-        tilePaneFooter.setPrefTileWidth(450);
-        tilePaneFooter.setPrefTileHeight(100);
-        tilePaneFooter.setMaxWidth(900);
-        tilePaneFooter.getChildren().addAll(getFooterLabels());
-        borderPane.setBottom(tilePaneFooter);
+        borderPane.setBottom(getFooter());
 
         Util.setBackground(borderPane, "/img/tulip-flower.jpg");
 
         return new Scene(borderPane, 900, 400);
-    }
-
-    private List<Label> getHeaderLabels() {
-        Label name = new Label("Broker: " + broker.getName());
-        return Arrays.asList(name);
     }
 
     private List<StackPane> getButtons() {
@@ -135,7 +114,7 @@ public class BrokerUI extends Application {
 
         });
 
-        Button showClientsBtn = new Button("My registered clients");
+        Button showClientsBtn = new Button("Registered clients");
         buttons.add(showClientsBtn);
         showClientsBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
@@ -146,7 +125,7 @@ public class BrokerUI extends Application {
 
         ArrayList<StackPane> stackPanes = new ArrayList<>();
         for (Button button : buttons) {
-            button.setPrefWidth(250);
+            button.setPrefWidth(200);
             StackPane sp = new StackPane(button);
             StackPane.setAlignment(sp, Pos.CENTER);
             stackPanes.add(sp);
@@ -155,9 +134,12 @@ public class BrokerUI extends Application {
         return stackPanes;
     }
 
-    private List<Label> getFooterLabels() {
+    private StackPane getFooter() {
 
         Label registration = new Label(broker.getIsRegistered() ? "Registered" : "Not registered");
+        registration.setTextFill(Color.WHITE);
+        registration.setFont(Font.font(STYLESHEET_CASPIAN, 15));
+
         broker.isRegisteredProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue o, Object oldVal, Object newVal) {
@@ -165,8 +147,10 @@ public class BrokerUI extends Application {
             }
         });
 
+        StackPane registrationSP = new StackPane(registration);
+        StackPane.setAlignment(registration, Pos.CENTER);
+        registrationSP.setPadding(new Insets(50));
 
-        return Arrays.asList(registration);
+        return registrationSP;
     }
-
 }

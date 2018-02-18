@@ -6,11 +6,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import tulip.app.common.view.Util;
 import tulip.app.client.model.Client;
@@ -23,12 +26,7 @@ import java.util.*;
 
 public class ClientUI extends Application {
 
-    private static Stage stage;
     private static Client client;
-
-    public static void main(String[] args) {
-        ClientUI.launch("Emma", "127.0.0.1", "5000");
-    }
 
     @Override
     public void init() throws Exception {
@@ -49,10 +47,9 @@ public class ClientUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        stage = primaryStage;
-        stage.setTitle("Tulip - Client");
-        stage.setScene(getScene());
-        stage.show();
+        primaryStage.setTitle("Tulip - Client");
+        primaryStage.setScene(getScene());
+        primaryStage.show();
     }
 
     private Scene getScene() {
@@ -60,14 +57,7 @@ public class ClientUI extends Application {
         BorderPane borderPane = new BorderPane();
 
         /* Header */
-        TilePane tilePaneHeader = new TilePane();
-        tilePaneHeader.setPrefRows(1);
-        tilePaneHeader.setPrefColumns(2);
-        tilePaneHeader.setPrefTileWidth(450);
-        tilePaneHeader.setPrefTileHeight(100);
-        tilePaneHeader.setMaxWidth(900);
-        tilePaneHeader.getChildren().addAll(getHeaderLabels());
-        borderPane.setTop(tilePaneHeader);
+        borderPane.setTop(Util.getHeading("Client - " + client.getName()));
 
         /* Body */
         TilePane tilePaneBody = new TilePane();
@@ -82,31 +72,16 @@ public class ClientUI extends Application {
         /* Footer */
         TilePane tilePaneFooter = new TilePane();
         tilePaneFooter.setPrefRows(1);
-        tilePaneFooter.setPrefColumns(2);
-        tilePaneFooter.setPrefTileWidth(450);
+        tilePaneFooter.setPrefColumns(3);
+        tilePaneFooter.setPrefTileWidth(300);
         tilePaneFooter.setPrefTileHeight(100);
         tilePaneFooter.setMaxWidth(900);
         tilePaneFooter.getChildren().addAll(getFooterLabels());
         borderPane.setBottom(tilePaneFooter);
 
-        Util.setBackground(borderPane, "/img/leo.png");
+        Util.setBackground(borderPane, "/img/leo.jpg");
 
         return new Scene(borderPane, 900, 400);
-    }
-
-    private List<Label> getHeaderLabels() {
-
-        Label name = new Label("Client: " + client.getName());
-
-        Label cash = new Label("Cash: " + client.getCash());
-        client.cashProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue o, Object oldVal, Object newVal) {
-                cash.setText("Cash: " + client.getCash());
-            }
-        });
-
-        return Arrays.asList(name, cash);
     }
 
     private List<StackPane> getButtons() {
@@ -121,7 +96,7 @@ public class ClientUI extends Application {
             }
         });
 
-        Button pendingPurchaseOrdersBtn = new Button("My purchase orders");
+        Button pendingPurchaseOrdersBtn = new Button("Pending purchase orders");
         buttons.add(pendingPurchaseOrdersBtn);
         pendingPurchaseOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
@@ -129,7 +104,7 @@ public class ClientUI extends Application {
             }
         });
 
-        Button pendingSellOrdersBtn = new Button("My sell orders");
+        Button pendingSellOrdersBtn = new Button("Pending sell orders");
         buttons.add(pendingSellOrdersBtn);
         pendingSellOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
@@ -164,9 +139,12 @@ public class ClientUI extends Application {
         return stackPanes;
     }
 
-    private List<Label> getFooterLabels() {
+    private List<StackPane> getFooterLabels() {
 
         Label registration = new Label(client.getIsRegistered() ? "Registered" : "Not registered");
+        registration.setTextFill(Color.WHITE);
+        registration.setFont(Font.font(STYLESHEET_CASPIAN, 15));
+        registration.setPadding(new Insets(10));
         client.isRegisteredProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue o, Object oldVal, Object newVal) {
@@ -175,6 +153,9 @@ public class ClientUI extends Application {
         });
 
         Label broker = new Label("Broker: " + client.getBroker());
+        broker.setTextFill(Color.WHITE);
+        broker.setFont(Font.font(STYLESHEET_CASPIAN, 15));
+        broker.setPadding(new Insets(10));
         client.brokerProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue o, Object oldVal, Object newVal) {
@@ -182,7 +163,26 @@ public class ClientUI extends Application {
             }
         });
 
-        return Arrays.asList(registration, broker);
+        Label cash = new Label("Cash: " + client.getCash());
+        cash.setTextFill(Color.WHITE);
+        cash.setFont(Font.font(STYLESHEET_CASPIAN, 15));
+        cash.setPadding(new Insets(10));
+        client.cashProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue o, Object oldVal, Object newVal) {
+                cash.setText("Cash: " + client.getCash());
+            }
+        });
+
+        StackPane.setAlignment(registration, Pos.CENTER);
+        StackPane.setAlignment(broker, Pos.CENTER);
+        StackPane.setAlignment(cash, Pos.CENTER);
+
+        return Arrays.asList(
+                new StackPane(registration),
+                new StackPane(broker),
+                new StackPane(cash)
+        );
     }
 
     private static void showOrderPlacement(){

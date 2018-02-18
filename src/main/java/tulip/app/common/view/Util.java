@@ -3,6 +3,8 @@ package tulip.app.common.view;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -14,12 +16,17 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import tulip.app.common.model.order.Order;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static javafx.application.Application.STYLESHEET_CASPIAN;
 
 public class Util {
 
@@ -34,7 +41,7 @@ public class Util {
     public static void showMarketState(HashMap<String, Double> marketState){
 
         Stage showMarketState = new Stage();
-        showMarketState.setTitle("Current Market State");
+        showMarketState.setTitle("Current market state");
         final CategoryAxis xAxis = new CategoryAxis();
         final NumberAxis yAxis = new NumberAxis();
         final BarChart<String,Number> barChart = new BarChart<String,Number>(xAxis,yAxis);
@@ -45,7 +52,7 @@ public class Util {
             serie.getData().add(new XYChart.Data(stock.getKey(), stock.getValue()));
         }
 
-        Scene scene  = new Scene(barChart,800,600);
+        Scene scene  = new Scene(barChart,500,500);
         barChart.getData().addAll(serie);
         showMarketState.setScene(scene);
         showMarketState.show();
@@ -53,8 +60,8 @@ public class Util {
 
     public static void showOrders(List<Order> pendingOrders){
 
-        Stage MarketPopUp = new Stage();
-        MarketPopUp.setTitle("Pending Orders");
+        Stage stage = new Stage();
+        stage.setTitle("Pending Orders");
 
         TableView tableView = new TableView();
         TableColumn idCol = new TableColumn("Id");
@@ -69,9 +76,9 @@ public class Util {
         tableView.getColumns().addAll(idCol, typeCol, companyCol, dateCol);
         tableView.setItems(FXCollections.observableArrayList(pendingOrders));
 
-        Scene scene  = new Scene(tableView,800,600);
-        MarketPopUp.setScene(scene);
-        MarketPopUp.show();
+        Scene scene  = new Scene(tableView,500,500);
+        stage.setScene(scene);
+        stage.show();
     }
 
     public static void showActors(String actorName, List<String> actors){
@@ -82,7 +89,7 @@ public class Util {
         ObservableList<String> list = FXCollections.observableArrayList(actors);
 
         TableView<String> tableView = new TableView<>();
-        TableColumn<String, String> col1 = new TableColumn<>();
+        TableColumn<String, String> col1 = new TableColumn<>(actorName);
         tableView.getColumns().addAll(col1);
 
         col1.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
@@ -111,5 +118,16 @@ public class Util {
                         true));
         region.setBackground(new Background(backgroundImage));
 
+    }
+
+    public static StackPane getHeading(String text) {
+        Text headingText = new Text(text);
+        StackPane headingStackPane = new StackPane(headingText);
+        StackPane.setAlignment(headingText, Pos.CENTER);
+        headingText.setFill(Color.WHITE);
+        headingText.setFont(Font.font(STYLESHEET_CASPIAN, 20));
+        headingStackPane.setPadding(new Insets(50));
+
+        return headingStackPane;
     }
 }
