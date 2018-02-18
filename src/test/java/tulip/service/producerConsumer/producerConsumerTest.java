@@ -1,17 +1,13 @@
 package tulip.service.producerConsumer;
 
 import org.junit.Test;
-import tulip.app.appMessage.ActorType;
-import tulip.app.appMessage.AppMessage;
-import tulip.app.appMessage.AppMessageContentType;
-import tulip.service.producerConsumer.messages.ContentType;
-import tulip.service.producerConsumer.messages.Message;
-import tulip.service.producerConsumer.messages.Target;
+import tulip.app.common.model.appMessage.ActorType;
+import tulip.app.common.model.appMessage.AppMessage;
+import tulip.app.common.model.appMessage.AppMessageContentType;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.*;
 

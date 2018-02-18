@@ -1,6 +1,6 @@
 package tulip.service.producerConsumer;
 
-import tulip.app.appMessage.AppMessage;
+import tulip.app.common.model.appMessage.AppMessage;
 
 /**
  * This method must be implemented by the objects using the class Producer, in order for the producer to be able
@@ -14,6 +14,6 @@ public interface ProducerMessenger {
      * not take advantage of the flow control.
      * @param appMessage The appMessage received
      */
-    public void uponReceiptOfAppMessage(AppMessage appMessage);
+    void uponReceiptOfAppMessage(AppMessage appMessage);
 
 }

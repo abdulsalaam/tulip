@@ -1,51 +1,49 @@
 package tulip.app.broker.view;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
-import javafx.scene.Group;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import tulip.app.MarketState;
-import tulip.app.Util;
+import tulip.app.common.view.Util;
 import tulip.app.broker.model.Broker;
-import tulip.app.exceptions.RegistrationException;
-import tulip.app.order.Order;
+import tulip.app.common.model.exceptions.RegistrationException;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BrokerUI extends Application {
 
-    private static GridPane grid;
-    private List<Button> buttons = new ArrayList<>();
     private static Broker broker;
 
-    public static void main(String [] args) {
-        startup("Leonardo", 5000, "127.0.0.1", 4000);
+    public static void go(String... args) {
+        launch(args);
     }
 
-    public static void startup(String name, int serverSocketPort, String socketHost, int socketPort) {
+    @Override
+    public void init() throws Exception {
+        super.init();
+        List<String> parameters = getParameters().getRaw();
+
+        String name = parameters.get(0);
+        int serverSocketPort = Integer.parseInt(parameters.get(1));
+        String socketHost = parameters.get(2);
+        int socketPort = Integer.parseInt(parameters.get(3));
+
         try {
             broker = new Broker(name, new ServerSocket(serverSocketPort), new Socket(socketHost, socketPort));
             new Thread(broker).start();
-            Application.launch();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,70 +51,51 @@ public class BrokerUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        primaryStage.setTitle("Tulip - Broker");
+        primaryStage.setScene(getScene());
+        primaryStage.show();
+    }
 
-        primaryStage.setTitle("Tulip");
+    private Scene getScene() {
 
-        BorderPane root = new BorderPane();
+        BorderPane borderPane = new BorderPane();
 
-        Scene scene = new Scene(root, 1000, 500);
+        /* Header */
+        borderPane.setTop(Util.getHeading("Broker - " + broker.getName()));
 
-        grid = new GridPane();
+        /* Body */
+        TilePane tilePaneBody = new TilePane();
+        tilePaneBody.setPrefRows(2);
+        tilePaneBody.setPrefColumns(3);
+        tilePaneBody.setPrefTileWidth(300);
+        tilePaneBody.setPrefTileHeight(70);
+        tilePaneBody.setMaxWidth(900);
+        tilePaneBody.getChildren().addAll(getButtons());
+        borderPane.setCenter(tilePaneBody);
 
-        // Gridpane
-        for (int i = 0; i < 12; i++)
-        {
-            ColumnConstraints column = new ColumnConstraints(150);
-            grid.getColumnConstraints().add(column);
-        }
-        for (int i = 0; i < 15; i++)
-        {
-            RowConstraints row = new RowConstraints(70);
-            grid.getRowConstraints().add(row);
-        }
+        /* Footer */
+        borderPane.setBottom(getFooter());
 
-        // Title
-        Text title = new Text("Tulip for Brokers");
-        title.setFill(Color.BLACK);
-        title.setFont(Font.font(STYLESHEET_CASPIAN, 50));
-        grid.add(title, 3, 0);
-        GridPane.setHalignment(title, HPos.CENTER);
+        Util.setBackground(borderPane, "/img/tulip-flower.jpg");
 
-        Label name = new Label("    " + broker.getNAME());
-        name.setFont(Font.font(STYLESHEET_CASPIAN, 20));
-        grid.add(name, 0, 0);
+        return new Scene(borderPane, 900, 400);
+    }
 
-        // Buttons
+    private List<StackPane> getButtons() {
+
+        List<Button> buttons = new ArrayList<>();
+
         Button requestMarketStateBtn = new Button("Request market state");
         buttons.add(requestMarketStateBtn);
-        grid.add(requestMarketStateBtn, 1, 1);
-
-        Button placeOrderBtn = new Button("Process order");
-        buttons.add(placeOrderBtn);
-        grid.add(placeOrderBtn, 3,1);
-
-        Button showPendingOrdersBtn = new Button("Show pending orders");
-        buttons.add(requestMarketStateBtn);
-        grid.add(showPendingOrdersBtn, 5, 1);
-
-        Button showClientsBtn = new Button("My registered clients");
-        buttons.add(showClientsBtn);
-        grid.add(showClientsBtn, 3, 3);
-
-        int index = 0;
-        for(Button button : buttons) {
-            button.setStyle("-fx-pref-width: 500px;");
-            GridPane.setHalignment(button, HPos.CENTER);
-        }
-
-        // Actions
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 broker.requestMarketState();
-                showMarketState(broker.getMarketState());
+                Util.showMarketState(broker.getMarketState());
             }
-
         });
 
+        Button placeOrderBtn = new Button("Process order");
+        buttons.add(placeOrderBtn);
         placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 try {
@@ -130,120 +109,52 @@ public class BrokerUI extends Application {
             }
         });
 
+        Button showPendingOrdersBtn = new Button("Show pending orders");
+        buttons.add(showPendingOrdersBtn);
         showPendingOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                showPendingOrders(broker.getPendingOrders());
+                Util.showOrders(broker.getPendingOrders());
             }
 
         });
 
+        Button showClientsBtn = new Button("Registered clients");
+        buttons.add(showClientsBtn);
         showClientsBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                showClients(broker.getClients());
+                Util.showActors("Client", broker.getClients());
             }
 
         });
 
+        ArrayList<StackPane> stackPanes = new ArrayList<>();
+        for (Button button : buttons) {
+            button.setPrefWidth(200);
+            StackPane sp = new StackPane(button);
+            StackPane.setAlignment(sp, Pos.CENTER);
+            stackPanes.add(sp);
+        }
 
-
-
-
-        // Style and final set up
-        root.setStyle(
-                "-fx-background-color: #CFCFCF; -fx-background-image: url('tulipFlower.jpg');" +
-                "-fx-background-size: cover;");
-        root.getChildren().add(grid);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
+        return stackPanes;
     }
 
-    public static void showMarketState(MarketState marketState){
+    private StackPane getFooter() {
 
-        Stage MarketPopUp = new Stage();
-        MarketPopUp.setTitle("Current Market State");
-        final CategoryAxis xAxis = new CategoryAxis();
-        final NumberAxis yAxis = new NumberAxis();
-        final BarChart<String,Number> bc =
-                new BarChart<String,Number>(xAxis,yAxis);
-        bc.setStyle("-fx-background-color: #CFCFCF;");
+        Label registration = new Label(broker.getIsRegistered() ? "Registered" : "Not registered");
+        registration.setTextFill(Color.WHITE);
+        registration.setFont(Font.font(STYLESHEET_CASPIAN, 15));
 
-        xAxis.setTickLabelFill(Color.WHITE);
-        yAxis.setTickLabelFill(Color.WHITE);
+        broker.isRegisteredProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue o, Object oldVal, Object newVal) {
+                registration.setText(broker.getIsRegistered() ? "Registered" : "Not registered");
+            }
+        });
 
-        XYChart.Series serie = new XYChart.Series();
+        StackPane registrationSP = new StackPane(registration);
+        StackPane.setAlignment(registration, Pos.CENTER);
+        registrationSP.setPadding(new Insets(50));
 
-        for(Map.Entry<String, Double> stock : marketState.entrySet()) {
-            serie.getData().add(new XYChart.Data(stock.getKey(), stock.getValue()));
-        }
-
-
-        bc.setStyle("" +
-                "-fx-background-color: #CFCFCF;" +
-                "-fx-background-image: url('background.png');" +
-                "-fx-background-size: cover;");
-        Scene scene  = new Scene(bc,800,600);
-        bc.getData().addAll(serie);
-        MarketPopUp.setScene(scene);
-        MarketPopUp.show();
-    }
-
-    public static void showPendingOrders(List<Order> pendingOrders){
-
-        Stage MarketPopUp = new Stage();
-        MarketPopUp.setTitle("Pending Orders");
-        final CategoryAxis xAxis = new CategoryAxis();
-        final NumberAxis yAxis = new NumberAxis();
-        final BarChart<String,Number> bc =
-                new BarChart<String,Number>(xAxis,yAxis);
-        bc.setStyle("-fx-background-color: #CFCFCF");
-
-        xAxis.setTickLabelFill(Color.WHITE);
-        yAxis.setTickLabelFill(Color.WHITE);
-
-        XYChart.Series serie = new XYChart.Series();
-
-        for(Order order : pendingOrders) {
-            serie.getData().add(new XYChart.Data(order.getCompany(), order.getDesiredNbOfStocks()));
-        }
-
-
-        bc.setStyle(
-                "-fx-background-color: #CFCFCF; -fx-background-image: url('background.png');" +
-                "-fx-background-size: cover;");
-        Scene scene  = new Scene(bc,800,600);
-        bc.getData().addAll(serie);
-        MarketPopUp.setScene(scene);
-        MarketPopUp.show();
-    }
-
-    public static void showClients(List<String> clients){
-
-        Stage showClients = new Stage();
-        showClients.setTitle("Registered clients");
-        Group root = new Group();
-        Scene scene = new Scene(root, 500, 200);
-
-        //GridPane
-        GridPane gridpane = new GridPane();
-        for (int i = 0; i < 5; i++)
-        {
-            ColumnConstraints column = new ColumnConstraints(150);
-            grid.getColumnConstraints().add(column);
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            RowConstraints row = new RowConstraints(70);
-            grid.getRowConstraints().add(row);
-        }
-        int index = 0;
-        for (String client : clients) {
-            gridpane.add(new Label(client), 0, index++);
-        }
-
-        root.getChildren().add(gridpane);
-        showClients.setScene(scene);
-        showClients.show();
-
+        return registrationSP;
     }
 }
