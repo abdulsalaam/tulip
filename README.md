@@ -19,16 +19,16 @@ This project was developed in the context of the course *Distributed Systems* de
 
 There are three types of agents active in our stock market simulation: 
 * the stock exchange
-* brokers
-* clients
+* the brokers
+* the clients
 
 The stock exchange communicates with one or serveral brokers. Similarly, each broker communicates with one or several clients.
 
-The agents exchange various type of information such as purchase/sell orders or market states.
+The agents exchange various types of information such as purchase/sell orders or market states.
 
 ## Architecture
 
-The architecture of the program consist of three layers.
+The architecture of the program consists of three layers.
 
 ### Sockets
 
@@ -37,7 +37,7 @@ Message objects are send through sockets using JSON serialization/deserializatio
 
 ### The service layer
 
-The service layer relies on socket communication and implements a producer-consumer algorithm to control the flow of data between the agents.
+The service layer relies on socket communication and implements a producer-consumer algorithm to control the data flow between the agents.
 
 ### The application layer
 
