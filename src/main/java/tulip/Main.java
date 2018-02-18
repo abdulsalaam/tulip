@@ -33,9 +33,7 @@ public class Main {
             if (cmd.hasOption("se")) {
 
                 if (!cmd.hasOption("sp")) { throw new ParseException("Missing mandatory --server-port argument."); }
-
-                int serverSocketPort = Integer.parseInt(cmd.getOptionValue("sp"));
-                StockExchangeUI.startup(serverSocketPort);
+                StockExchangeUI.launch(args);
 
             } else if (cmd.hasOption("b")) {
 
@@ -43,23 +41,14 @@ public class Main {
                 if (!cmd.hasOption("sp")) { throw new ParseException("Missing mandatory --server-port argument."); }
                 if (!cmd.hasOption("h")) { throw new ParseException("Missing mandatory --host argument."); }
                 if (!cmd.hasOption("p")) { throw new ParseException("Missing mandatory --port argument."); }
-
-                String name = cmd.getOptionValue("n");
-                int serverSocketPort = Integer.parseInt(cmd.getOptionValue("sp"));
-                String host = cmd.getOptionValue("h");
-                int port = Integer.parseInt(cmd.getOptionValue("p"));
-                BrokerUI.startup(name, serverSocketPort, host, port);
+                BrokerUI.launch(args);
 
             } else if (cmd.hasOption("c")) {
 
                 if (!cmd.hasOption("n")) { throw new ParseException("Missing mandatory --name argument."); }
                 if (!cmd.hasOption("h")) { throw new ParseException("Missing mandatory --host argument."); }
                 if (!cmd.hasOption("p")) { throw new ParseException("Missing mandatory --port argument."); }
-
-                String name = cmd.getOptionValue("n");
-                String host = cmd.getOptionValue("h");
-                int port = Integer.parseInt(cmd.getOptionValue("p"));
-                ClientUI.startup(name, host, port);
+                ClientUI.launch(args);
 
             } else {
                 throw new ParseException("You must specify at least one of the following options: --stock-exchange --broker --client ");

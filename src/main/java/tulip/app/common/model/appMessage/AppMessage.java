@@ -1,4 +1,4 @@
-package tulip.app.appMessage;
+package tulip.app.common.model.appMessage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

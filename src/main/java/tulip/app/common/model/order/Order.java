@@ -1,4 +1,4 @@
-package tulip.app.order;
+package tulip.app.common.model.order;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

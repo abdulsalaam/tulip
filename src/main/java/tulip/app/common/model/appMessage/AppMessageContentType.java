@@ -1,4 +1,4 @@
-package tulip.app.appMessage;
+package tulip.app.common.model.appMessage;
 
 /**
  * The different types of app messages

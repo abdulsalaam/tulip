@@ -1,6 +1,6 @@
 package tulip.app.stockExchange.model;
 
-import tulip.app.order.Order;
+import tulip.app.common.model.order.Order;
 
 import java.util.LinkedList;
 import java.util.Queue;

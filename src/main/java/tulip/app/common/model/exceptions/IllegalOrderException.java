@@ -1,4 +1,4 @@
-package tulip.app.exceptions;
+package tulip.app.common.model.exceptions;
 
 public class IllegalOrderException extends RuntimeException {
     public IllegalOrderException() { super(); }

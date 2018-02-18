@@ -1,6 +1,7 @@
 package tulip.app;
 
 import org.junit.Test;
+import tulip.app.common.model.MarketState;
 
 import static org.junit.Assert.*;
 

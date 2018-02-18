@@ -1,6 +1,6 @@
 package tulip.service.producerConsumer;
 
-import tulip.app.appMessage.AppMessage;
+import tulip.app.common.model.appMessage.AppMessage;
 
 /**
  * This method must be implemented by the objects using the class Producer, in order for the producer to be able

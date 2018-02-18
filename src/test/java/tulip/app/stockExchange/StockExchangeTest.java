@@ -1,18 +1,10 @@
 package tulip.app.stockExchange;
 
 import org.junit.Test;
-import tulip.app.client.model.Client;
-import tulip.app.order.Order;
-import tulip.app.order.OrderType;
-import tulip.app.stockExchange.model.StockExchange;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Date;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
 
 public class StockExchangeTest {
 

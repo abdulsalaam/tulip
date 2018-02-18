@@ -1,11 +1,13 @@
 package tulip.app.broker.model;
 
-import tulip.app.MarketState;
-import tulip.app.appMessage.ActorType;
-import tulip.app.appMessage.AppMessage;
-import tulip.app.appMessage.AppMessageContentType;
-import tulip.app.exceptions.RegistrationException;
-import tulip.app.order.Order;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import tulip.app.common.model.MarketState;
+import tulip.app.common.model.appMessage.ActorType;
+import tulip.app.common.model.appMessage.AppMessage;
+import tulip.app.common.model.appMessage.AppMessageContentType;
+import tulip.app.common.model.exceptions.RegistrationException;
+import tulip.app.common.model.order.Order;
 import tulip.service.producerConsumer.Consumer;
 import tulip.service.producerConsumer.Producer;
 import tulip.service.producerConsumer.ProducerMessenger;
@@ -20,7 +22,7 @@ public class Broker implements Runnable, ProducerMessenger {
     private final String NAME;
 
     /** Tells whether the broker is registered to the stock exchange or not */
-    private boolean isRegistered = false;
+    private BooleanProperty isRegistered = new SimpleBooleanProperty(false);
 
     /** Amount of cash available to the broker */
     private double cash = 0;
@@ -111,8 +113,8 @@ public class Broker implements Runnable, ProducerMessenger {
         switch (appMessage.getAppMessageContentType()) {
 
             case registrationAcknowledgment:
-                if (!isRegistered) {
-                    this.isRegistered = true;
+                if (!getIsRegistered()) {
+                    setIsRegistered(true);
                     System.out.println("Broker " + NAME + " is now registered");
                 }
                 break;
@@ -139,7 +141,7 @@ public class Broker implements Runnable, ProducerMessenger {
     public void registerToStockExchange() {
 
         // Loop until the broker is registered
-        while (!isRegistered) {
+        while (!getIsRegistered()) {
 
             // Sends registration request
             producer.produce(new AppMessage(
@@ -163,7 +165,7 @@ public class Broker implements Runnable, ProducerMessenger {
      */
     private void registerClient(String clientName) {
 
-        if (isRegistered) {
+        if (getIsRegistered()) {
 
             // If needed adds the client to the client list
             if (!clients.contains(clientName)) { clients.add(clientName); }
@@ -194,7 +196,7 @@ public class Broker implements Runnable, ProducerMessenger {
      * market state information
      */
     public void requestMarketState() {
-        if (isRegistered) {
+        if (getIsRegistered()) {
             producer.produce(new AppMessage(
                     this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.marketStateRequest, ""
             ));
@@ -221,7 +223,7 @@ public class Broker implements Runnable, ProducerMessenger {
      */
     public void placeOrder() throws RegistrationException, IndexOutOfBoundsException {
 
-        if (!isRegistered) { throw new RegistrationException("The broker is not registered"); }
+        if (!getIsRegistered()) { throw new RegistrationException("The broker is not registered"); }
 
         Order order = pendingOrders.poll();
         if (order == null) { throw new IndexOutOfBoundsException(); }
@@ -294,5 +296,17 @@ public class Broker implements Runnable, ProducerMessenger {
 
     public String getNAME() {
         return NAME;
+    }
+
+    public final boolean getIsRegistered() {
+        return isRegistered.get();
+    }
+
+    public final void setIsRegistered(boolean value) {
+        isRegistered.set(value);
+    }
+
+    public final BooleanProperty isRegisteredProperty() {
+        return isRegistered;
     }
 }

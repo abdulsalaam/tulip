@@ -1,8 +1,6 @@
-package tulip.app.appMessage;
+package tulip.app.common.model.appMessage;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class AppMessageTest {
 

@@ -1,4 +1,4 @@
-package tulip.app.order;
+package tulip.app.common.model.order;
 
 /**
  * The different types of orders that can be made.
