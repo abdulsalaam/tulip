@@ -15,6 +15,7 @@ import tulip.service.producerConsumer.ProducerMessenger;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -152,7 +153,6 @@ public class Client implements Runnable, ProducerMessenger {
         } else {
             System.out.println("The client is not registered");
         }
-
     }
 
     /**
@@ -177,7 +177,6 @@ public class Client implements Runnable, ProducerMessenger {
                     new AppMessage(NAME, ActorType.client, getBroker(), ActorType.broker,
                             AppMessageContentType.order, sellOrder.toJSON())
             );
-
 
         pendingSellOrders.add(sellOrder);
     }
@@ -204,7 +203,6 @@ public class Client implements Runnable, ProducerMessenger {
                     new AppMessage(NAME, ActorType.client, getBroker(), ActorType.broker,
                             AppMessageContentType.order, purchaseOrder.toJSON())
             );
-
 
         pendingPurchaseOrders.add(purchaseOrder);
     }
@@ -316,7 +314,7 @@ public class Client implements Runnable, ProducerMessenger {
 
     }
 
-    public MarketState getMarketState() {
+    public HashMap<String, Double> getMarketState() {
         marketState = null;
         synchronized (marketStateLock) {
             while (marketState == null) {
@@ -340,7 +338,7 @@ public class Client implements Runnable, ProducerMessenger {
         return Collections.unmodifiableList(pendingSellOrders);
     }
 
-    public String getNAME() {
+    public String getName() {
         return NAME;
     }
 

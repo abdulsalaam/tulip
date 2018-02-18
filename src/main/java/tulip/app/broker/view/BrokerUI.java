@@ -23,7 +23,6 @@ import java.util.List;
 
 public class BrokerUI extends Application {
 
-    private static Stage stage;
     private static Broker broker;
 
     public static void main(String[] args) {
@@ -50,10 +49,9 @@ public class BrokerUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        stage = primaryStage;
-        stage.setTitle("Tulip - Broker");
-        stage.setScene(getScene());
-        stage.show();
+        primaryStage.setTitle("Tulip - Broker");
+        primaryStage.setScene(getScene());
+        primaryStage.show();
     }
 
     private Scene getScene() {
@@ -96,7 +94,7 @@ public class BrokerUI extends Application {
     }
 
     private List<Label> getHeaderLabels() {
-        Label name = new Label("Broker: " + broker.getNAME());
+        Label name = new Label("Broker: " + broker.getName());
         return Arrays.asList(name);
     }
 

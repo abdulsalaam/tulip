@@ -15,9 +15,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import tulip.app.common.model.MarketState;
 import tulip.app.common.model.order.Order;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +31,7 @@ public class Util {
         alert.showAndWait();
     }
 
-    public static void showMarketState(MarketState marketState){
+    public static void showMarketState(HashMap<String, Double> marketState){
 
         Stage showMarketState = new Stage();
         showMarketState.setTitle("Current Market State");

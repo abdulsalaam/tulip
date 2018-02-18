@@ -61,7 +61,7 @@ public class Broker implements Runnable, ProducerMessenger {
     }
 
     /**
-     * Consumes messages while he can, and treats the ones received from the client,
+     * Consumes messages while he can, and processes the ones received from the client,
      * following the producer-consumer algorithm used
      */
     @Override
@@ -85,7 +85,8 @@ public class Broker implements Runnable, ProducerMessenger {
                     case marketStateRequest:
                         getMarketState();
                         consumer.sendAppMessageTo(appMessage.getSender(),
-                                new AppMessage(this.NAME, ActorType.broker, appMessage.getSender(), ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
+                                new AppMessage(this.NAME, ActorType.broker, appMessage.getSender(),
+                                        ActorType.client, AppMessageContentType.marketStateReply, marketState.toJSON()
                                 ));
                         break;
 
@@ -105,7 +106,7 @@ public class Broker implements Runnable, ProducerMessenger {
     }
 
     /**
-     * Treats app messages received from stock exchange
+     * Processes app messages received from the stock exchange
      */
     @Override
     public void uponReceiptOfAppMessage(AppMessage appMessage) {
@@ -219,7 +220,7 @@ public class Broker implements Runnable, ProducerMessenger {
     }
 
     /**
-     * Proceeds an order
+     * Places an order
      */
     public void placeOrder() throws RegistrationException, IndexOutOfBoundsException {
 
@@ -229,7 +230,8 @@ public class Broker implements Runnable, ProducerMessenger {
         if (order == null) { throw new IndexOutOfBoundsException(); }
 
         producer.produce(new AppMessage(
-                this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.order, order.toJSON()
+                this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange,
+                AppMessageContentType.order, order.toJSON()
         ));
     }
 
@@ -264,17 +266,18 @@ public class Broker implements Runnable, ProducerMessenger {
      */
     private void closeTheDay(){
         producer.produce(new AppMessage(
-                this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange, AppMessageContentType.endOfDayNotification, ""
+                this.NAME, ActorType.broker, "stockExchange", ActorType.stockExchange,
+                AppMessageContentType.endOfDayNotification, ""
         ));
     }
 
     public List<Order> getPendingOrders() {
         @SuppressWarnings("unchecked")
         List<Order> list = (List<Order>) pendingOrders;
-        return list.subList(0, list.size());
+        return Collections.unmodifiableList(list);
     }
 
-    public MarketState getMarketState() {
+    public HashMap<String, Double> getMarketState() {
         marketState = null;
         synchronized (marketStateLock) {
             while (marketState == null) {
@@ -291,10 +294,10 @@ public class Broker implements Runnable, ProducerMessenger {
     }
 
     public List<String> getClients() {
-        return clients;
+        return Collections.unmodifiableList(clients);
     }
 
-    public String getNAME() {
+    public String getName() {
         return NAME;
     }
 

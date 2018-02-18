@@ -7,7 +7,6 @@ import tulip.app.common.model.appMessage.AppMessageContentType;
 import tulip.app.common.model.order.Order;
 import tulip.app.common.model.order.OrderType;
 import tulip.service.producerConsumer.Consumer;
-
 import java.net.ServerSocket;
 import java.util.*;
 
@@ -39,11 +38,11 @@ public class StockExchange implements Runnable {
         this.consumer = new Consumer(NAME, serverSocket);
 
         try {
-            // Adds companies
             addCompany("Apple", 500, 70);
             addCompany("Alphabet", 1000, 40);
             addCompany("Tesla", 800, 48);
             addCompany("Amazon", 900, 50);
+            addCompany("General Electric", 1000, 45);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -205,7 +204,7 @@ public class StockExchange implements Runnable {
             Company company = entry.getValue();
             double deltaPrice =
                     (company.nbOfStocksForPurchase() - (company.nbOfStocksForSale() + company.getNbFloatingStocks()) )
-                            / company.getNB_EMITTED_STOCKS();
+                            / company.getNbEmittedStocks();
             double newStockPrice = company.getStockPrice() * (1 + deltaPrice);
             company.updateStockPrice(newStockPrice);
             System.out.println(entry.getKey() + " price is now: " + newStockPrice);
@@ -226,7 +225,7 @@ public class StockExchange implements Runnable {
             while (!c.getPendingPurchaseOrders().isEmpty()) {
 
                 // Retrieves and removes the head of the pendingPurchaseOrder queue
-                Order purchaseOrder = c.getPendingPurchaseOrders().poll();
+                Order purchaseOrder = c.pollPendingPurchaseOrder();
 
                 // If the desired price is superior or equal to the market price
                 if (purchaseOrder.getDesiredPrice() >= c.getStockPrice()) {
@@ -243,13 +242,13 @@ public class StockExchange implements Runnable {
                             !c.getPendingSellOrders().isEmpty()) {
 
                         // Retrieves, but does not remove, the head of the queue
-                        Order sellOrder = c.getPendingSellOrders().peek();
+                        Order sellOrder = c.peekPendingSellOrder();
 
                         // If the market price is inferior to the minimum selling price
                         if (c.getStockPrice() < sellOrder.getDesiredPrice()) {
 
                             // Remove the head of the queue
-                            c.getPendingSellOrders().remove();
+                            c.removePendingSellOrder();
 
                             // Sets the sell order as processed
                             sellOrder.processOrder(new Date(), c.getStockPrice());
@@ -274,7 +273,7 @@ public class StockExchange implements Runnable {
 
                             // For this sell order, if all the stocks for sale have been sold
                             if (sellOrder.getDesiredNbOfStocks() == sellOrder.getActualNbOfStocks()) {
-                                c.getPendingSellOrders().remove();
+                                c.removePendingSellOrder();
                                 sellOrder.processOrder(new Date(), c.getStockPrice());
                                 sendsProcessedOrder(sellOrder);
                             }
@@ -291,7 +290,7 @@ public class StockExchange implements Runnable {
 
             // Processes and sends the remaining sell orders
             while (!c.getPendingSellOrders().isEmpty()) {
-                Order sellOrder = c.getPendingSellOrders().poll();
+                Order sellOrder = c.pollPendingSellOrder();
                 sellOrder.processOrder(new Date(), c.getStockPrice());
                 sendsProcessedOrder(sellOrder);
             }

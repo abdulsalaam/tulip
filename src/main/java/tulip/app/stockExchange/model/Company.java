@@ -2,7 +2,9 @@ package tulip.app.stockExchange.model;
 
 import tulip.app.common.model.order.Order;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Company {
@@ -93,20 +95,44 @@ public class Company {
         pendingSellOrders.add(sellOrder);
     }
 
+    Order pollPendingPurchaseOrder() {
+        return pendingPurchaseOrders.poll();
+    }
+
+    Order pollPendingSellOrder() {
+        return pendingSellOrders.poll();
+    }
+
+    void removePendingPurchaseOrder() {
+        pendingPurchaseOrders.remove();
+    }
+
+    void removePendingSellOrder() {
+        pendingSellOrders.remove();
+    }
+
+    Order peekPendingPurchaseOrder() {
+        return pendingPurchaseOrders.peek();
+    }
+
+    Order peekPendingSellOrder() {
+        return pendingSellOrders.peek();
+    }
+
     public double getStockPrice() {
         return stockPrice;
     }
 
-    public int getNB_EMITTED_STOCKS() {
+    public int getNbEmittedStocks() {
         return NB_EMITTED_STOCKS;
     }
 
-    public Queue<Order> getPendingPurchaseOrders() {
-        return pendingPurchaseOrders;
+    public List<Order> getPendingPurchaseOrders() {
+        return Collections.unmodifiableList((List<Order>) pendingPurchaseOrders);
     }
 
-    public Queue<Order> getPendingSellOrders() {
-        return pendingSellOrders;
+    public List<Order> getPendingSellOrders() {
+        return Collections.unmodifiableList((List<Order>) pendingSellOrders);
     }
 
     public int getNbFloatingStocks() {

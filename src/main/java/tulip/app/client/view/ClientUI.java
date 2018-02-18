@@ -96,7 +96,7 @@ public class ClientUI extends Application {
 
     private List<Label> getHeaderLabels() {
 
-        Label name = new Label("Client: " + client.getNAME());
+        Label name = new Label("Client: " + client.getName());
 
         Label cash = new Label("Cash: " + client.getCash());
         client.cashProperty().addListener(new ChangeListener() {

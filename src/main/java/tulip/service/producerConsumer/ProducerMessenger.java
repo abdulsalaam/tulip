@@ -14,6 +14,6 @@ public interface ProducerMessenger {
      * not take advantage of the flow control.
      * @param appMessage The appMessage received
      */
-    public void uponReceiptOfAppMessage(AppMessage appMessage);
+    void uponReceiptOfAppMessage(AppMessage appMessage);
 
 }
