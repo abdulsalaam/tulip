@@ -28,6 +28,10 @@ public class ClientUI extends Application {
 
     private static Client client;
 
+    public static void go(String... args) {
+        launch(args);
+    }
+
     @Override
     public void init() throws Exception {
         super.init();

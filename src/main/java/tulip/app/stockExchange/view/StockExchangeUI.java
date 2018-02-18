@@ -24,6 +24,10 @@ public class StockExchangeUI extends Application {
 
     private static StockExchange stockExchange;
 
+    public static void go(String... args) {
+        launch(args);
+    }
+
     @Override
     public void init() throws Exception {
         super.init();

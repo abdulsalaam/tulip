@@ -33,7 +33,7 @@ public class Main {
             if (cmd.hasOption("se")) {
 
                 if (!cmd.hasOption("sp")) { throw new ParseException("Missing mandatory --server-port argument."); }
-                StockExchangeUI.launch(cmd.getOptionValue("sp"));
+                StockExchangeUI.go(cmd.getOptionValue("sp"));
 
             } else if (cmd.hasOption("b")) {
 
@@ -41,7 +41,7 @@ public class Main {
                 if (!cmd.hasOption("sp")) { throw new ParseException("Missing mandatory --server-port argument."); }
                 if (!cmd.hasOption("h")) { throw new ParseException("Missing mandatory --host argument."); }
                 if (!cmd.hasOption("p")) { throw new ParseException("Missing mandatory --port argument."); }
-                BrokerUI.launch(
+                BrokerUI.go(
                         cmd.getOptionValue("n"),
                         cmd.getOptionValue("sp"),
                         cmd.getOptionValue("h"),
@@ -53,7 +53,7 @@ public class Main {
                 if (!cmd.hasOption("n")) { throw new ParseException("Missing mandatory --name argument."); }
                 if (!cmd.hasOption("h")) { throw new ParseException("Missing mandatory --host argument."); }
                 if (!cmd.hasOption("p")) { throw new ParseException("Missing mandatory --port argument."); }
-                ClientUI.launch(
+                ClientUI.go(
                         cmd.getOptionValue("n"),
                         cmd.getOptionValue("h"),
                         cmd.getOptionValue("p")

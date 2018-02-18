@@ -27,6 +27,10 @@ public class BrokerUI extends Application {
 
     private static Broker broker;
 
+    public static void go(String... args) {
+        launch(args);
+    }
+
     @Override
     public void init() throws Exception {
         super.init();
