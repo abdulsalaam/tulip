@@ -3,42 +3,57 @@ package tulip.app.client.view;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.TilePane;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import tulip.app.MarketState;
+import tulip.app.Util;
 import tulip.app.client.model.Client;
+import tulip.app.exceptions.IllegalOrderException;
+import tulip.app.exceptions.RegistrationException;
+import tulip.app.order.Order;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class View extends Application {
 
     private static Stage stage;
     private static Client client;
 
-    public static void main(String [] args) {
-        startup("Emma", "127.0.0.1", 5000);
+    public static void main(String[] args) {
+        View.launch("Emma", "127.0.0.1", "5000");
     }
 
-    public static void startup(String name, String socketHost, int socketPort) {
+    @Override
+    public void init() throws Exception {
+        super.init();
+        List<String> parameters = getParameters().getRaw();
+
+        String name = parameters.get(0);
+        String socketHost = parameters.get(1);
+        int socketPort = Integer.parseInt(parameters.get(2));
+
         try {
             client = new Client(name, 100000, new Socket(socketHost, socketPort));
             new Thread(client).start();
-            Application.launch();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,6 +101,13 @@ public class View extends Application {
         tilePaneFooter.getChildren().addAll(getFooterLabels());
         borderPane.setBottom(tilePaneFooter);
 
+        Image img = new Image(ClientUI.class.getResourceAsStream("/img/leo.png"));
+        BackgroundImage backgroundImage = new BackgroundImage(img,
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false));
+        borderPane.setBackground(new Background(backgroundImage));
+
         return new Scene(borderPane, 900, 500);
     }
 
@@ -112,7 +134,7 @@ public class View extends Application {
         buttons.add(requestMarketStateBtn);
         requestMarketStateBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                // showMarketState(client.getMarketState());
+                showMarketState(client.getMarketState());
             }
         });
 
@@ -120,7 +142,7 @@ public class View extends Application {
         buttons.add(pendingPurchaseOrdersBtn);
         pendingPurchaseOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                // showOrders(client.getPendingPurchaseOrders());
+                showOrders(client.getPendingPurchaseOrders());
             }
         });
 
@@ -128,7 +150,7 @@ public class View extends Application {
         buttons.add(pendingSellOrdersBtn);
         pendingSellOrdersBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                // showOrders(client.getPendingSellOrders());
+                showOrders(client.getPendingSellOrders());
             }
         });
 
@@ -136,7 +158,7 @@ public class View extends Application {
         buttons.add(placeOrderBtn);
         placeOrderBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                // showOrderPlacement();
+                showOrderPlacement();
             }
         });
 
@@ -144,7 +166,7 @@ public class View extends Application {
         buttons.add(closeTheDayBtn);
         closeTheDayBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                // client.closeTheDay();
+                client.closeTheDay();
             }
         });
 
@@ -178,5 +200,118 @@ public class View extends Application {
         });
 
         return Arrays.asList(registration, broker);
+    }
+
+    private static void showMarketState(MarketState marketState){
+
+        Stage showMarketState = new Stage();
+        showMarketState.setTitle("Current Market State");
+        final CategoryAxis xAxis = new CategoryAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        final BarChart<String,Number> barChart = new BarChart<String,Number>(xAxis,yAxis);
+
+        XYChart.Series serie = new XYChart.Series();
+
+        for (Map.Entry<String, Double> stock : marketState.entrySet()) {
+            serie.getData().add(new XYChart.Data(stock.getKey(), stock.getValue()));
+        }
+
+        Scene scene  = new Scene(barChart,800,600);
+        barChart.getData().addAll(serie);
+        showMarketState.setScene(scene);
+        showMarketState.show();
+    }
+
+    private static void showOrderPlacement(){
+
+        Stage showOrderPlacement = new Stage();
+        showOrderPlacement.setTitle("Place an order");
+        Group root = new Group();
+        Scene scene = new Scene(root, 500, 200);
+
+        @SuppressWarnings("unchecked")
+        ComboBox company = new ComboBox(FXCollections.observableArrayList(client.getMarketState().keySet()));
+
+        final TextField nbStock = new TextField();
+        nbStock.setPromptText("Number of stocks");
+
+        final TextField price = new TextField();
+        price.setPromptText("Price");
+
+        Button purchase = new Button("Purchase");
+        purchase.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                if ( company.getValue() == null || nbStock.getText().equals("") || price.getText().equals("")) {
+                    Util.warningWindow("Error", "Please fill all the fields", "");
+                } else {
+                    try {
+                        client.placePurchaseOrder((String) company.getValue(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                        showOrderPlacement.close();
+                    } catch (RegistrationException e) {
+                        Util.warningWindow("Registration error", "The client is not registered", "");
+                    } catch (IllegalOrderException e) {
+                        Util.warningWindow("Illegal order", "You do not have enough money available for this operation", "");
+                    }
+                }
+            }
+        });
+
+        Button sell = new Button("Sell");
+        sell.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                if ( company.getValue() == null || nbStock.getText().equals("") || price.getText().equals("")) {
+                    Util.warningWindow("Error", "Please fill all the fields", "");
+                } else {
+                    try {
+                        client.placeSellOrder((String) company.getValue(), Integer.parseInt(nbStock.getText()), Double.parseDouble(price.getText()));
+                        showOrderPlacement.close();
+                    } catch (RegistrationException e) {
+                        Util.warningWindow("Registration error", "The client is not registered", "");
+                    } catch (IllegalOrderException e) {
+                        Util.warningWindow("Illegal order", "You do not have enough stocks available for this operation", "");
+                    }
+                }
+            }
+        });
+
+        TilePane tilePane = new TilePane();
+        tilePane.setPrefRows(4);
+        tilePane.setPrefColumns(2);
+        tilePane.setPrefTileWidth(200);
+        tilePane.setPrefTileHeight(50);
+        tilePane.setMaxWidth(400);
+        tilePane.getChildren().addAll(
+                new Label("Company:"), company,
+                new Label("Number of stocks: "), nbStock,
+                new Label("Price: "), price,
+                purchase, sell
+        );
+
+        root.getChildren().add(tilePane);
+        showOrderPlacement.setScene(scene);
+        showOrderPlacement.show();
+    }
+
+    private static void showOrders(List<Order> pendingOrders){
+
+        Stage MarketPopUp = new Stage();
+        MarketPopUp.setTitle("Pending Orders");
+
+        TableView tableView = new TableView();
+        TableColumn idCol = new TableColumn("Id");
+        TableColumn typeCol = new TableColumn("Type");
+        TableColumn companyCol = new TableColumn("Company");
+        TableColumn dateCol = new TableColumn("Emission Date");
+
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<>("orderType"));
+        companyCol.setCellValueFactory(new PropertyValueFactory<>("company"));
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("emissionDate"));
+        tableView.getColumns().addAll(idCol, typeCol, companyCol, dateCol);
+        tableView.setItems(FXCollections.observableArrayList(pendingOrders));
+
+        Scene scene  = new Scene(tableView,800,600);
+        MarketPopUp.setScene(scene);
+        MarketPopUp.show();
     }
 }

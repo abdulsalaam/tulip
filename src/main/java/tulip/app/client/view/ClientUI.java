@@ -199,6 +199,7 @@ public class ClientUI extends Application {
         primaryStage.show();
 
     }
+
     public static void showMarketState(MarketState marketState){
 
         Stage MarketPopUp = new Stage();
@@ -227,11 +228,6 @@ public class ClientUI extends Application {
         MarketPopUp.setScene(scene);
         MarketPopUp.show();
     }
-
-    // Text fields
-    TextField company = new TextField ("Company");
-    TextField nbStock = new TextField ("Number of stocks");
-    TextField price = new TextField ("Price");
 
     public static void showOrderPlacement(){
 
