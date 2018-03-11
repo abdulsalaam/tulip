@@ -33,7 +33,7 @@ The architecture of the program consists of three layers.
 ### Sockets
 
 The agents of the system communicate by using TCP sockets.
-Message objects are send through sockets using JSON serialization/deserialization.
+Message objects are sent through sockets using JSON serialization/deserialization.
 
 ### The service layer
 
